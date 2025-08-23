@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleSpreadsheet } from "google-spreadsheet"
+import { GoogleSpreadsheet, GoogleSpreadsheetRow } from "google-spreadsheet"
 import { JWT } from "google-auth-library"
 import { SpreadsheetResponse } from "@/models"
 
@@ -20,8 +20,17 @@ export async function POST(req: NextRequest) {
 
     const sheets = await Promise.all(
       doc.sheetsByIndex.map(async (sheet) => {
-        const rows = await sheet.getRows()
-        const parsed = rows.map((row, index) => {
+        const rows = await sheet
+          .getRows()
+          .catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
+        if (rows.length === 0)
+          return {
+            sheetId: sheet.sheetId,
+            title: sheet.title,
+            rows: [],
+          }
+
+        const parsed = rows.map((row) => {
           const obj: Record<string, string> = {}
           let key = ""
           const rowNumber = row.rowNumber

@@ -7,19 +7,17 @@ export function useHistory(key: string, maxItems: number = 10) {
   useEffect(() => {
     const saved = localStorage.getItem(key)
     if (saved) setHistory(JSON.parse(saved))
-  }, [key])
+  }, [])
 
   // hàm lưu 1 item
   const save = useCallback(
     (item: string) => {
       if (!item.trim()) return
-
+      if (history.some((e) => e === item)) return
       // bỏ trùng nếu đã có
       const filtered = history.filter((h) => h !== item)
-
       // thêm vào đầu
       const newHistory = [item, ...filtered].slice(0, maxItems)
-
       localStorage.setItem(key, JSON.stringify(newHistory))
       setHistory(newHistory)
     },

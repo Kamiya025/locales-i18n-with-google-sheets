@@ -4,11 +4,26 @@ import { useGlobalSpreadsheetFilter } from "@/hooks/useGlobalSpreadsheetFilter"
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import Switch from "../ui/switch/Switch"
 import { SpreadsheetItemViewer } from "./sheet"
-
+import { downloadJSON } from "./hook"
+import { transformToI18n } from "@/util/transform"
+import { useCallback } from "react"
 export default function SpreadsheetViewer() {
   const { data, listLocales } = useSpreadsheet()
   const { filtered, search, setSearch, setShowOnlyMissing, showOnlyMissing } =
     useGlobalSpreadsheetFilter(data)
+  const totalKeys =
+    data?.sheets.reduce((sum, sheet) => sum + sheet.rows.length, 0) ?? 0
+  const handleDownload = useCallback(() => {
+    if (!data) return
+    const translations = transformToI18n(data)
+
+    // tạo từng file vi.json, en.json...
+    Object.entries(translations).forEach(([lang, data]) => {
+      const langName = lang.toLowerCase().trim()
+      downloadJSON(`${langName}.json`, data)
+    })
+  }, [data])
+
   if (!data) return null
   return (
     <div className="w-full flex flex-col items-center flex-1 p-6 space-y-6 overflow-y-auto">
@@ -19,10 +34,7 @@ export default function SpreadsheetViewer() {
 
             <div className="flex flex-wrap gap-4 text-xs">
               <p>Tổng số namespace: {data.sheets.length ?? 0}</p>
-              <p>
-                Tổng từ khóa:{" "}
-                {data.sheets.reduce((sum, sheet) => sum + sheet.rows.length, 0)}
-              </p>
+              <p>Tổng từ khóa: {totalKeys}</p>
               <p>
                 Chưa hoàn thiện:{" "}
                 {data.sheets.reduce((sum, sheet) => {
@@ -53,6 +65,14 @@ export default function SpreadsheetViewer() {
               onChange={() => setShowOnlyMissing(!showOnlyMissing)}
               label="Thiếu bản dịch"
             />
+            {totalKeys > 0 && (
+              <button
+                onClick={handleDownload}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+              >
+                Get JSON
+              </button>
+            )}
           </div>
         </div>
         {filtered?.sheets.map((sheet) => (

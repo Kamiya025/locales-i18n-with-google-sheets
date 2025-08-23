@@ -1,22 +1,19 @@
-// app/page.tsx
 "use client"
 
 import { useFetchSheet } from "@/hooks/useFetchSheet"
 import { useHistory } from "@/hooks/useHistory"
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import { useState } from "react"
-import SpreadsheetViewer from "../detail"
 
 export default function GetLinkGoogleSheets() {
   const storageKey = "sheet-url-history"
   const [url, setUrl] = useState("")
-  const { data: response, setResponse } = useSpreadsheet()
+  const { setResponse } = useSpreadsheet()
   const { history, save } = useHistory(storageKey, 10)
   const fetchSheet = useFetchSheet((data, url) => {
     setResponse(data)
     save(url)
   })
-  const isHeader = Boolean(response)
 
   return (
     <form
@@ -44,8 +41,8 @@ export default function GetLinkGoogleSheets() {
             "Đang tải..."
           ) : (
             <>
-              <span className="md:block hidden">Get</span>
-              <span className="md:hidden block">Lấy dữ liệu</span>
+              <span className="md:block hidden">Lấy dữ liệu</span>
+              <span className="md:hidden block">Get</span>
             </>
           )}
         </button>
