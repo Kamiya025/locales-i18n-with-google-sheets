@@ -17,6 +17,10 @@ const sheetApi = {
     const url = "/sheet/save-row/"
     return axiosClient.post(url, data)
   },
+  saveNewRow(data: SpreadsheetUpdateRowRequest): Promise<SpreadsheetResponse> {
+    const url = "/sheet/add-row/"
+    return axiosClient.post(url, data)
+  },
 }
 
 export default sheetApi

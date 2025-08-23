@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleSpreadsheet } from "google-spreadsheet"
 import { JWT } from "google-auth-library"
-import { SpreadsheetUpdateRowRequest } from "@/models"
+import { SpreadsheetResponse, SpreadsheetUpdateRowRequest } from "@/models"
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,27 +36,48 @@ export async function POST(req: NextRequest) {
       )
     }
     await sheet.loadHeaderRow()
-    const rows = await sheet.getRows()
 
-    const row = rows.find((r) => r.rowNumber === data.rowNumber)
-    if (!row) {
-      return NextResponse.json(
-        { success: false, error: "Row not found" },
-        { status: 404 }
-      )
+    await sheet.addRows([
+      {
+        KEY: data.key,
+        ...data.data,
+      },
+    ])
+
+    const sheets = await Promise.all(
+      doc.sheetsByIndex.map(async (sheet) => {
+        const rows = await sheet.getRows()
+        const parsed = rows.map((row, index) => {
+          const obj: Record<string, string> = {}
+          let key = ""
+          const rowNumber = row.rowNumber
+          sheet.headerValues.forEach((header) => {
+            const normalized = header.toLowerCase()
+            if (normalized === "key") {
+              key = row.get(header)
+            } else {
+              obj[header] = row.get(header) ?? ""
+            }
+          })
+
+          return { rowNumber, key, data: obj }
+        })
+
+        return {
+          sheetId: sheet.sheetId,
+          title: sheet.title,
+          rows: parsed,
+        }
+      })
+    )
+
+    const response: SpreadsheetResponse = {
+      title: doc.title,
+      id: spreadsheetId,
+      sheets,
     }
 
-    // update từng cột trong data.data
-    for (const [lang, value] of Object.entries(data.data)) {
-      if (sheet.headerValues.includes(lang)) {
-        row.set(lang, "" + value)
-      } else {
-        console.warn(`Column ${lang} not in headers`)
-      }
-    }
-
-    await row.save()
-    return NextResponse.json({ success: true })
+    return NextResponse.json(response)
   } catch (err: any) {
     if (err.response?.status === 403)
       return NextResponse.json(
