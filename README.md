@@ -51,7 +51,10 @@
 
 ---
 
-## 🚀 Demo
+## 🚀 Demo & Repository
+
+**🌐 Live Application**: [locales-brown.vercel.app](https://locales-brown.vercel.app)  
+**📦 Source Code**: [github.com/Kamiya025/locales-i18n-with-google-sheets](https://github.com/Kamiya025/locales-i18n-with-google-sheets)
 
 ### Dashboard Overview
 
@@ -89,8 +92,9 @@
 
 - **Next.js 15.5.0** - React framework với App Router + RSC
 - **React 19** - Latest React features với concurrent rendering
-- **TypeScript 5** - Strict type safety và IntelliSense
+- **TypeScript 5** - Strict type safety và IntelliSense (96.1% codebase)
 - **Node.js 18+** - Modern JavaScript runtime
+- **CSS3** - Custom styles và utilities (3.9% codebase)
 
 ### **Styling & Design System**
 
@@ -139,8 +143,8 @@
 ### Clone Repository
 
 ```bash
-git clone https://github.com/kamiya-quang-hung/translate-web-excel.git
-cd translate-web-excel
+git clone https://github.com/Kamiya025/locales-i18n-with-google-sheets.git
+cd locales-i18n-with-google-sheets
 ```
 
 ### Install Dependencies
@@ -183,6 +187,19 @@ npm run dev
 
 Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
 
+### 🌐 **Live Demo**
+
+Xem ứng dụng đang chạy tại: **[locales-brown.vercel.app](https://locales-brown.vercel.app)**
+
+### 📊 **Project Stats**
+
+- **Repository**: [github.com/Kamiya025/locales-i18n-with-google-sheets](https://github.com/Kamiya025/locales-i18n-with-google-sheets)
+- **Language Composition**:
+  - TypeScript: 96.1% (Type-safe codebase)
+  - CSS: 3.9% (Custom styling & themes)
+- **Total Commits**: 11+
+- **Current Version**: v1.0.0
+
 ---
 
 ## 🎯 Cách sử dụng
@@ -212,7 +229,7 @@ Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
 ## 📁 Cấu trúc dự án
 
 ```
-translate-web-excel/
+locales-i18n-with-google-sheets/
 ├── src/
 │   ├── apis/                     # API clients
 │   │   ├── axios-client.ts
@@ -224,7 +241,7 @@ translate-web-excel/
 │   │   └── page.tsx             # Home page
 │   ├── components/               # React components
 │   │   ├── detail/              # Translation detail views
-│   │   ├── form/                # Form components  
+│   │   ├── form/                # Form components
 │   │   ├── home/                # Home page components
 │   │   └── ui/                  # Luxury UI component system
 │   │     ├── button/            # CVA Button component
@@ -259,15 +276,15 @@ translate-web-excel/
 
 ```css
 /* Ocean Blue Theme - High Contrast & Readable 🌊 */
---primary: #0369a1;           /* Ocean Blue */
---primary-light: #0ea5e9;     /* Sky Blue */
---primary-dark: #0c4a6e;      /* Deep Ocean */
---primary-accent: #06b6d4;    /* Cyan Blue */
+--primary: #0369a1; /* Ocean Blue */
+--primary-light: #0ea5e9; /* Sky Blue */
+--primary-dark: #0c4a6e; /* Deep Ocean */
+--primary-accent: #06b6d4; /* Cyan Blue */
 
 /* Secondary Blues */
---secondary: #3b82f6;         /* Bright Blue */
---secondary-light: #60a5fa;   /* Light Blue */
---tertiary: #1e40af;          /* Royal Blue */
+--secondary: #3b82f6; /* Bright Blue */
+--secondary-light: #60a5fa; /* Light Blue */
+--tertiary: #1e40af; /* Royal Blue */
 
 /* Surface & Glass Effects - High Contrast */
 --surface: rgba(255, 255, 255, 0.95);
@@ -299,14 +316,14 @@ const buttonVariants = cva(
       variant: {
         primary: "bg-gradient-to-br from-blue-400 via-blue-500 to-purple-600",
         glass: "bg-white/80 backdrop-blur-xl border border-white/50",
-        outline: "bg-white/60 backdrop-blur-xl border-2 border-slate-300"
+        outline: "bg-white/60 backdrop-blur-xl border-2 border-slate-300",
       },
       size: {
         sm: "px-4 py-2.5 text-sm",
-        md: "px-6 py-3.5 text-base", 
-        lg: "px-8 py-4.5 text-lg"
-      }
-    }
+        md: "px-6 py-3.5 text-base",
+        lg: "px-8 py-4.5 text-lg",
+      },
+    },
   }
 )
 ```
@@ -349,7 +366,7 @@ npm run type-check  # TypeScript type checking
 
 ### **Performance Optimizations**
 
-- **Code Splitting**: Automatic với Next.js + React 19 
+- **Code Splitting**: Automatic với Next.js + React 19
 - **CVA Tree Shaking**: Only load used component variants
 - **tailwind-merge**: Efficient className deduplication
 - **React Query Caching**: Smart server state management
@@ -361,7 +378,7 @@ npm run type-check  # TypeScript type checking
 - **Keyboard Navigation**: Full keyboard support với Headless UI
 - **Screen Reader**: ARIA labels, semantic HTML, focus management
 - **Color Contrast**: WCAG AA compliance với ocean blue theme
-- **Focus Indicators**: Custom focus rings thay vì browser outlines  
+- **Focus Indicators**: Custom focus rings thay vì browser outlines
 - **Touch Targets**: 44px minimum cho mobile accessibility
 - **Motion**: Respects `prefers-reduced-motion` user preference
 
@@ -407,15 +424,13 @@ Dự án này được phân phối dưới **MIT License**. Xem file `LICENSE` 
 
 Nếu gặp vấn đề hoặc có câu hỏi:
 
-- **GitHub Issues**: [Create an issue](https://github.com/kamiya-quang-hung/translate-web-excel/issues)
-- **Email**: quanghung.kamiya@gmail.com
-- **Telegram**: [@kamiya_quanghung](https://t.me/kamiya_quanghung)
-- **LinkedIn**: [Quang Hưng (Kamiya)](https://linkedin.com/in/quang-hung-kamiya)
+- **GitHub Issues**: [Create an issue](https://github.com/Kamiya025/locales-i18n-with-google-sheets/issues)
+- **Email**: hawk01525@gmail.com
 
 ---
 
 <p align="center">
-  <strong>🎨 Được xây dựng với passion & precision bởi <a href="https://github.com/kamiya-quang-hung">Quang Hưng (Kamiya)</a></strong>
+  <strong>🎨 Được xây dựng với passion & precision bởi <a href="https://github.com/Kamiya025">Quang Hưng (Kamiya)</a></strong>
 </p>
 
 <p align="center">
