@@ -1,40 +1,53 @@
-# 🌐 Google Sheet Translation Manager
+# 🌊 Google Sheet Translation Manager
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-15.5.0-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/React_Query-5.85.5-FF4154?style=for-the-badge&logo=react-query&logoColor=white" alt="React Query" />
+  <img src="https://img.shields.io/badge/Headless_UI-2.0-662D91?style=for-the-badge&logo=headlessui&logoColor=white" alt="Headless UI" />
+  <img src="https://img.shields.io/badge/CVA-0.7.0-FF6B35?style=for-the-badge" alt="Class Variance Authority" />
 </p>
 
 <p align="center">
-  <strong>Một công cụ hiện đại để quản lý bản dịch từ Google Sheets với giao diện đẹp mắt và tính năng đầy đủ.</strong>
+  <strong>🎨 Công cụ quản lý bản dịch từ Google Sheets với luxury design system, ocean blue theme và trải nghiệm người dùng đỉnh cao.</strong>
 </p>
 
 ---
 
 ## ✨ Tính năng nổi bật
 
-### 📊 **Quản lý Translation**
+### 📊 **Quản lý Translation Thông Minh**
 
 - 🔗 **Import từ Google Sheets**: Chỉ cần dán link, tự động fetch dữ liệu
 - 📁 **Namespace Management**: Tổ chức translations theo từng module/namespace
-- 🔍 **Tìm kiếm thông minh**: Search trong tất cả hoặc namespace cụ thể
+- 🔍 **Smart Search with Debounce**: Tìm kiếm thông minh với autocomplete suggestions
 - 📱 **Responsive Design**: Hoạt động mượt mà trên mọi thiết bị
+- 🔗 **Direct Sheet Links**: Copy & share links trực tiếp đến specific sheets
 
-### 🎯 **Workflow Management**
+### 🎯 **Workflow Management Pro**
 
 - ⭐ **History & Favorites**: Lưu lịch sử với khả năng đánh dấu yêu thích
 - 🔄 **Real-time Sync**: Cập nhật translations trực tiếp lên Google Sheets
 - 📥 **Export JSON**: Tải về file JSON cho từng ngôn ngữ
-- 🎛️ **Advanced Filtering**: Lọc theo missing translations, namespace
+- 🎛️ **Advanced Filtering**: Lọc theo selected languages & missing translations
+- 📊 **Progress Tracking**: Real-time progress với color-coded status indicators
 
-### 🎨 **Modern UI/UX**
+### 🎨 **Luxury Design System**
 
-- 💎 **Glass Morphism**: Giao diện hiện đại với hiệu ứng kính mờ
-- 🌈 **Soft Color Palette**: Màu sắc dịu dàng, dễ chịu cho mắt
-- ⚡ **Smooth Animations**: Transitions mượt mà 300ms
-- 🎭 **Hover Effects**: Interactive feedback cho mọi thao tác
+- 🌊 **Ocean Blue Theme**: Thiết kế cao cấp với ocean blue color palette
+- 💎 **Advanced Glassmorphism**: 3-layer glass effects với backdrop blur
+- ✨ **CVA Variants**: Class Variance Authority cho component styling nhất quán
+- 🎭 **Smooth Interactions**: Hover effects, loading states, transitions 500ms
+- ♿ **Accessibility First**: Headless UI components với WCAG compliance
+
+### 🛠️ **Developer Experience**
+
+- 🎨 **CVA Design System**: Type-safe component variants với IntelliSense
+- 🔧 **Headless UI Integration**: Accessible components out-of-the-box
+- 🚫 **No Outline Policy**: Clean focus management với custom focus rings
+- 📱 **Mobile-First**: Responsive breakpoints với overflow handling
+- 🎯 **TypeScript Strict**: Type safety cho mọi component và hook
 
 ---
 
@@ -72,31 +85,47 @@
 
 ## 🛠️ Tech Stack
 
-### **Frontend**
+### **Core Framework**
 
-- **Next.js 15.5.0** - React framework với App Router
-- **TypeScript 5** - Type safety và developer experience
+- **Next.js 15.5.0** - React framework với App Router + RSC
+- **React 19** - Latest React features với concurrent rendering
+- **TypeScript 5** - Strict type safety và IntelliSense
+- **Node.js 18+** - Modern JavaScript runtime
+
+### **Styling & Design System**
+
 - **Tailwind CSS 4** - Utility-first CSS framework
-- **React Query 5.85.5** - Server state management
+- **CVA (Class Variance Authority)** - Type-safe component variants
+- **clsx + tailwind-merge** - Conditional classNames với conflict resolution
+- **Custom CSS Properties** - Ocean blue theme variables
+- **Glassmorphism** - Advanced backdrop-blur effects
 
-### **UI/UX**
+### **UI Components & Accessibility**
 
-- **Glass Morphism** - Modern design trend
-- **Custom Components** - Switch, History Panel, Form components
-- **Responsive Design** - Mobile-first approach
-- **dayjs** - Lightweight date manipulation
+- **Headless UI 2.0** - Unstyled, accessible UI primitives
+- **React Hot Toast** - Elegant notification system
+- **Custom Components** - Design system với luxury variants
+- **WCAG 2.1 Compliance** - Screen reader + keyboard navigation support
 
-### **Data Management**
+### **State Management & Data**
 
-- **Google Sheets API** - Direct integration
-- **localStorage** - History và favorites persistence
+- **React Query 5.85.5** - Server state management với caching
 - **React Context** - Global state management
+- **Google Sheets API** - Direct spreadsheet integration
+- **localStorage** - History, favorites, preferences persistence
 
-### **Development**
+### **Date & Utilities**
 
-- **React 19** - Latest React features
+- **dayjs** - Lightweight date manipulation với i18n
+- **Vietnamese locale** - Localized relative time formatting
+- **Custom hooks** - useDebounce, useHistory, useGlobalFilter
+
+### **Developer Experience**
+
 - **ESLint** - Code quality assurance
-- **Hot Reload** - Fast development experience
+- **TypeScript Strict** - Zero any types policy
+- **Hot Reload** - Fast development với HMR
+- **Bundle Analysis** - Performance monitoring
 
 ---
 
@@ -110,7 +139,7 @@
 ### Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/translate-web-excel.git
+git clone https://github.com/kamiya-quang-hung/translate-web-excel.git
 cd translate-web-excel
 ```
 
@@ -122,6 +151,19 @@ npm install
 yarn install
 # hoặc
 pnpm install
+```
+
+#### 🔧 **Key Dependencies Installed:**
+
+```json
+{
+  "class-variance-authority": "^0.7.0",
+  "clsx": "^2.0.0",
+  "tailwind-merge": "^2.0.0",
+  "@headlessui/react": "^2.0.0",
+  "react-hot-toast": "^2.4.1",
+  "dayjs": "^1.11.10"
+}
 ```
 
 ### Environment Setup
@@ -177,23 +219,33 @@ translate-web-excel/
 │   │   └── sheet/
 │   ├── app/                      # Next.js App Router
 │   │   ├── api/sheet/           # API routes
-│   │   ├── globals.css          # Global styles
+│   │   ├── globals.css          # Ocean blue theme + CVA utilities
 │   │   ├── layout.tsx           # Root layout
 │   │   └── page.tsx             # Home page
 │   ├── components/               # React components
 │   │   ├── detail/              # Translation detail views
-│   │   ├── form/                # Form components
+│   │   ├── form/                # Form components  
 │   │   ├── home/                # Home page components
-│   │   └── ui/                  # Reusable UI components
-│   │     ├── history/           # History management
-│   │     └── switch/            # Custom switch component
+│   │   └── ui/                  # Luxury UI component system
+│   │     ├── button/            # CVA Button component
+│   │     ├── card/              # Glassmorphism Card variants
+│   │     ├── input/             # Form Input with variants
+│   │     ├── badge/             # Status Badge components
+│   │     ├── dialog/            # Headless UI Dialog wrapper
+│   │     ├── tooltip/           # Accessible Tooltip
+│   │     ├── history/           # History & Favorites management
+│   │     └── footer/            # Personal branding footer
 │   ├── hooks/                   # Custom React hooks
-│   │   ├── useHistory.ts        # History management
-│   │   ├── useGlobalSpreadsheetFilter.tsx
-│   │   └── useFetchSheet.ts
-│   ├── models/                  # TypeScript types
+│   │   ├── useHistory.ts        # History management with localStorage
+│   │   ├── useGlobalSpreadsheetFilter.tsx # Smart filtering
+│   │   ├── useFetchSheet.ts     # Google Sheets integration
+│   │   └── useDebounce.ts       # Input debouncing
+│   ├── lib/                     # Utility libraries
+│   │   ├── utils.ts            # cn() utility với clsx + tailwind-merge
+│   │   └── variants.ts         # CVA component variants
+│   ├── models/                  # TypeScript types & interfaces
 │   ├── providers/               # React Context providers
-│   └── util/                    # Utility functions
+│   └── util/                    # Helper functions
 ├── public/                      # Static assets
 ├── package.json
 └── README.md
@@ -201,26 +253,62 @@ translate-web-excel/
 
 ---
 
-## 🎨 Design System
+## 🎨 Luxury Design System
 
-### **Color Palette**
+### **Ocean Blue Color Palette**
 
 ```css
-/* Primary Colors */
---primary: #6366f1        /* Indigo */
---primary-light: #8b5cf6  /* Purple */
---secondary: #06b6d4      /* Cyan */
---accent: #ec4899         /* Pink */
+/* Ocean Blue Theme - High Contrast & Readable 🌊 */
+--primary: #0369a1;           /* Ocean Blue */
+--primary-light: #0ea5e9;     /* Sky Blue */
+--primary-dark: #0c4a6e;      /* Deep Ocean */
+--primary-accent: #06b6d4;    /* Cyan Blue */
 
-/* Surface Colors */
---surface: rgba(255, 255, 255, 0.9)
---border: rgba(148, 163, 184, 0.2)
---shadow: rgba(148, 163, 184, 0.1)
+/* Secondary Blues */
+--secondary: #3b82f6;         /* Bright Blue */
+--secondary-light: #60a5fa;   /* Light Blue */
+--tertiary: #1e40af;          /* Royal Blue */
 
-/* Status Colors */
---success: #10b981        /* Emerald */
---warning: #f59e0b        /* Amber */
---error: #ef4444          /* Red */
+/* Surface & Glass Effects - High Contrast */
+--surface: rgba(255, 255, 255, 0.95);
+--surface-hover: rgba(255, 255, 255, 0.98);
+--surface-blue: rgba(240, 249, 255, 0.9);
+--surface-blue-hover: rgba(224, 242, 254, 0.95);
+
+/* Borders & Shadows */
+--border: rgba(59, 130, 246, 0.15);
+--border-light: rgba(147, 197, 253, 0.3);
+--shadow: rgba(59, 130, 246, 0.08);
+--shadow-blue: rgba(59, 130, 246, 0.15);
+
+/* Status Colors with Blue Tints */
+--success: #059669;
+--warning: #d97706;
+--error: #dc2626;
+--info: #0284c7;
+```
+
+### **CVA Variant System**
+
+```typescript
+// Example: Button variants with type safety
+const buttonVariants = cva(
+  "font-medium rounded-xl transition-all duration-500 ease-out",
+  {
+    variants: {
+      variant: {
+        primary: "bg-gradient-to-br from-blue-400 via-blue-500 to-purple-600",
+        glass: "bg-white/80 backdrop-blur-xl border border-white/50",
+        outline: "bg-white/60 backdrop-blur-xl border-2 border-slate-300"
+      },
+      size: {
+        sm: "px-4 py-2.5 text-sm",
+        md: "px-6 py-3.5 text-base", 
+        lg: "px-8 py-4.5 text-lg"
+      }
+    }
+  }
+)
 ```
 
 ### **Typography**
@@ -252,17 +340,30 @@ npm run type-check  # TypeScript type checking
 
 ### **Development Guidelines**
 
-- **Components**: Tách nhỏ, tái sử dụng, có TypeScript types
-- **Hooks**: Custom hooks cho logic phức tạp
-- **Styling**: Tailwind CSS classes, custom CSS properties
-- **State**: React Query cho server state, Context cho global state
+- **Components**: CVA variants với type-safe props, Headless UI integration
+- **Styling**: CVA + Tailwind CSS, cn() utility cho className merging
+- **Accessibility**: Headless UI components, WCAG 2.1 compliance, semantic HTML
+- **Types**: Strict TypeScript, zero any types, variant prop typing
+- **State**: React Query + Context, selected language filtering
+- **Hooks**: Custom hooks với debouncing, local storage persistence
 
 ### **Performance Optimizations**
 
-- **Code Splitting**: Automatic với Next.js
-- **Image Optimization**: Next.js Image component
-- **Bundle Analysis**: Built-in bundle analyzer
-- **Caching**: React Query + localStorage
+- **Code Splitting**: Automatic với Next.js + React 19 
+- **CVA Tree Shaking**: Only load used component variants
+- **tailwind-merge**: Efficient className deduplication
+- **React Query Caching**: Smart server state management
+- **Local Storage**: History & preferences persistence
+- **Debounced Search**: Reduced API calls với 300ms delay
+
+### **Accessibility Features**
+
+- **Keyboard Navigation**: Full keyboard support với Headless UI
+- **Screen Reader**: ARIA labels, semantic HTML, focus management
+- **Color Contrast**: WCAG AA compliance với ocean blue theme
+- **Focus Indicators**: Custom focus rings thay vì browser outlines  
+- **Touch Targets**: 44px minimum cho mobile accessibility
+- **Motion**: Respects `prefers-reduced-motion` user preference
 
 ---
 
@@ -306,14 +407,19 @@ Dự án này được phân phối dưới **MIT License**. Xem file `LICENSE` 
 
 Nếu gặp vấn đề hoặc có câu hỏi:
 
-- **GitHub Issues**: [Create an issue](https://github.com/yourusername/translate-web-excel/issues)
-- **Email**: your.email@example.com
-- **Documentation**: [Wiki](https://github.com/yourusername/translate-web-excel/wiki)
+- **GitHub Issues**: [Create an issue](https://github.com/kamiya-quang-hung/translate-web-excel/issues)
+- **Email**: quanghung.kamiya@gmail.com
+- **Telegram**: [@kamiya_quanghung](https://t.me/kamiya_quanghung)
+- **LinkedIn**: [Quang Hưng (Kamiya)](https://linkedin.com/in/quang-hung-kamiya)
 
 ---
 
 <p align="center">
-  <strong>Được xây dựng với ❤️ bởi [Your Name]</strong>
+  <strong>🎨 Được xây dựng với passion & precision bởi <a href="https://github.com/kamiya-quang-hung">Quang Hưng (Kamiya)</a></strong>
+</p>
+
+<p align="center">
+  <em>Frontend Developer specializing in React, Next.js & luxury UI/UX design</em>
 </p>
 
 <p align="center">
