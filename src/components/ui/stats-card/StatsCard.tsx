@@ -1,6 +1,7 @@
 "use client"
 
 import Card from "../card"
+import { Transition } from "@headlessui/react"
 
 interface StatsCardProps {
   title: string
@@ -51,12 +52,32 @@ export default function StatsCard({
           </div>
         </div>
 
-        <div className="text-2xl font-bold text-slate-700">
-          {loading ? (
-            <div className="w-16 h-8 bg-slate-200 rounded animate-pulse" />
-          ) : (
-            value
-          )}
+        <div className="text-2xl font-bold text-slate-700 relative">
+          <Transition
+            show={!loading}
+            enter="transition-all duration-300 ease-out"
+            enterFrom="opacity-0 scale-95 translate-y-2"
+            enterTo="opacity-100 scale-100 translate-y-0"
+            leave="transition-all duration-200 ease-in"
+            leaveFrom="opacity-100 scale-100 translate-y-0"
+            leaveTo="opacity-0 scale-95 translate-y-2"
+          >
+            <div className="min-h-[2rem] flex items-center">{value}</div>
+          </Transition>
+
+          <Transition
+            show={loading}
+            enter="transition-all duration-200 ease-out"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+            leave="transition-all duration-300 ease-in"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-16 h-8 bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 rounded animate-pulse" />
+            </div>
+          </Transition>
         </div>
 
         {subtitle && (

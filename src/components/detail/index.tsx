@@ -10,9 +10,13 @@ import StatsCard from "../ui/stats-card"
 import { SpreadsheetItemViewer } from "./sheet"
 import { downloadJSON } from "./hook"
 import { transformToI18n } from "@/util/transform"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
+import SearchCombobox from "../ui/search-combobox"
+import NamespaceSelector from "../ui/namespace-selector"
+import AddSheetModal from "../ui/add-sheet-modal"
 export default function SpreadsheetViewer() {
   const { data, listLocales, selectedLocales } = useSpreadsheet()
+  const [isAddSheetModalOpen, setIsAddSheetModalOpen] = useState(false)
   const {
     filtered,
     search,
@@ -67,6 +71,45 @@ export default function SpreadsheetViewer() {
 
   // Tính số keys hoàn thành dựa trên ngôn ngữ được chọn
   const completedKeys = totalKeys - totalMissing
+
+  // Tạo suggestions cho search autocomplete
+  const searchSuggestions = useMemo(() => {
+    if (!data || !data.sheets) return []
+
+    const allKeys = new Set<string>()
+
+    data.sheets.forEach((sheet) => {
+      if (
+        selectedNamespace === "all" ||
+        sheet.sheetId.toString() === selectedNamespace
+      ) {
+        sheet.rows?.forEach((row) => {
+          if (row && row.key) {
+            allKeys.add(row.key)
+          }
+        })
+      }
+    })
+
+    return Array.from(allKeys).sort()
+  }, [data, selectedNamespace])
+
+  // Tạo options cho namespace selector
+  const namespaceOptions = useMemo(() => {
+    const options = [{ value: "all", label: "Tất cả" }]
+
+    if (data?.sheets) {
+      data.sheets.forEach((sheet) => {
+        options.push({
+          value: sheet.sheetId.toString(),
+          label: sheet.title,
+        })
+      })
+    }
+
+    return options
+  }, [data])
+
   const handleDownload = useCallback(() => {
     if (!data) return
     const translations = transformToI18n(data)
@@ -138,74 +181,28 @@ export default function SpreadsheetViewer() {
               <div className="flex flex-rows md:gap-1">
                 {/* Search Input */}
                 <div className="flex-1 relative">
-                  <input
-                    type="text"
+                  <SearchCombobox
+                    value={search}
+                    onChange={setSearch}
                     placeholder={
                       selectedNamespace === "all"
                         ? "Tìm kiếm toàn bộ..."
                         : "Tìm kiếm trong danh mục..."
                     }
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full bg-transparent px-4 py-3 outline-none text-slate-700 placeholder-slate-400 transition-all duration-300"
+                    suggestions={searchSuggestions}
+                    isLoading={isSearching}
+                    className="pl-8"
                   />
-
-                  {/* Search Loading Indicator */}
-                  {isSearching && (
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                      <span className="text-xs text-slate-400">...</span>
-                    </div>
-                  )}
                 </div>
                 {/* Divider - Hidden on mobile */}
                 <div className="hidden md:block w-px h-8 bg-slate-200/50 mx-2"></div>
                 {/* Namespace Selector */}
-                <div className="relative md:min-w-[200px]">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-slate-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                  </div>
-                  <select
+                <div className="md:min-w-[200px]">
+                  <NamespaceSelector
                     value={selectedNamespace}
-                    onChange={(e) => setSelectedNamespace(e.target.value)}
-                    className="w-full bg-transparent pl-12 pr-10 py-3 outline-none text-slate-700 cursor-pointer appearance-none hover:text-indigo-600 transition-all duration-300"
-                  >
-                    <option value="all">Tất cả</option>
-                    {data?.sheets?.map((sheet) => (
-                      <option
-                        key={sheet.sheetId}
-                        value={sheet.sheetId.toString()}
-                      >
-                        {sheet.title}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-slate-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
+                    onChange={setSelectedNamespace}
+                    options={namespaceOptions}
+                  />
                 </div>
               </div>
             </Card>
@@ -220,10 +217,10 @@ export default function SpreadsheetViewer() {
                 />
                 <LanguageFilter />
               </div>
-              {totalKeys > 0 && (
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  onClick={handleDownload}
-                  variant="secondary"
+                  onClick={() => setIsAddSheetModalOpen(true)}
+                  variant="outline"
                   icon={
                     <svg
                       className="w-5 h-5"
@@ -235,14 +232,37 @@ export default function SpreadsheetViewer() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        d="M12 4v16m8-8H4"
                       />
                     </svg>
                   }
                 >
-                  Tải JSON
+                  Thêm Danh Mục
                 </Button>
-              )}
+                {totalKeys > 0 && (
+                  <Button
+                    onClick={handleDownload}
+                    variant="secondary"
+                    icon={
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    }
+                  >
+                    Tải JSON
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </Card>
@@ -267,6 +287,12 @@ export default function SpreadsheetViewer() {
           )}
         </div>
       </div>
+
+      {/* Add Sheet Modal */}
+      <AddSheetModal
+        isOpen={isAddSheetModalOpen}
+        onClose={() => setIsAddSheetModalOpen(false)}
+      />
     </div>
   )
 }

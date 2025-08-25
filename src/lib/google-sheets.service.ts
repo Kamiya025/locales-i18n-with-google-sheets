@@ -322,6 +322,76 @@ export class GoogleSheetsService {
     await existing.save()
   }
 
+  async addSheet(
+    spreadsheetId: string,
+    sheetTitle: string
+  ): Promise<SpreadsheetResponse> {
+    const doc = await this.getDocument(spreadsheetId)
+
+    // Validate sheet title
+    if (!sheetTitle.trim()) {
+      throw new Error("Sheet title cannot be empty")
+    }
+
+    // Check if sheet with this title already exists
+    const existingSheet = doc.sheetsByTitle[sheetTitle.trim()]
+    if (existingSheet) {
+      throw new Error(`Sheet "${sheetTitle}" already exists`)
+    }
+
+    // Get existing languages from other sheets
+    const existingLanguages = new Set<string>()
+    for (const sheet of doc.sheetsByIndex) {
+      await sheet.loadHeaderRow()
+      sheet.headerValues.forEach((header) => {
+        if (header.toLowerCase() !== "key") {
+          existingLanguages.add(header)
+        }
+      })
+    }
+
+    // Prepare headers: KEY + existing languages
+    const headers = ["KEY", ...Array.from(existingLanguages)]
+
+    // Create new sheet with all existing languages
+    const newSheet = await doc.addSheet({
+      title: sheetTitle.trim(),
+      headerValues: headers,
+    })
+
+    // Apply header formatting to match existing sheets
+    if (doc.sheetsByIndex.length > 1) {
+      // Get formatting from the first existing sheet
+      const existingSheetForFormat = doc.sheetsByIndex[0]
+      await existingSheetForFormat.loadCells("A1:Z1")
+
+      if (existingSheetForFormat.getCell(0, 0)) {
+        const firstCell = existingSheetForFormat.getCell(0, 0)
+
+        // Apply same formatting to all header cells in new sheet
+        await newSheet.loadCells(
+          `A1:${String.fromCharCode(64 + headers.length)}1`
+        )
+
+        for (let i = 0; i < headers.length; i++) {
+          const headerCell = newSheet.getCell(0, i)
+
+          if (firstCell.backgroundColor) {
+            headerCell.backgroundColor = firstCell.backgroundColor
+          }
+          if (firstCell.textFormat) {
+            headerCell.textFormat = firstCell.textFormat
+          }
+        }
+
+        await newSheet.saveUpdatedCells()
+      }
+    }
+
+    // Return updated spreadsheet data
+    return this.getSpreadsheet(spreadsheetId)
+  }
+
   async addLanguageColumn(
     spreadsheetId: string,
     languageName: string

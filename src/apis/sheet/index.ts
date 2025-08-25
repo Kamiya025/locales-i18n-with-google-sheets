@@ -28,6 +28,13 @@ const sheetApi = {
     const url = "/sheet/add-language"
     return axiosClient.post(url, { spreadsheetId, languageName })
   },
+  addSheet(
+    spreadsheetId: string,
+    sheetTitle: string
+  ): Promise<SpreadsheetResponse> {
+    const url = "/sheet/add-sheet"
+    return axiosClient.post(url, { spreadsheetId, sheetTitle })
+  },
   validateSheet(sheetUrl: string): Promise<{
     isValid: boolean
     spreadsheet?: SpreadsheetResponse

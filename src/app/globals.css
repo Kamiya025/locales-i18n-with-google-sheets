@@ -258,3 +258,17 @@ kbd {
     box-shadow: 0 0 20px 10px rgba(99, 102, 241, 0.1);
   }
 }
+
+/* Custom animation for fade-in effect */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}

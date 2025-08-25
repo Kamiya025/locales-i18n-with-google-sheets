@@ -1,5 +1,6 @@
 "use client"
 import React, { useState } from "react"
+import { Switch as HeadlessSwitch } from "@headlessui/react"
 
 interface SwitchProps {
   label?: string
@@ -18,61 +19,51 @@ const Switch: React.FC<SwitchProps> = ({
 }) => {
   const [isChecked, setIsChecked] = useState(defaultChecked)
 
-  const handleToggle = () => {
-    if (disabled) return
-    const newCheckedState = !isChecked
-    setIsChecked(newCheckedState)
+  const handleChange = (checked: boolean) => {
+    setIsChecked(checked)
     if (onChange) {
-      onChange(newCheckedState)
+      onChange(checked)
     }
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === " " || event.key === "Enter") {
-      event.preventDefault()
-      handleToggle()
+  const getSwitchStyles = (enabled: boolean) => {
+    if (disabled) {
+      return "bg-slate-100 dark:bg-slate-800 cursor-not-allowed"
+    }
+
+    if (color === "blue") {
+      return enabled
+        ? "bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg shadow-indigo-200"
+        : "bg-slate-200 dark:bg-slate-700"
+    } else {
+      return enabled
+        ? "bg-gradient-to-r from-slate-600 to-slate-800 shadow-lg shadow-slate-200"
+        : "bg-slate-200 dark:bg-slate-700"
     }
   }
 
-  const switchColors =
-    color === "blue"
-      ? {
-          background: isChecked
-            ? "bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg shadow-indigo-200"
-            : "bg-slate-200 dark:bg-slate-700", // Blue version
-          knob: isChecked
-            ? "translate-x-full bg-white shadow-lg"
-            : "translate-x-0 bg-white shadow-md",
-        }
-      : {
-          background: isChecked
-            ? "bg-gradient-to-r from-slate-600 to-slate-800 shadow-lg shadow-slate-200"
-            : "bg-slate-200 dark:bg-slate-700", // Gray version
-          knob: isChecked
-            ? "translate-x-full bg-white shadow-lg"
-            : "translate-x-0 bg-white shadow-md",
-        }
+  const getKnobStyles = (enabled: boolean) => {
+    return enabled
+      ? "translate-x-full bg-white shadow-lg"
+      : "translate-x-0 bg-white shadow-md"
+  }
 
   return (
     <div className={`flex items-center gap-3 ${disabled ? "opacity-50" : ""}`}>
-      <button
-        type="button"
-        className={`relative inline-flex h-7 w-[53px] px-0.5 items-center rounded-full border border-white/20 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:ring-offset-2 ${
-          disabled
-            ? "bg-slate-100 dark:bg-slate-800 cursor-not-allowed"
-            : `${switchColors.background} cursor-pointer hover:shadow-lg`
-        }`}
-        onClick={handleToggle}
-        onKeyDown={handleKeyDown}
+      <HeadlessSwitch
+        checked={isChecked}
+        onChange={handleChange}
         disabled={disabled}
-        role="switch"
-        aria-checked={isChecked}
-        aria-label={label ?? "Toggle switch"}
+        className={`relative inline-flex h-7 w-[53px] px-0.5 items-center rounded-full border border-white/20 transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400/50 focus:ring-offset-2 ${
+          !disabled ? "hover:shadow-lg" : ""
+        } ${getSwitchStyles(isChecked)}`}
       >
         <span
-          className={`inline-block h-6 w-6 transform rounded-full transition-all duration-300 ease-out ${switchColors.knob}`}
+          className={`inline-block h-6 w-6 transform rounded-full transition-all duration-300 ease-out ${getKnobStyles(
+            isChecked
+          )}`}
         />
-      </button>
+      </HeadlessSwitch>
       {label && (
         <span
           className={`select-none text-sm font-medium transition-all duration-200 ${
