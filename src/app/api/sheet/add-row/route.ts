@@ -1,85 +1,38 @@
-// app/api/sheet/save-row/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleSpreadsheet } from "google-spreadsheet"
-import { JWT } from "google-auth-library"
-import { SpreadsheetResponse, SpreadsheetUpdateRowRequest } from "@/models"
+import { googleSheetsService } from "@/lib/google-sheets.service"
+import { SpreadsheetUpdateRowRequest } from "@/models"
 
 export async function POST(req: NextRequest) {
   try {
-    const {
-      spreadsheetId,
-      sheetId,
-      row: data,
-    } = (await req.json()) as SpreadsheetUpdateRowRequest
+    const body = (await req.json()) as SpreadsheetUpdateRowRequest
 
-    if (!spreadsheetId || !sheetId || !data || !data.rowNumber) {
+    if (
+      !body.spreadsheetId ||
+      !body.sheetId ||
+      !body.row?.key ||
+      !body.row?.data
+    ) {
       return NextResponse.json(
-        { success: false, error: "Missing params" },
+        { success: false, error: "Missing required fields" },
         { status: 400 }
       )
     }
 
-    // Auth
-    const auth = new JWT({
-      email: process.env.GOOGLE_CLIENT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    })
-    const doc = new GoogleSpreadsheet(spreadsheetId, auth)
-    await doc.loadInfo()
+    const { spreadsheetId, sheetId, row } = body
 
-    const sheet = doc.sheetsById[sheetId]
-    if (!sheet) {
-      return NextResponse.json(
-        { success: false, error: "Sheet not found" },
-        { status: 404 }
-      )
-    }
-    await sheet.loadHeaderRow()
-
-    await sheet.addRows([
+    const updatedSpreadsheet = await googleSheetsService.addRowToSheet(
+      spreadsheetId,
+      sheetId,
       {
-        KEY: data.key,
-        ...data.data,
-      },
-    ])
-
-    const sheets = await Promise.all(
-      doc.sheetsByIndex.map(async (sheet) => {
-        const rows = await sheet.getRows()
-        const parsed = rows.map((row, index) => {
-          const obj: Record<string, string> = {}
-          let key = ""
-          const rowNumber = row.rowNumber
-          sheet.headerValues.forEach((header) => {
-            const normalized = header.toLowerCase()
-            if (normalized === "key") {
-              key = row.get(header)
-            } else {
-              obj[header] = row.get(header) ?? ""
-            }
-          })
-
-          return { rowNumber, key, data: obj }
-        })
-
-        return {
-          sheetId: sheet.sheetId,
-          title: sheet.title,
-          rows: parsed,
-        }
-      })
+        key: row.key,
+        data: row.data,
+      }
     )
 
-    const response: SpreadsheetResponse = {
-      title: doc.title,
-      id: spreadsheetId,
-      sheets,
-    }
-
-    return NextResponse.json(response)
+    // Return direct format for backward compatibility
+    return NextResponse.json(updatedSpreadsheet)
   } catch (err: any) {
-    if (err.response?.status === 403)
+    if (err.response?.status === 403) {
       return NextResponse.json(
         {
           message:
@@ -88,8 +41,10 @@ export async function POST(req: NextRequest) {
         },
         { status: 403 }
       )
+    }
+
     return NextResponse.json(
-      { success: false, error: err.message },
+      { success: false, error: err.message ?? "Unknown error" },
       { status: 500 }
     )
   }

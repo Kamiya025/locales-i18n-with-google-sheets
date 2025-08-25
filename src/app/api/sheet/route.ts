@@ -1,79 +1,49 @@
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleSpreadsheet, GoogleSpreadsheetRow } from "google-spreadsheet"
-import { JWT } from "google-auth-library"
-import { SpreadsheetResponse } from "@/models"
+import {
+  googleSheetsService,
+  GoogleSheetsService,
+} from "@/lib/google-sheets.service"
 
 export async function POST(req: NextRequest) {
-  const { sheetId } = await req.json()
-
   try {
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_CLIENT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    })
+    const { sheetId } = await req.json()
 
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth)
-
-    await doc.loadInfo()
-    // Lấy danh sách sheet
-
-    const sheets = await Promise.all(
-      doc.sheetsByIndex.map(async (sheet) => {
-        const rows = await sheet
-          .getRows()
-          .catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
-        if (rows.length === 0)
-          return {
-            sheetId: sheet.sheetId,
-            title: sheet.title,
-            rows: [],
-          }
-
-        const parsed = rows.map((row) => {
-          const obj: Record<string, string> = {}
-          let key = ""
-          const rowNumber = row.rowNumber
-          sheet.headerValues.forEach((header) => {
-            const normalized = header.toLowerCase()
-            if (normalized === "key") {
-              key = row.get(header)
-            } else {
-              obj[header] = row.get(header) ?? ""
-            }
-          })
-
-          return { rowNumber, key, data: obj }
-        })
-
-        return {
-          sheetId: sheet.sheetId,
-          title: sheet.title,
-          rows: parsed,
-        }
-      })
-    )
-
-    const response: SpreadsheetResponse = {
-      title: doc.title,
-      id: sheetId,
-      sheets,
+    if (!sheetId) {
+      return NextResponse.json(
+        { message: "Missing sheetId parameter" },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json(response)
+    const spreadsheet = await googleSheetsService.getSpreadsheet(sheetId)
+
+    // Return direct format for backward compatibility
+    return NextResponse.json(spreadsheet)
   } catch (err: any) {
-    if (err.response?.status === 403)
+    // Use centralized error handling but return old format
+    if (err.response?.status === 403) {
       return NextResponse.json(
         {
           message:
-            "Chúng tôi không có quyền truy cập file của bạn,\n vui lòng thêm quyền truy cập cho email:" +
+            "Chúng tôi không có quyền truy cập file của bạn,\n vui lòng thêm quyền truy cập cho email: " +
             process.env.GOOGLE_CLIENT_EMAIL,
         },
         { status: 403 }
       )
+    }
+
+    // Provide helpful format suggestions for common errors
+    const errorMessage = err.message ?? "Unknown error"
+    const suggestion =
+      GoogleSheetsService.generateFormatSuggestion(errorMessage)
+
     return NextResponse.json(
-      { message: err.message || "Unknown error" },
-      { status: 500 }
+      {
+        message: errorMessage,
+        suggestion: suggestion,
+        type: "FORMAT_ERROR",
+      },
+      { status: 400 }
     )
   }
 }

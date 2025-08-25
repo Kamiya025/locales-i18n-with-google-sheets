@@ -4,23 +4,81 @@ import sheetApi from "@/apis/sheet"
 import { SpreadsheetResponse } from "@/models"
 import { useMutation } from "@tanstack/react-query"
 import { AxiosError } from "axios"
-import toast from "react-hot-toast"
+import { customToast } from "@/components/ui/toast"
+
+interface FormatValidationError extends Error {
+  suggestion?: string
+  type?: string
+}
+
+interface ValidationResult {
+  isValid: boolean
+  spreadsheet?: SpreadsheetResponse
+  validationIssues: Array<{
+    sheetTitle: string
+    errors: string[]
+    fixes: Array<{
+      type:
+        | "missing_key"
+        | "duplicate_keys"
+        | "empty_keys"
+        | "no_languages"
+        | "no_headers"
+      title: string
+      description: string
+      action: string
+    }>
+  }>
+}
 
 export const useFetchSheet = (
-  onSuccess: (data: SpreadsheetResponse, url: string) => void
+  onSuccess: (data: SpreadsheetResponse, url: string) => void,
+  onValidationIssues?: (validationResult: ValidationResult, url: string) => void
 ) => {
   return useMutation<
     SpreadsheetResponse, // Kiểu dữ liệu trả về
-    AxiosError<{ message: string }>, // Kiểu lỗi API
+    FormatValidationError | AxiosError<{ message: string }>, // Kiểu lỗi API
     string // Biến truyền vào (sheetId)
   >({
-    mutationFn: async (sheetId: string) => {
-      return toast.promise(sheetApi.getAll(sheetId), {
-        loading: "Đang lấy dữ liệu Google Sheet...",
-        success: "Lấy dữ liệu thành công!",
-        error: (err) => err.response?.data?.message || "Có lỗi xảy ra",
-      })
+    mutationFn: async (sheetUrl: string) => {
+      try {
+        // First, validate the sheet
+        const validation = await sheetApi.validateSheet(sheetUrl)
+
+        if (validation.isValid && validation.spreadsheet) {
+          // If valid, return the spreadsheet data directly
+          return validation.spreadsheet
+        } else {
+          // If not valid, check if we have fixable issues
+          if (validation.validationIssues.length > 0 && onValidationIssues) {
+            // Call the validation issues handler to show auto-fix dialog
+            onValidationIssues(validation, sheetUrl)
+          }
+
+          // Create a comprehensive error message
+          const errorMessages = validation.validationIssues
+            .flatMap((issue) => issue.errors)
+            .join("\n")
+
+          throw new Error(`Format validation failed:\n${errorMessages}`)
+        }
+      } catch (error: any) {
+        // Handle format validation errors with detailed suggestions
+        if (error.name === "FormatValidationError" && error.suggestion) {
+          // Show detailed error with suggestion
+          customToast.error(
+            `❌ Sai format Google Sheets!\n\n${error.message}\n\n💡 ${error.suggestion}`
+          )
+        } else {
+          // Regular error handling
+          customToast.error(error.message ?? "Có lỗi xảy ra")
+        }
+        throw error
+      }
     },
-    onSuccess: onSuccess,
+    onSuccess: (data, sheetUrl) => {
+      customToast.success("Lấy dữ liệu thành công!")
+      onSuccess(data, sheetUrl)
+    },
   })
 }

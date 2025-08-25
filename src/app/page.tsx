@@ -1,4 +1,5 @@
 import HomePage from "@/components/home"
+import Footer from "@/components/ui/footer"
 import { SpreadsheetProvider } from "@/providers/preadsheetProvider"
 import { Metadata } from "next"
 export const metadata: Metadata = {
@@ -7,10 +8,13 @@ export const metadata: Metadata = {
 }
 export default function Home() {
   return (
-    <main className="relative flex items-center justify-center w-screen h-screen bg-amber-200">
-      <SpreadsheetProvider>
-        <HomePage />
-      </SpreadsheetProvider>
-    </main>
+    <SpreadsheetProvider>
+      <div className="flex flex-col">
+        <main className="flex-1">
+          <HomePage />
+        </main>
+        <Footer />
+      </div>
+    </SpreadsheetProvider>
   )
 }

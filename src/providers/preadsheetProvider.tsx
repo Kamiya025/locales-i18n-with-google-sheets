@@ -2,11 +2,13 @@
 import { useSyncSheet } from "@/hooks/useSyncSheet"
 import { SheetRowData, SpreadsheetResponse } from "@/models"
 import { getLanguages } from "@/util"
-import { createContext, ReactNode, useContext, useState } from "react"
+import { createContext, ReactNode, useContext, useState, useMemo } from "react"
 
 interface SpreadsheetContextProps {
   data: SpreadsheetResponse | null
   listLocales: string[]
+  selectedLocales: string[]
+  setSelectedLocales: (locales: string[]) => void
   setResponse: (data: SpreadsheetResponse) => void
   updateTranslation: (sheetID: number, rows: SheetRowData) => void
   syncSheet: () => void
@@ -19,12 +21,22 @@ const SpreadsheetContext = createContext<SpreadsheetContextProps | undefined>(
 export const SpreadsheetProvider = ({ children }: { children: ReactNode }) => {
   const [response, setResponse] = useState<SpreadsheetResponse | null>(null)
   const [listLocales, setListLocales] = useState<string[]>([])
+  const [selectedLocales, setSelectedLocales] = useState<string[]>([])
   const mutation = useSyncSheet(() => {})
 
   const updateResponse = (data: SpreadsheetResponse) => {
+    if (!data) {
+      setResponse(null)
+      setListLocales([])
+      setSelectedLocales([])
+      return
+    }
+    
     setResponse(data)
     const list = getLanguages(data)
     setListLocales(list)
+    // Mặc định chọn tất cả ngôn ngữ khi load data mới
+    setSelectedLocales(list)
   }
   function updateTranslation(sheetId: number, row: SheetRowData) {
     if (response === null) return
@@ -58,18 +70,23 @@ export const SpreadsheetProvider = ({ children }: { children: ReactNode }) => {
       }
     })
   }
+  const contextValue = useMemo(
+    () => ({
+      data: response,
+      setResponse: updateResponse,
+      listLocales,
+      selectedLocales,
+      setSelectedLocales,
+      updateTranslation,
+      syncSheet: () => {
+        if (response) mutation.mutate(response)
+      },
+    }),
+    [response, listLocales, selectedLocales, updateTranslation, mutation]
+  )
+
   return (
-    <SpreadsheetContext.Provider
-      value={{
-        data: response,
-        setResponse: updateResponse,
-        listLocales,
-        updateTranslation,
-        syncSheet: () => {
-          if (response) mutation.mutate(response)
-        },
-      }}
-    >
+    <SpreadsheetContext.Provider value={contextValue}>
       {children}
     </SpreadsheetContext.Provider>
   )

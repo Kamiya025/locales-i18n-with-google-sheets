@@ -1,45 +1,79 @@
 import { SpreadsheetResponse } from "@/models"
 import { useMemo, useState } from "react"
+import { useDebounce } from "./useDebounce"
+
+// Helper functions to reduce nesting
+const getUniqueLangs = (sheets: any[]) => {
+  if (!sheets || !Array.isArray(sheets)) return []
+  
+  const langs =
+    sheets.flatMap((s: any) =>
+      s?.rows?.flatMap((r: any) => Object.keys(r?.data || {})) || []
+    ) ?? []
+  return Array.from(new Set(langs))
+}
+
+const matchesSearch = (row: any, keyword: string) => {
+  if (!row || !keyword) return true
+  
+  return (
+    row.key?.toLowerCase().includes(keyword) ||
+    Object.values(row.data || {}).some((v: any) =>
+      (v ?? "").toLowerCase().includes(keyword)
+    )
+  )
+}
+
+const hasMissingTranslations = (row: any, uniqueLangs: string[]) => {
+  if (!row || !row.data || !uniqueLangs.length) return false
+  
+  return uniqueLangs.some((lang) => !(row.data[lang] ?? "").trim())
+}
 
 export function useGlobalSpreadsheetFilter(
   response: SpreadsheetResponse | null
 ) {
   const [search, setSearch] = useState("")
   const [showOnlyMissing, setShowOnlyMissing] = useState(false)
+  const [selectedNamespace, setSelectedNamespace] = useState("all")
+
+  // Debounce search input with 300ms delay
+  const debouncedSearch = useDebounce(search, 300)
+
+  // Check if we're currently waiting for debounce
+  const isSearching = search !== debouncedSearch
 
   const filtered = useMemo(() => {
-    if (!response) return response
+    if (!response || !response.sheets) return response
 
-    const keyword = search.trim().toLowerCase()
+    const keyword = debouncedSearch.trim().toLowerCase()
+    const uniqueLangs = getUniqueLangs(response.sheets)
 
-    // lấy danh sách ngôn ngữ duy nhất
-    const langs =
-      response.sheets.flatMap((s) =>
-        s.rows.flatMap((r) => Object.keys(r.data))
-      ) || []
-    const uniqueLangs = Array.from(new Set(langs))
+    // nếu không filter gì thì return luôn (chỉ khi selectedNamespace là "all")
+    if (!keyword && !showOnlyMissing && selectedNamespace === "all")
+      return response
 
-    // nếu không filter gì thì return luôn
-    if (!keyword && !showOnlyMissing) return response
+    // Filter theo namespace trước
+    let filteredSheets = response.sheets
+    if (selectedNamespace !== "all") {
+      filteredSheets = response.sheets.filter(
+        (sheet) => sheet.sheetId.toString() === selectedNamespace
+      )
+    }
 
     return {
       ...response,
-      sheets: response.sheets
+      sheets: filteredSheets
         .map((sheet) => {
+          if (!sheet || !sheet.rows) return { ...sheet, rows: [] }
+          
           const rows = sheet.rows.filter((row) => {
             // filter theo search
-            const matchSearch =
-              !keyword ||
-              row.key.toLowerCase().includes(keyword) ||
-              Object.values(row.data).some((v) =>
-                (v ?? "").toLowerCase().includes(keyword)
-              )
-
-            if (!matchSearch) return false
+            if (!matchesSearch(row, keyword)) return false
 
             // filter theo missing translations
             if (showOnlyMissing) {
-              return uniqueLangs.some((lang) => !(row.data[lang] ?? "").trim())
+              return hasMissingTranslations(row, uniqueLangs)
             }
 
             return true
@@ -47,9 +81,18 @@ export function useGlobalSpreadsheetFilter(
 
           return { ...sheet, rows }
         })
-        .filter((sheet) => sheet.rows.length > 0),
+        .filter((sheet) => sheet.rows && sheet.rows.length > 0),
     }
-  }, [response, search, showOnlyMissing])
+  }, [response, debouncedSearch, showOnlyMissing, selectedNamespace])
 
-  return { filtered, search, setSearch, showOnlyMissing, setShowOnlyMissing }
+  return {
+    filtered,
+    search,
+    setSearch,
+    showOnlyMissing,
+    setShowOnlyMissing,
+    selectedNamespace,
+    setSelectedNamespace,
+    isSearching, // New: indicates if search is being debounced
+  }
 }

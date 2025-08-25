@@ -1,62 +1,39 @@
-// app/api/sync/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleSpreadsheet } from "google-spreadsheet"
-import { JWT } from "google-auth-library"
+import { googleSheetsService } from "@/lib/google-sheets.service"
 import { SpreadsheetResponse } from "@/models"
 
 /**
- * Cập nhật dữ liệu vào Google Sheets
- * @param req
- * @returns
+ * Cập nhật dữ liệu vào Google Sheets (sync toàn bộ spreadsheet)
  */
-
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as SpreadsheetResponse
   try {
-    // Auth service account
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_CLIENT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    })
-    const doc = new GoogleSpreadsheet(body.id, serviceAccountAuth)
-    await doc.loadInfo()
+    const body = (await req.json()) as SpreadsheetResponse
 
-    // Lặp qua từng sheet
-    for (const sheetData of body.sheets) {
-      const sheet = doc.sheetsByTitle[sheetData.title]
-      if (!sheet) continue
-
-      // Lấy rows hiện tại
-      const rows = await sheet.getRows()
-
-      // Map: key -> row (ép kiểu để tránh lỗi TS7053)
-      const rowMap = new Map<string, (typeof rows)[number]>()
-      for (const r of rows) {
-        const key = (r as any).key as string | undefined
-        if (key) {
-          rowMap.set(key, r)
-        }
-      }
-
-      // Cập nhật
-      for (const row of sheetData.rows) {
-        const existing = rowMap.get(row.key)
-        if (existing) {
-          // update từng cột
-          for (const [lang, value] of Object.entries(row.data)) {
-            ;(existing as any)[lang] = value
-          }
-          await existing.save()
-        }
-      }
+    if (!body.id || !body.sheets) {
+      return NextResponse.json(
+        { success: false, error: "Missing required fields" },
+        { status: 400 }
+      )
     }
 
+    await googleSheetsService.syncSpreadsheet(body)
+
+    // Return simple success response for backward compatibility
     return NextResponse.json({ success: true })
   } catch (err: any) {
-    console.error("Sync error:", err)
+    if (err.response?.status === 403) {
+      return NextResponse.json(
+        {
+          message:
+            "Chúng tôi không có quyền chỉnh sửa file của bạn,\n vui lòng thêm quyền truy cập cho email: " +
+            process.env.GOOGLE_CLIENT_EMAIL,
+        },
+        { status: 403 }
+      )
+    }
+
     return NextResponse.json(
-      { success: false, error: err.message },
+      { success: false, error: err.message ?? "Unknown error" },
       { status: 500 }
     )
   }

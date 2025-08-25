@@ -8,8 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.7",
     "@tanstack/react-query": "^5.85.5",
     "axios": "^1.11.0",
+    "dayjs": "^1.11.13",
     "google-auth-library": "^10.2.1",
     "google-spreadsheet": "^5.0.2",
     "next": "15.5.0",
