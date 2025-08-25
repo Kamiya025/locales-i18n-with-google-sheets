@@ -21,19 +21,21 @@ export default function StatsCard({
   loading = false,
 }: Readonly<StatsCardProps>) {
   const colorClasses = {
-    emerald: "border-emerald-200/30 text-emerald-600",
-    blue: "border-blue-200/30 text-blue-600",
-    amber: "border-amber-200/30 text-amber-600",
-    purple: "border-purple-200/30 text-purple-600",
-    indigo: "border-indigo-200/30 text-indigo-600",
-    rose: "border-rose-200/30 text-rose-600",
+    emerald: "border-emerald-200/30 text-emerald-700",
+    blue: "border-blue-200/30 text-blue-700",
+    amber: "border-amber-200/30 text-amber-700",
+    purple: "border-purple-200/30 text-purple-700",
+    indigo: "border-indigo-200/30 text-indigo-700",
+    rose: "border-rose-200/30 text-rose-700",
   }
 
   return (
     <Card
       variant="glass"
       size="md"
-      className={`border ${colorClasses[color].split(" ")[0]}`}
+      className={`border ${
+        colorClasses[color].split(" ")[0]
+      } hover:bg-slate-300 cursor-pointer shadow-lg`}
     >
       <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -52,7 +54,7 @@ export default function StatsCard({
           </div>
         </div>
 
-        <div className="text-2xl font-bold text-slate-700 relative">
+        <div className="text-2xl font-bold text-slate-800 relative">
           <Transition
             show={!loading}
             enter="transition-all duration-300 ease-out"
@@ -81,7 +83,9 @@ export default function StatsCard({
         </div>
 
         {subtitle && (
-          <div className="text-sm text-slate-500 truncate">{subtitle}</div>
+          <div className="text-sm text-slate-600 truncate font-medium">
+            {subtitle}
+          </div>
         )}
       </div>
     </Card>

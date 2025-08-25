@@ -1,7 +1,13 @@
 "use client"
 
 import { Fragment, ReactNode } from "react"
-import { Dialog as HeadlessDialog, Transition } from "@headlessui/react"
+import {
+  Dialog as HeadlessDialog,
+  DialogPanel,
+  DialogTitle,
+  DialogDescription,
+  Transition,
+} from "@headlessui/react"
 import Card from "../card"
 
 interface DialogProps {
@@ -67,7 +73,7 @@ export default function Dialog({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/10 backdrop-blur-md" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-xl" />
         </Transition.Child>
 
         {/* Modal container */}
@@ -83,17 +89,17 @@ export default function Dialog({
               leaveFrom="opacity-100 scale-100 translate-y-0"
               leaveTo="opacity-0 scale-95 translate-y-4"
             >
-              <HeadlessDialog.Panel
+              <DialogPanel
                 className={`${sizeClass} transform transition-all ${className}`}
               >
                 <Card
                   variant="glass"
                   size="lg"
                   shadow="lg"
-                  className="flex flex-col h-full border-white/20 modal-shadow"
+                  className="flex flex-col h-full border-white/30 shadow-2xl shadow-slate-500/25"
                 >
                   {/* Header */}
-                  <div className="flex-shrink-0 glass-effect border-b border-slate-200/30 p-6 rounded-t-lg relative">
+                  <div className="flex-shrink-0 bg-gradient-to-r from-white/90 via-slate-50/85 to-blue-50/80 backdrop-blur-xl border-b border-slate-200/40 p-6 rounded-t-xl relative">
                     <div className="flex items-center gap-3">
                       {icon && (
                         <div
@@ -107,19 +113,19 @@ export default function Dialog({
                         </div>
                       )}
                       <div className="flex-1">
-                        <HeadlessDialog.Title
+                        <DialogTitle
                           as="h2"
                           className="text-xl font-bold text-slate-800"
                         >
                           {title}
-                        </HeadlessDialog.Title>
+                        </DialogTitle>
                         {subtitle && (
-                          <HeadlessDialog.Description
+                          <DialogDescription
                             as="p"
                             className="text-sm text-slate-600"
                           >
                             {subtitle}
-                          </HeadlessDialog.Description>
+                          </DialogDescription>
                         )}
                       </div>
 
@@ -155,12 +161,12 @@ export default function Dialog({
 
                   {/* Footer */}
                   {footer && (
-                    <div className="flex-shrink-0 glass-effect border-t border-slate-200/30 p-6 rounded-b-lg">
+                    <div className="flex-shrink-0 bg-gradient-to-r from-white/90 via-slate-50/85 to-blue-50/80 backdrop-blur-xl border-t border-slate-200/40 p-6 rounded-b-xl">
                       {footer}
                     </div>
                   )}
                 </Card>
-              </HeadlessDialog.Panel>
+              </DialogPanel>
             </Transition.Child>
           </div>
         </div>

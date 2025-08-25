@@ -1,6 +1,11 @@
 "use client"
 
-import { Popover, Transition } from "@headlessui/react"
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react"
 import { Fragment, ReactNode } from "react"
 
 interface TooltipProps {
@@ -61,14 +66,14 @@ export default function Tooltip({
       <Popover className={`relative inline-block ${className}`}>
         {({ open }) => (
           <>
-            <Popover.Button
+            <PopoverButton
               as="div"
               className={`cursor-pointer transition-colors duration-200 ${
                 open ? "text-indigo-600" : ""
               }`}
             >
               {children}
-            </Popover.Button>
+            </PopoverButton>
 
             <Transition
               as={Fragment}
@@ -79,8 +84,8 @@ export default function Tooltip({
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel
-                className={`absolute z-50 ${getPlacementClasses()}`}
+              <PopoverPanel
+                className={`absolute z-[55] ${getPlacementClasses()}`}
               >
                 {({ close }) => (
                   <div
@@ -101,7 +106,7 @@ export default function Tooltip({
                     />
                   </div>
                 )}
-              </Popover.Panel>
+              </PopoverPanel>
             </Transition>
           </>
         )}
@@ -114,7 +119,7 @@ export default function Tooltip({
     <div className={`relative inline-block group ${className}`}>
       {children}
       <div
-        className={`absolute z-50 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-300 ${getPlacementClasses()}`}
+        className={`absolute z-[55] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 delay-300 ${getPlacementClasses()}`}
       >
         <div
           className={`relative bg-slate-800 text-white text-sm rounded-lg px-3 py-2 shadow-lg max-w-xs whitespace-nowrap ${contentClassName}`}

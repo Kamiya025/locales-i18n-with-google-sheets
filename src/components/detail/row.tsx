@@ -21,7 +21,7 @@ export function RowItemViewer(
   }, [row])
 
   return (
-    <Card variant="glass" size="lg" hover className="relative">
+    <Card variant="glass" size="lg" hover className="relative shadow-2xl">
       <form
         onSubmit={(e) => {
           e.preventDefault()

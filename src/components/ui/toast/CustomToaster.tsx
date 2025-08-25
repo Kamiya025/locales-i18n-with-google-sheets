@@ -149,7 +149,7 @@ const CustomToast = ({ t }: { t: any }) => {
 export default function CustomToaster() {
   return (
     <Toaster
-      position="top-right"
+      position="bottom-right"
       gutter={8}
       containerClassName=""
       containerStyle={{}}

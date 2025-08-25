@@ -22,15 +22,21 @@ export default function Badge({
   className = "",
 }: Readonly<BadgeProps>) {
   const baseClasses =
-    "inline-flex items-center justify-center font-bold text-center rounded-lg transition-all duration-200"
+    "inline-flex items-center justify-center font-semibold text-center rounded-xl transition-all duration-300 ease-out backdrop-blur-lg border shadow-md relative overflow-hidden before:absolute before:inset-0 before:rounded-xl before:pointer-events-none before:z-[1]"
 
   const variantClasses = {
-    primary: "bg-blue-600 text-white",
-    secondary: "bg-slate-200 text-slate-700",
-    success: "bg-emerald-500 text-white",
-    warning: "bg-amber-500 text-white",
-    error: "bg-red-500 text-white",
-    language: "gradient-primary text-white font-bold uppercase",
+    primary:
+      "bg-gradient-to-r from-blue-500/90 via-indigo-600/90 to-purple-600/90 text-white shadow-blue-500/25 border-blue-300/20 hover:shadow-lg hover:shadow-blue-600/30 before:bg-gradient-to-r before:from-white/20 before:to-transparent",
+    secondary:
+      "bg-gradient-to-r from-slate-100/95 via-slate-200/90 to-slate-300/85 text-slate-700 shadow-slate-500/15 border-slate-300/30 hover:shadow-lg hover:shadow-slate-600/20 before:bg-gradient-to-r before:from-white/30 before:to-transparent",
+    success:
+      "bg-gradient-to-r from-emerald-500/90 via-green-600/90 to-teal-600/90 text-white shadow-emerald-500/25 border-emerald-300/20 hover:shadow-lg hover:shadow-emerald-600/30 before:bg-gradient-to-r before:from-white/20 before:to-transparent",
+    warning:
+      "bg-gradient-to-r from-amber-500/90 via-orange-600/90 to-yellow-600/90 text-white shadow-amber-500/25 border-amber-300/20 hover:shadow-lg hover:shadow-amber-600/30 before:bg-gradient-to-r before:from-white/20 before:to-transparent",
+    error:
+      "bg-gradient-to-r from-red-500/90 via-rose-600/90 to-pink-600/90 text-white shadow-red-500/25 border-red-300/20 hover:shadow-lg hover:shadow-red-600/30 before:bg-gradient-to-r before:from-white/20 before:to-transparent",
+    language:
+      "bg-gradient-to-r from-violet-500/90 via-purple-600/90 to-indigo-600/90 text-white font-bold uppercase shadow-violet-500/25 border-violet-300/20 hover:shadow-lg hover:shadow-violet-600/30 before:bg-gradient-to-r before:from-white/20 before:to-transparent",
   }
 
   const sizeClasses = {

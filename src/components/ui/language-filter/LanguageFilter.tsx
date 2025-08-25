@@ -2,7 +2,7 @@
 
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import { useState } from "react"
-import { Menu, Transition } from "@headlessui/react"
+import { Menu, MenuButton, Transition } from "@headlessui/react"
 import { Fragment } from "react"
 import AddLanguageModal from "../add-language-modal"
 
@@ -34,7 +34,7 @@ export default function LanguageFilter() {
         {({ open }) => (
           <>
             {/* Trigger Button */}
-            <Menu.Button className="glass-effect border border-white/30 rounded-lg backdrop-blur-sm hover:border-slate-300/40 transition-all duration-300 focus:ring-2 focus:ring-slate-400/50 focus:border-slate-400/50 px-4 py-3 flex items-center gap-2 text-slate-700 focus:outline-none ui-open:ring-2 ui-open:ring-blue-500/50">
+            <MenuButton className="glass-effect border border-white/30 rounded-lg backdrop-blur-sm hover:border-slate-300/40 transition-all duration-300 focus:ring-2 focus:ring-slate-400/50 focus:border-slate-400/50 px-4 py-3 flex items-center gap-2 text-slate-700 focus:outline-none ui-open:ring-2 ui-open:ring-blue-500/50">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -66,7 +66,7 @@ export default function LanguageFilter() {
                   d="M19 9l-7 7-7-7"
                 />
               </svg>
-            </Menu.Button>
+            </MenuButton>
 
             {/* Dropdown Menu with Transition */}
             <Transition
@@ -78,7 +78,7 @@ export default function LanguageFilter() {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute top-full left-0 mt-2 w-64 glass-effect border border-white/30 rounded-lg backdrop-blur-md shadow-lg z-[9999] focus:outline-none">
+              <Menu.Items className="absolute top-full left-0 mt-2 w-64 glass-effect border border-white/30 rounded-lg backdrop-blur-md shadow-lg z-[70] focus:outline-none">
                 <div className="p-4">
                   {/* Header với Select/Deselect All */}
                   <div className="flex justify-between items-center mb-3 pb-3 border-b border-slate-200/30">

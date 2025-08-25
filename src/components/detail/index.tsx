@@ -26,7 +26,7 @@ export default function SpreadsheetViewer() {
     selectedNamespace,
     setSelectedNamespace,
     isSearching,
-  } = useGlobalSpreadsheetFilter(data)
+  } = useGlobalSpreadsheetFilter(data, selectedLocales)
   // Tính toán stats dựa trên namespace được chọn
   const statsData = useMemo(() => {
     if (!data || !data.sheets) return null
@@ -56,8 +56,9 @@ export default function SpreadsheetViewer() {
         sum +
         sheet.rows.filter(
           (row) =>
-            // Chỉ kiểm tra ngôn ngữ được chọn, không phải tất cả ngôn ngữ
+            // Chỉ kiểm tra ngôn ngữ được chọn
             row &&
+            selectedLocales.length > 0 &&
             selectedLocales.some((lang) => !(row.data?.[lang] ?? "").trim())
         ).length
       )
@@ -123,18 +124,16 @@ export default function SpreadsheetViewer() {
 
   if (!data) return null
   return (
-    <div className="w-full h-full min-h-screen flex flex-col items-center p-6 pb-8 space-y-6 overflow-y-auto custom-scrollbar relative">
+    <div className="w-full h-full min-h-screen flex flex-col items-center p-6 pb-8 space-y-6 overflow-y-auto overflow-x-visible custom-scrollbar relative">
       <div className="container flex flex-col gap-6">
         <Card
           variant="glass"
           size="lg"
           shadow="md"
-          className="border-white/20 z-10"
+          className="border-white/20 z-10 overflow-visible glass-blue"
         >
           <div className="space-y-4">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-indigo-800 to-purple-800 bg-clip-text text-transparent">
-              {data.title}
-            </h1>
+            <h1 className="text-3xl font-bold text-slate-800">{data.title}</h1>
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <StatsCard
@@ -173,39 +172,30 @@ export default function SpreadsheetViewer() {
 
           <div className="mt-6 space-y-4">
             {/* Search Input Group */}
-            <Card
-              variant="glass"
-              className="!p-0 hover:border-slate-300/40 focus-within:ring-2 focus-within:ring-slate-400/50 focus-within:border-slate-400/50"
-            >
-              {/* Unified Layout - Always Visible */}
-              <div className="flex flex-rows md:gap-1">
-                {/* Search Input */}
-                <div className="flex-1 relative">
-                  <SearchCombobox
-                    value={search}
-                    onChange={setSearch}
-                    placeholder={
-                      selectedNamespace === "all"
-                        ? "Tìm kiếm toàn bộ..."
-                        : "Tìm kiếm trong danh mục..."
-                    }
-                    suggestions={searchSuggestions}
-                    isLoading={isSearching}
-                    className="pl-8"
-                  />
-                </div>
-                {/* Divider - Hidden on mobile */}
-                <div className="hidden md:block w-px h-8 bg-slate-200/50 mx-2"></div>
-                {/* Namespace Selector */}
-                <div className="md:min-w-[200px]">
-                  <NamespaceSelector
-                    value={selectedNamespace}
-                    onChange={setSelectedNamespace}
-                    options={namespaceOptions}
-                  />
-                </div>
+            <div className="flex flex-row gap-1 relative overflow-visible">
+              {/* Search Input */}
+
+              <SearchCombobox
+                value={search}
+                onChange={setSearch}
+                placeholder={
+                  selectedNamespace === "all"
+                    ? "Tìm kiếm toàn bộ..."
+                    : "Tìm kiếm trong danh mục..."
+                }
+                suggestions={searchSuggestions}
+                isLoading={isSearching}
+                className="flex-1 !rounded-r-none"
+              />
+
+              <div className="relative min-w-[200px] overflow-visible">
+                <NamespaceSelector
+                  value={selectedNamespace}
+                  onChange={setSelectedNamespace}
+                  options={namespaceOptions}
+                />
               </div>
-            </Card>
+            </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -213,7 +203,7 @@ export default function SpreadsheetViewer() {
                   color="blue"
                   defaultChecked={showOnlyMissing}
                   onChange={() => setShowOnlyMissing(!showOnlyMissing)}
-                  label="Chỉ hiển thị thiếu bản dịch"
+                  label="Chỉ chưa hoàn thiện"
                 />
                 <LanguageFilter />
               </div>

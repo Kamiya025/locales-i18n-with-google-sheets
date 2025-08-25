@@ -14,8 +14,93 @@ export interface SheetData {
   rows: SheetRow[]
 }
 
+// Simple in-memory cache with TTL
+interface CacheEntry {
+  data: any
+  timestamp: number
+  ttl: number
+}
+
+class SimpleCache {
+  private cache = new Map<string, CacheEntry>()
+
+  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000) {
+    // 5 phút default
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl: ttlMs,
+    })
+  }
+
+  get(key: string): any | null {
+    const entry = this.cache.get(key)
+    if (!entry) return null
+
+    // Check if expired
+    if (Date.now() - entry.timestamp > entry.ttl) {
+      this.cache.delete(key)
+      return null
+    }
+
+    return entry.data
+  }
+
+  clear() {
+    this.cache.clear()
+  }
+
+  // Clean expired entries
+  cleanup() {
+    const now = Date.now()
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp > entry.ttl) {
+        this.cache.delete(key)
+      }
+    }
+  }
+}
+
+// Rate limiting để tránh Google API quota exceeded
+class RateLimiter {
+  private requestTimes: number[] = []
+  private readonly maxRequests = 80 // Google limit: 100/minute, để buffer
+  private readonly windowMs = 60 * 1000 // 1 phút
+
+  async checkLimit(): Promise<void> {
+    const now = Date.now()
+
+    // Remove old requests outside the window
+    this.requestTimes = this.requestTimes.filter(
+      (time) => now - time < this.windowMs
+    )
+
+    if (this.requestTimes.length >= this.maxRequests) {
+      const oldestRequest = Math.min(...this.requestTimes)
+      const waitTime = this.windowMs - (now - oldestRequest)
+
+      console.log(
+        `⏱️ Rate limit reached. Waiting ${Math.round(waitTime / 1000)}s...`
+      )
+      await this.sleep(waitTime)
+
+      // Recursive check after waiting
+      return this.checkLimit()
+    }
+
+    // Record this request
+    this.requestTimes.push(now)
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+}
+
 export class GoogleSheetsService {
   private readonly auth: JWT
+  private readonly cache = new SimpleCache()
+  private readonly rateLimiter = new RateLimiter()
 
   constructor() {
     this.auth = new JWT({
@@ -23,12 +108,66 @@ export class GoogleSheetsService {
       key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     })
+
+    // Cleanup expired cache entries mỗi 10 phút
+    setInterval(() => {
+      this.cache.cleanup()
+    }, 10 * 60 * 1000)
+  }
+
+  // Helper method để invalidate cache cho spreadsheet
+  private invalidateSpreadsheetCache(spreadsheetId: string) {
+    this.cache.clear() // For simplicity, clear all cache. Could be more granular
+    console.log(`🗑️ Cache invalidated for spreadsheet: ${spreadsheetId}`)
   }
 
   private async getDocument(spreadsheetId: string): Promise<GoogleSpreadsheet> {
-    const doc = new GoogleSpreadsheet(spreadsheetId, this.auth)
-    await doc.loadInfo()
-    return doc
+    return this.withRetry(async () => {
+      // Apply rate limiting before API call
+      await this.rateLimiter.checkLimit()
+
+      const doc = new GoogleSpreadsheet(spreadsheetId, this.auth)
+      await doc.loadInfo()
+      return doc
+    })
+  }
+
+  // Retry mechanism với exponential backoff cho Google API errors
+  private async withRetry<T>(
+    apiCall: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await apiCall()
+      } catch (error: any) {
+        const isQuotaError =
+          error.response?.status === 429 ||
+          error.message?.includes("quota") ||
+          error.message?.includes("rate limit")
+
+        if (isQuotaError && attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt) // Exponential backoff
+          console.log(
+            `🔄 Google API quota error. Retrying in ${
+              delay / 1000
+            }s... (Attempt ${attempt + 1}/${maxRetries + 1})`
+          )
+          await this.sleep(delay)
+          continue
+        }
+
+        // Re-throw if not quota error or max retries reached
+        throw error
+      }
+    }
+
+    throw new Error("Max retries reached")
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   private parseSheetRows(
@@ -54,6 +193,15 @@ export class GoogleSheetsService {
   }
 
   async getSpreadsheet(spreadsheetId: string): Promise<SpreadsheetResponse> {
+    // Check cache first
+    const cacheKey = `spreadsheet:${spreadsheetId}`
+    const cached = this.cache.get(cacheKey)
+    if (cached) {
+      console.log(`🚀 Cache hit for spreadsheet: ${spreadsheetId}`)
+      return cached
+    }
+
+    console.log(`📚 Fetching spreadsheet from API: ${spreadsheetId}`)
     const doc = await this.getDocument(spreadsheetId)
 
     const sheets = await Promise.all(
@@ -61,9 +209,10 @@ export class GoogleSheetsService {
         // Validate sheet format first
         await this.validateSheetFormat(sheet)
 
-        const rows = await sheet
-          .getRows()
-          .catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
+        const rows = await this.withRetry(async () => {
+          await this.rateLimiter.checkLimit()
+          return sheet.getRows()
+        }).catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
 
         if (rows.length === 0) {
           return {
@@ -86,11 +235,16 @@ export class GoogleSheetsService {
       })
     )
 
-    return {
+    const result = {
       title: doc.title,
       id: spreadsheetId,
       sheets,
     }
+
+    // Cache for 5 minutes
+    this.cache.set(cacheKey, result, 5 * 60 * 1000)
+
+    return result
   }
 
   async getSpreadsheetValidation(spreadsheetId: string): Promise<{
@@ -112,6 +266,15 @@ export class GoogleSheetsService {
       }>
     }>
   }> {
+    // Check cache first
+    const cacheKey = `validation:${spreadsheetId}`
+    const cached = this.cache.get(cacheKey)
+    if (cached) {
+      console.log(`🚀 Cache hit for validation: ${spreadsheetId}`)
+      return cached
+    }
+
+    console.log(`🔍 Validating spreadsheet from API: ${spreadsheetId}`)
     const doc = await this.getDocument(spreadsheetId)
     const validationIssues: Array<{
       sheetTitle: string
@@ -130,8 +293,13 @@ export class GoogleSheetsService {
     }> = []
 
     let isAllValid = true
+    const sheetsData: Array<{
+      sheetId: number
+      title: string
+      rows: any[]
+    }> = []
 
-    // Check each sheet for validation issues
+    // Check each sheet for validation issues và collect data một lần
     for (const sheet of doc.sheetsByIndex) {
       try {
         // Try to load header row safely
@@ -155,6 +323,11 @@ export class GoogleSheetsService {
               },
             ],
           })
+          sheetsData.push({
+            sheetId: sheet.sheetId,
+            title: sheet.title,
+            rows: [],
+          })
           continue // Skip further validation for this sheet
         } else {
           // Re-throw other unexpected errors
@@ -172,13 +345,19 @@ export class GoogleSheetsService {
           errors: formatValidation.errors,
           fixes: formatValidation.fixes,
         })
+        sheetsData.push({
+          sheetId: sheet.sheetId,
+          title: sheet.title,
+          rows: [],
+        })
         continue // Skip further validation for this sheet
       }
 
-      // Validate data if format is OK
-      const rows = await sheet
-        .getRows()
-        .catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
+      // Validate data if format is OK - CHỈ ĐỌC 1 LẦN với rate limiting và retry
+      const rows = await this.withRetry(async () => {
+        await this.rateLimiter.checkLimit()
+        return sheet.getRows()
+      }).catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
 
       if (rows.length > 0) {
         const parsed = this.parseSheetRows(sheet, rows)
@@ -195,20 +374,43 @@ export class GoogleSheetsService {
             fixes: dataValidation.fixes,
           })
         }
+
+        // Store processed data để tránh đọc lại
+        sheetsData.push({
+          sheetId: sheet.sheetId,
+          title: sheet.title,
+          rows: parsed,
+        })
+      } else {
+        sheetsData.push({
+          sheetId: sheet.sheetId,
+          title: sheet.title,
+          rows: [],
+        })
       }
     }
 
-    // If all valid, return the spreadsheet data
+    // Nếu validation thành công, tạo SpreadsheetResponse từ data đã có
+    // KHÔNG GỌI getSpreadsheet() nữa để tránh duplicate calls
     let spreadsheet: SpreadsheetResponse | undefined
     if (isAllValid) {
-      spreadsheet = await this.getSpreadsheet(spreadsheetId)
+      spreadsheet = {
+        title: doc.title,
+        id: spreadsheetId,
+        sheets: sheetsData,
+      }
     }
 
-    return {
+    const result = {
       isValid: isAllValid,
       spreadsheet,
       validationIssues,
     }
+
+    // Cache validation result for 3 minutes (shorter than data cache)
+    this.cache.set(`validation:${spreadsheetId}`, result, 3 * 60 * 1000)
+
+    return result
   }
 
   async addRowToSheet(
@@ -230,6 +432,9 @@ export class GoogleSheetsService {
         ...rowData.data,
       },
     ])
+
+    // Invalidate cache after modification
+    this.invalidateSpreadsheetCache(spreadsheetId)
 
     // Return updated spreadsheet data
     return this.getSpreadsheet(spreadsheetId)
@@ -269,6 +474,8 @@ export class GoogleSheetsService {
   }
 
   async syncSpreadsheet(spreadsheetData: SpreadsheetResponse): Promise<void> {
+    // Invalidate cache before sync
+    this.invalidateSpreadsheetCache(spreadsheetData.id)
     const doc = await this.getDocument(spreadsheetData.id)
 
     // Process each sheet

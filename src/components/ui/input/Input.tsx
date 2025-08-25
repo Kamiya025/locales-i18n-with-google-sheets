@@ -25,21 +25,21 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const baseClasses =
-      "w-full border outline-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      "w-full border outline-none transition-all duration-500 ease-out disabled:opacity-50 disabled:cursor-not-allowed relative"
 
     const variantClasses = {
       default:
-        "bg-white border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
+        "bg-gradient-to-br from-white/95 via-slate-50/90 to-blue-50/85 border-blue-200/40 backdrop-blur-lg shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/15 focus:ring-2 focus:ring-blue-400/50 focus:border-blue-300/60 text-slate-700 placeholder-slate-400",
       glass:
-        "glass-effect border-white/30 backdrop-blur-sm hover:border-slate-300/40 focus:ring-2 focus:ring-slate-400/50 focus:border-slate-400/50 text-slate-700 placeholder-slate-400",
+        "bg-white/80 backdrop-blur-xl border-white/50 shadow-xl shadow-slate-200/30 hover:shadow-2xl hover:shadow-slate-300/40 focus:ring-2 focus:ring-slate-400/50 focus:border-white/70 text-slate-700 placeholder-slate-400",
       outline:
-        "bg-transparent border-slate-300 focus:ring-2 focus:ring-slate-400 focus:border-slate-400",
+        "bg-white/60 backdrop-blur-xl border-2 border-slate-300 shadow-lg shadow-slate-200/20 hover:shadow-xl hover:shadow-slate-300/30 focus:ring-2 focus:ring-slate-400/50 focus:border-slate-400 text-slate-700 placeholder-slate-400",
     }
 
     const sizeClasses = {
-      sm: "px-3 py-2 text-sm rounded-lg",
-      md: "px-4 py-3 text-base rounded-lg",
-      lg: "px-6 py-4 text-lg rounded-xl",
+      sm: "px-4 py-2.5 text-sm rounded-xl",
+      md: "px-6 py-3.5 text-base rounded-xl",
+      lg: "px-8 py-4.5 text-lg rounded-xl",
     }
 
     const errorClasses = error

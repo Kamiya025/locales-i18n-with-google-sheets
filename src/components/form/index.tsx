@@ -16,20 +16,18 @@ interface GetLinkGoogleSheetsProps {
 
 // Helper functions to reduce complexity
 const getInputClassNames = (isHeader: boolean) =>
-  `w-full glass-effect border border-white/30 ${
-    isHeader ? "rounded-lg px-4 py-2" : "rounded-lg px-6 py-3"
+  `w-full bg-gradient-to-br from-white/95 via-slate-50/90 to-blue-50/85 border-blue-200/40 backdrop-blur-lg shadow-lg shadow-blue-500/10 hover:shadow-xl hover:shadow-blue-500/15 focus:ring-2 focus:ring-blue-400/50 focus:border-blue-300/60 text-slate-700 placeholder-slate-400 ${
+    isHeader ? "rounded-xl px-4 py-2.5 text-sm" : "rounded-xl px-6 py-3.5"
   } ${
     isHeader ? "pr-10" : "pr-12"
-  } focus:ring-2 focus:ring-slate-400/50 focus:border-slate-400/50 outline-none transition-all duration-300 ${
-    isHeader ? "text-sm" : ""
-  } text-slate-700 placeholder-slate-400 backdrop-blur-sm hover:border-slate-300/40`
+  } outline-none transition-all duration-500 ease-out`
 
 const getButtonClassNames = (isHeader: boolean) =>
-  `gradient-primary text-white ${
+  `bg-gradient-to-br from-blue-400 via-blue-500 to-purple-600 text-white shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-600/40 border border-blue-300/20 hover:border-blue-200/30 backdrop-blur-lg before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:rounded-xl hover:scale-[1.03] hover:-translate-y-0.5 font-semibold tracking-wide relative overflow-hidden ${
     isHeader
-      ? "px-4 py-2 rounded-lg text-sm min-w-[100px]"
-      : "px-6 py-3 rounded-lg min-w-[120px]"
-  } hover:shadow-lg disabled:opacity-50 transition-all duration-300 font-medium soft-shadow`
+      ? "px-4 py-2.5 rounded-xl text-sm min-h-[36px] min-w-[100px]"
+      : "px-6 py-3.5 rounded-xl text-base min-h-[44px] min-w-[120px]"
+  } disabled:opacity-50 transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2`
 
 export default function GetLinkGoogleSheets({
   isHeader = false,

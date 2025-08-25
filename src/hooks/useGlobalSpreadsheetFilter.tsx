@@ -5,17 +5,17 @@ import { useDebounce } from "./useDebounce"
 // Helper functions to reduce nesting
 const getUniqueLangs = (sheets: any[]) => {
   if (!sheets || !Array.isArray(sheets)) return []
-  
+
   const langs =
-    sheets.flatMap((s: any) =>
-      s?.rows?.flatMap((r: any) => Object.keys(r?.data || {})) || []
+    sheets.flatMap(
+      (s: any) => s?.rows?.flatMap((r: any) => Object.keys(r?.data || {})) || []
     ) ?? []
   return Array.from(new Set(langs))
 }
 
 const matchesSearch = (row: any, keyword: string) => {
   if (!row || !keyword) return true
-  
+
   return (
     row.key?.toLowerCase().includes(keyword) ||
     Object.values(row.data || {}).some((v: any) =>
@@ -24,14 +24,15 @@ const matchesSearch = (row: any, keyword: string) => {
   )
 }
 
-const hasMissingTranslations = (row: any, uniqueLangs: string[]) => {
-  if (!row || !row.data || !uniqueLangs.length) return false
-  
-  return uniqueLangs.some((lang) => !(row.data[lang] ?? "").trim())
+const hasMissingTranslations = (row: any, selectedLangs: string[]) => {
+  if (!row || !row.data || !selectedLangs.length) return false
+
+  return selectedLangs.some((lang) => !(row.data[lang] ?? "").trim())
 }
 
 export function useGlobalSpreadsheetFilter(
-  response: SpreadsheetResponse | null
+  response: SpreadsheetResponse | null,
+  selectedLocales: string[] = []
 ) {
   const [search, setSearch] = useState("")
   const [showOnlyMissing, setShowOnlyMissing] = useState(false)
@@ -46,8 +47,7 @@ export function useGlobalSpreadsheetFilter(
   const filtered = useMemo(() => {
     if (!response || !response.sheets) return response
 
-    const keyword = debouncedSearch.trim().toLowerCase()
-    const uniqueLangs = getUniqueLangs(response.sheets)
+    const keyword = (debouncedSearch || "").trim().toLowerCase()
 
     // nếu không filter gì thì return luôn (chỉ khi selectedNamespace là "all")
     if (!keyword && !showOnlyMissing && selectedNamespace === "all")
@@ -66,14 +66,14 @@ export function useGlobalSpreadsheetFilter(
       sheets: filteredSheets
         .map((sheet) => {
           if (!sheet || !sheet.rows) return { ...sheet, rows: [] }
-          
+
           const rows = sheet.rows.filter((row) => {
             // filter theo search
             if (!matchesSearch(row, keyword)) return false
 
-            // filter theo missing translations
+            // filter theo missing translations - chỉ check ngôn ngữ đã chọn
             if (showOnlyMissing) {
-              return hasMissingTranslations(row, uniqueLangs)
+              return hasMissingTranslations(row, selectedLocales)
             }
 
             return true
@@ -83,7 +83,13 @@ export function useGlobalSpreadsheetFilter(
         })
         .filter((sheet) => sheet.rows && sheet.rows.length > 0),
     }
-  }, [response, debouncedSearch, showOnlyMissing, selectedNamespace])
+  }, [
+    response,
+    debouncedSearch,
+    showOnlyMissing,
+    selectedNamespace,
+    selectedLocales,
+  ])
 
   return {
     filtered,

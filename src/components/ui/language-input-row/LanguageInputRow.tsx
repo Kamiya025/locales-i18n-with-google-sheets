@@ -29,15 +29,11 @@ export default function LanguageInputRow({
   } focus:bg-white/80 focus:ring-2 focus:ring-indigo-400/30`
 
   const badgeClasses =
-    "w-20 px-3 py-4 flex justify-center items-center text-center gradient-primary text-white font-bold"
+    "w-20 px-3 py-4 flex justify-center items-center text-center bg-gradient-to-br from-violet-500/90 via-purple-600/90 to-indigo-600/90 backdrop-blur-lg border-r border-violet-300/30 text-white font-bold uppercase shadow-lg shadow-violet-500/20 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/20 before:to-transparent before:pointer-events-none transition-all duration-300"
 
   return (
     <div className={containerClasses}>
-      {variant === "glass" ? (
-        <div className={badgeClasses}>{language}</div>
-      ) : (
-        <div className={badgeClasses}>{language}</div>
-      )}
+      <div className={badgeClasses}>{language}</div>
       <div className="flex-1">
         <input
           placeholder={`${placeholder} (${language})`}
