@@ -2,7 +2,7 @@
 
 import { useFetchSheet } from "@/hooks/useFetchSheet"
 import { useHistory } from "@/hooks/useHistory"
-import { useAutoFix } from "@/hooks/useAutoFix"
+import { useBatchAutoFix } from "@/hooks/useBatchAutoFix"
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import { useState } from "react"
 import HistoryPanel from "../ui/history/HistoryPanel"
@@ -95,8 +95,8 @@ export default function GetLinkGoogleSheets({
     debugHistory,
   } = useHistory(storageKey, 15)
 
-  // Auto-fix hook for applying individual fixes
-  const autoFixMutation = useAutoFix((updatedData) => {
+  // Auto-fix hook for applying batch fixes with better performance
+  const batchAutoFixMutation = useBatchAutoFix((updatedData) => {
     setResponse(updatedData)
     // Close both modals after successful fix
     setFormatWarningModal((prev) => ({ ...prev, isOpen: false }))
@@ -143,16 +143,23 @@ export default function GetLinkGoogleSheets({
 
   const handleAutoFixAll = async () => {
     try {
-      // Apply all fixes automatically
+      // Collect all fixes for batch processing
+      const allFixes: Array<{ sheetTitle: string; fixType: string }> = []
+
       for (const issue of formatWarningModal.validationIssues) {
         for (const fix of issue.fixes) {
-          await autoFixMutation.mutateAsync({
-            spreadsheetId: formatWarningModal.spreadsheetId,
+          allFixes.push({
             sheetTitle: issue.sheetTitle,
             fixType: fix.type,
           })
         }
       }
+
+      // Apply all fixes in parallel via batch API
+      await batchAutoFixMutation.mutateAsync({
+        spreadsheetId: formatWarningModal.spreadsheetId,
+        fixes: allFixes,
+      })
 
       // Success is handled by the mutation's onSuccess callback
       // which will close the modals and update the data
@@ -307,7 +314,7 @@ export default function GetLinkGoogleSheets({
         validationIssues={formatWarningModal.validationIssues}
         onViewAndFix={handleViewAndFix}
         onAutoFixAll={handleAutoFixAll}
-        isAutoFixing={autoFixMutation.isPending}
+        isAutoFixing={batchAutoFixMutation.isPending}
       />
 
       {/* Auto Fix Dialog */}

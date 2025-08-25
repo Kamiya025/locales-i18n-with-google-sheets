@@ -149,7 +149,8 @@ export class GoogleSheetsService {
               {
                 type: "no_headers",
                 title: "📝 Tạo Headers",
-                description: "Tự động tạo headers cơ bản: KEY, English",
+                description:
+                  "Tự động tạo headers thông minh: KEY + ngôn ngữ từ sheet khác hoặc VI-VN",
                 action: "Tạo Headers",
               },
             ],
@@ -499,14 +500,25 @@ export class GoogleSheetsService {
     const sheet = doc.sheetsByTitle[sheetTitle]
     if (!sheet) throw new Error(`Sheet "${sheetTitle}" not found`)
 
-    // Create basic headers: KEY and English
-    const headers = ["KEY", "English"]
+    // Scan other sheets to find existing languages
+    const existingLanguages = await this.extractLanguagesFromOtherSheets(
+      doc,
+      sheetTitle
+    )
+
+    // Create smart headers: KEY + languages from other sheets or VI-VN
+    const languagesToAdd =
+      existingLanguages.length > 0 ? existingLanguages : ["VI-VN"] // Default to Vietnamese instead of English
+
+    const headers = ["KEY", ...languagesToAdd]
 
     // Set the headers in row 1
     await sheet.setHeaderRow(headers)
 
-    // Optionally apply formatting to the header row
-    await sheet.loadCells("A1:B1")
+    // Apply formatting to the header row
+    const headerRange = `A1:${String.fromCharCode(64 + headers.length)}1`
+    await sheet.loadCells(headerRange)
+
     for (let i = 0; i < headers.length; i++) {
       const cell = sheet.getCell(0, i)
       cell.textFormat = { bold: true }
@@ -633,33 +645,105 @@ export class GoogleSheetsService {
     )
 
     if (languageColumns.length === 0) {
-      // Add a default language column
-      const newHeaders = [...headers, "English"]
+      // Scan other sheets to find existing languages
+      const existingLanguages = await this.extractLanguagesFromOtherSheets(
+        doc,
+        sheetTitle
+      )
+
+      // Determine which languages to add
+      const languagesToAdd =
+        existingLanguages.length > 0 ? existingLanguages : ["VI-VN"] // Default to Vietnamese instead of English
+
+      // Add the language columns
+      const newHeaders = [...headers, ...languagesToAdd]
       await sheet.setHeaderRow(newHeaders)
 
-      // Apply formatting to new header
+      // Apply formatting to new headers
       const headerRowIndex = 0
-      const newColIndex = headers.length
-      await sheet.loadCells(
-        `${String.fromCharCode(65 + newColIndex)}1:${String.fromCharCode(
-          65 + newColIndex
-        )}1`
-      )
-      const newHeaderCell = sheet.getCell(headerRowIndex, newColIndex)
+      for (let i = 0; i < languagesToAdd.length; i++) {
+        const newColIndex = headers.length + i
+        await sheet.loadCells(
+          `${String.fromCharCode(65 + newColIndex)}1:${String.fromCharCode(
+            65 + newColIndex
+          )}1`
+        )
+        const newHeaderCell = sheet.getCell(headerRowIndex, newColIndex)
 
-      // Copy formatting from KEY column if it exists
-      if (headers.length > 0) {
-        const keyCell = sheet.getCell(headerRowIndex, 0)
-        if (keyCell.backgroundColor) {
-          newHeaderCell.backgroundColor = keyCell.backgroundColor
-        }
-        if (keyCell.textFormat) {
-          newHeaderCell.textFormat = keyCell.textFormat
+        // Copy formatting from KEY column if it exists
+        if (headers.length > 0) {
+          const keyCell = sheet.getCell(headerRowIndex, 0)
+          if (keyCell.backgroundColor) {
+            newHeaderCell.backgroundColor = keyCell.backgroundColor
+          }
+          if (keyCell.textFormat) {
+            newHeaderCell.textFormat = keyCell.textFormat
+          }
         }
       }
 
       await sheet.saveUpdatedCells()
     }
+  }
+
+  /**
+   * Extract languages from other sheets that have proper format
+   */
+  private async extractLanguagesFromOtherSheets(
+    doc: GoogleSpreadsheet,
+    excludeSheetTitle: string
+  ): Promise<string[]> {
+    const allLanguages = new Set<string>()
+
+    for (const otherSheet of doc.sheetsByIndex) {
+      // Skip the current sheet
+      if (otherSheet.title === excludeSheetTitle) continue
+
+      try {
+        // Load headers for this sheet
+        await otherSheet.loadHeaderRow()
+        const otherHeaders = otherSheet.headerValues ?? []
+
+        // Check if this sheet has proper format (has KEY column)
+        const hasKeyColumn = otherHeaders.some(
+          (h) => h && h.toLowerCase() === "key"
+        )
+
+        if (hasKeyColumn) {
+          // Extract language columns (non-KEY headers)
+          const languageHeaders = otherHeaders.filter(
+            (h) => h && h.toLowerCase() !== "key" && h.trim().length > 0
+          )
+
+          // Add unique languages to our set
+          languageHeaders.forEach((lang) => allLanguages.add(lang))
+        }
+      } catch (error) {
+        // If we can't read this sheet, skip it
+        console.warn(`Could not read sheet "${otherSheet.title}":`, error)
+        continue
+      }
+    }
+
+    // Convert Set to Array and prioritize common languages
+    const languageArray = Array.from(allLanguages)
+
+    // Sort languages with Vietnamese and English first
+    return languageArray.sort((a, b) => {
+      const aLower = a.toLowerCase()
+      const bLower = b.toLowerCase()
+
+      // Vietnamese variations first
+      if (aLower.includes("vi") || aLower.includes("viet")) return -1
+      if (bLower.includes("vi") || bLower.includes("viet")) return 1
+
+      // English variations second
+      if (aLower.includes("en") || aLower.includes("english")) return -1
+      if (bLower.includes("en") || bLower.includes("english")) return 1
+
+      // Alphabetical for the rest
+      return a.localeCompare(b)
+    })
   }
 
   // Enhanced validation that returns fixable issues
@@ -716,7 +800,8 @@ export class GoogleSheetsService {
       fixes.push({
         type: "no_languages",
         title: "🌍 Thêm Column Ngôn Ngữ",
-        description: 'Tự động thêm column "English" làm ngôn ngữ mặc định',
+        description:
+          'Tự động scan các sheet khác để tìm ngôn ngữ có sẵn, hoặc thêm "VI-VN" làm mặc định',
         action: "Thêm Ngôn Ngữ",
       })
     }
@@ -800,13 +885,13 @@ export class GoogleSheetsService {
       return `
 📋 Cách khắc phục:
 1. Mở Google Sheets
-2. Thêm row đầu tiên với headers: KEY, English, Vietnamese, ...
+2. Thêm row đầu tiên với headers: KEY, VI-VN, English, ...
 3. Row đầu tiên phải có ít nhất 2 columns: KEY và 1 ngôn ngữ
 4. Không để row đầu tiên trống
 
 ✅ Ví dụ headers đúng:
-| KEY     | English | Vietnamese |
-|---------|---------|------------|
+| KEY     | VI-VN    | English |
+|---------|----------|---------|
       `.trim()
     }
 
@@ -819,10 +904,10 @@ export class GoogleSheetsService {
 4. Các columns khác sẽ là tên ngôn ngữ
 
 ✅ Ví dụ format đúng:
-| KEY     | English | Vietnamese |
-|---------|---------|------------|
-| hello   | Hello   | Xin chào   |
-| goodbye | Goodbye | Tạm biệt   |
+| KEY     | VI-VN    | English |
+|---------|----------|---------|
+| hello   | Xin chào | Hello   |
+| goodbye | Tạm biệt | Goodbye |
       `.trim()
     }
 
@@ -837,10 +922,15 @@ export class GoogleSheetsService {
 
     return `
 📋 Format mong đợi:
-| KEY     | Language1 | Language2 |
+| KEY     | VI-VN     | English   |
 |---------|-----------|-----------|
 | key1    | value1    | value2    |
 | key2    | value3    | value4    |
+
+✨ Auto Fix thông minh:
+- Tự động scan các sheet khác để tìm ngôn ngữ đã có
+- Ưu tiên ngôn ngữ Việt Nam (VI-VN) làm mặc định
+- Copy ngôn ngữ từ sheet khác nếu có format đúng
 
 ❌ Tránh:
 - Sheet không có headers hoặc row đầu tiên trống

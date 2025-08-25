@@ -19,8 +19,10 @@ export const useAutoFix = (onSuccess: (data: SpreadsheetResponse) => void) => {
           loading: `Đang sửa lỗi "${fixType}"...`,
           success: `Đã sửa thành công!`,
           error: (err) =>
-            err.response?.data?.error ??
-            err.response?.data?.message ??
+            (err as AxiosError<{ message: string; error?: string }>).response
+              ?.data?.error ??
+            (err as AxiosError<{ message: string; error?: string }>).response
+              ?.data?.message ??
             "Có lỗi xảy ra khi sửa format",
         }
       )

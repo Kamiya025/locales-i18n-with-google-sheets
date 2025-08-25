@@ -61,6 +61,27 @@ const sheetApi = {
     const url = "/sheet/auto-fix"
     return axiosClient.post(url, { spreadsheetId, sheetTitle, fixType })
   },
+  batchAutoFix(
+    spreadsheetId: string,
+    fixes: Array<{ sheetTitle: string; fixType: string }>
+  ): Promise<{
+    success: boolean
+    data: SpreadsheetResponse
+    results: Array<{
+      success: boolean
+      fixType: string
+      sheetTitle: string
+      error?: string
+    }>
+    summary: {
+      total: number
+      successful: number
+      failed: number
+    }
+  }> {
+    const url = "/sheet/batch-auto-fix"
+    return axiosClient.post(url, { spreadsheetId, fixes })
+  },
 }
 
 export default sheetApi

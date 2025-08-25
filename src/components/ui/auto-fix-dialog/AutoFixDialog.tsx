@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { useAutoFix } from "@/hooks/useAutoFix"
+import { useState, useCallback, useMemo } from "react"
+import { useBatchAutoFix, useOptimizedAutoFix } from "@/hooks/useBatchAutoFix"
+import { useDebounceCallback } from "@/hooks/useDebounceCallback"
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import Button from "../button"
 import { Dialog } from "../dialog"
@@ -38,49 +39,109 @@ export default function AutoFixDialog({
   const [fixingItems, setFixingItems] = useState<Set<string>>(new Set())
   const { setResponse } = useSpreadsheet()
 
-  const autoFixMutation = useAutoFix((updatedData) => {
+  // Use optimized hooks for better performance
+  const batchAutoFixMutation = useBatchAutoFix((updatedData, results) => {
     setResponse(updatedData)
-    // Remove the fixed item from the list by triggering a re-validation
-    // For now, we'll just close the dialog - in real app you'd re-validate
+
+    // Show detailed results if there were failures
+    if (results.summary.failed > 0) {
+      console.warn(
+        "Some fixes failed:",
+        results.results.filter((r) => !r.success)
+      )
+    }
+
     onClose()
   })
 
-  const handleFix = async (
-    sheetTitle: string,
-    fixType: string,
-    fixKey: string
-  ) => {
-    setFixingItems((prev) => new Set(prev).add(fixKey))
+  const singleAutoFixMutation = useOptimizedAutoFix((updatedData) => {
+    setResponse(updatedData)
+  })
 
-    try {
-      await autoFixMutation.mutateAsync({
-        spreadsheetId,
-        sheetTitle,
-        fixType,
-      })
-    } finally {
-      setFixingItems((prev) => {
-        const newSet = new Set(prev)
-        newSet.delete(fixKey)
-        return newSet
-      })
-    }
-  }
+  const handleFixInternal = useCallback(
+    async (sheetTitle: string, fixType: string, fixKey: string) => {
+      setFixingItems((prev) => new Set(prev).add(fixKey))
 
-  const handleFixAll = async () => {
+      try {
+        await singleAutoFixMutation.mutateAsync({
+          spreadsheetId,
+          sheetTitle,
+          fixType,
+        })
+      } finally {
+        setFixingItems((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(fixKey)
+          return newSet
+        })
+      }
+    },
+    [singleAutoFixMutation, spreadsheetId]
+  )
+
+  // Debounced version to prevent spam clicks
+  const handleFix = useDebounceCallback(handleFixInternal, 500)
+
+  const handleFixAllInternal = useCallback(async () => {
+    // Collect all fixes to process in batch
+    const allFixes: Array<{ sheetTitle: string; fixType: string }> = []
+    const allFixKeys: string[] = []
+
     for (const issue of validationIssues) {
       for (const fix of issue.fixes) {
         const fixKey = `${issue.sheetTitle}-${fix.type}`
         if (!fixingItems.has(fixKey)) {
-          await handleFix(issue.sheetTitle, fix.type, fixKey)
+          allFixes.push({ sheetTitle: issue.sheetTitle, fixType: fix.type })
+          allFixKeys.push(fixKey)
         }
       }
     }
-  }
 
-  const totalFixes = validationIssues.reduce(
-    (sum, issue) => sum + issue.fixes.length,
-    0
+    if (allFixes.length === 0) return
+
+    // Set all as fixing
+    setFixingItems((prev) => {
+      const newSet = new Set(prev)
+      allFixKeys.forEach((key) => newSet.add(key))
+      return newSet
+    })
+
+    try {
+      // Process all fixes in parallel via batch API
+      await batchAutoFixMutation.mutateAsync({
+        spreadsheetId,
+        fixes: allFixes,
+      })
+    } finally {
+      // Clear all fixing states
+      setFixingItems((prev) => {
+        const newSet = new Set(prev)
+        allFixKeys.forEach((key) => newSet.delete(key))
+        return newSet
+      })
+    }
+  }, [validationIssues, fixingItems, batchAutoFixMutation, spreadsheetId])
+
+  // Debounced version to prevent spam clicks
+  const handleFixAll = useDebounceCallback(handleFixAllInternal, 1000)
+
+  // Memoize expensive calculations
+  const totalFixes = useMemo(
+    () => validationIssues.reduce((sum, issue) => sum + issue.fixes.length, 0),
+    [validationIssues]
+  )
+
+  // Optimize loading state checks
+  const isAnyFixing = useMemo(
+    () =>
+      fixingItems.size > 0 ||
+      batchAutoFixMutation.isPending ||
+      singleAutoFixMutation.isPending,
+    [
+      fixingItems.size,
+      batchAutoFixMutation.isPending,
+      singleAutoFixMutation.isPending,
+    ]
   )
 
   const footer = (
@@ -119,8 +180,8 @@ export default function AutoFixDialog({
         <Button
           variant="gradient"
           onClick={handleFixAll}
-          disabled={autoFixMutation.isPending || fixingItems.size > 0}
-          loading={autoFixMutation.isPending}
+          disabled={isAnyFixing}
+          loading={isAnyFixing}
           icon={
             <svg
               className="w-4 h-4"
@@ -275,7 +336,7 @@ export default function AutoFixDialog({
                               onClick={() =>
                                 handleFix(issue.sheetTitle, fix.type, fixKey)
                               }
-                              disabled={isFixing || autoFixMutation.isPending}
+                              disabled={isFixing || isAnyFixing}
                               loading={isFixing}
                               className="flex-shrink-0"
                             >
