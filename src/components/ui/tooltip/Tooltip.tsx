@@ -88,7 +88,7 @@ export default function Tooltip({
                   >
                     {/* Close button */}
                     <button
-                      onClick={close}
+                      onClick={() => close()}
                       className="absolute -top-1 -right-1 w-5 h-5 bg-slate-600 hover:bg-slate-500 rounded-full flex items-center justify-center text-white text-xs transition-colors duration-200"
                       aria-label="Đóng"
                     >
