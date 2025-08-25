@@ -192,12 +192,19 @@ export default function HistoryPanel({
           ) : (
             <div className="p-2">
               {filteredItems.map((item) => (
-                <button
+                <div
                   key={item.id}
-                  type="button"
-                  className="group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50/50 transition-all cursor-pointer w-full text-left"
+                  className="group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50/50 transition-all cursor-pointer w-full text-left relative"
                   onClick={() => onSelect(item.url, item.title)}
+                  role="button"
+                  tabIndex={0}
                   aria-label={`Mở ${item.title ?? "Unnamed Sheet"}`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      onSelect(item.url, item.title)
+                    }
+                  }}
                 >
                   {/* Icon */}
                   <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-emerald-100 to-blue-100 rounded-lg flex items-center justify-center">
@@ -237,7 +244,7 @@ export default function HistoryPanel({
                   </div>
 
                   {/* Actions */}
-                  <div className="absolute flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-auto">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
@@ -289,7 +296,7 @@ export default function HistoryPanel({
                       </svg>
                     </button>
                   </div>
-                </button>
+                </div>
               ))}
             </div>
           )}
