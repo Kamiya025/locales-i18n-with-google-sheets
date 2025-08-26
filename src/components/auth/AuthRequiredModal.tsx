@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-
+import { signIn } from "next-auth/react"
 import { Dialog } from "@/components/ui/dialog"
 import Button from "@/components/ui/button"
 
