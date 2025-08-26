@@ -3,12 +3,15 @@
 import { useFetchSheet } from "@/hooks/useFetchSheet"
 import { useHistory } from "@/hooks/useHistory"
 import { useBatchAutoFix } from "@/hooks/useBatchAutoFix"
+
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import { useState } from "react"
 import HistoryPanel from "../ui/history/HistoryPanel"
 import FavoriteQuickAccess from "../ui/history/FavoriteQuickAccess"
 import AutoFixDialog from "../ui/auto-fix-dialog"
 import FormatWarningModal from "../ui/format-warning-modal"
+import { useAuthenticatedFetch } from "@/hooks/useAuthenticatedFetch"
+import AuthRequiredModal from "../auth/AuthRequiredModal"
 
 interface GetLinkGoogleSheetsProps {
   isHeader?: boolean
@@ -93,6 +96,21 @@ export default function GetLinkGoogleSheets({
     debugHistory,
   } = useHistory(storageKey, 15)
 
+  // Authentication handling
+  const {
+    showAuthModal,
+    authError,
+    handleAuthError,
+    closeAuthModal,
+    onAuthSuccess,
+    isAuthenticated,
+  } = useAuthenticatedFetch(() => {
+    // Retry callback: re-submit the same URL
+    if (url) {
+      fetchSheet.mutate(url)
+    }
+  })
+
   // Auto-fix hook for applying batch fixes with better performance
   const batchAutoFixMutation = useBatchAutoFix((updatedData) => {
     setResponse(updatedData)
@@ -123,6 +141,11 @@ export default function GetLinkGoogleSheets({
         spreadsheetId,
         validationIssues: validationResult.validationIssues,
       })
+    },
+    // Add error handling for authentication
+    (error) => {
+      const authHandled = handleAuthError(error)
+      return authHandled // Return true if auth error was handled
     }
   )
 
@@ -187,6 +210,10 @@ export default function GetLinkGoogleSheets({
   const placeholder = isHeader
     ? "Dán link Google Sheets..."
     : "Dán link Google Sheets vào đây..."
+
+  const mobilePlaceholder = isHeader
+    ? "Dán link Google Sheets... (Enter để submit)"
+    : "Dán link Google Sheets vào đây... (Enter để submit)"
   const buttonText = isHeader ? "Get" : "Lấy dữ liệu"
 
   return (
@@ -210,7 +237,8 @@ export default function GetLinkGoogleSheets({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder={placeholder}
-              className={getInputClassNames(isHeader)}
+              className={`${getInputClassNames(isHeader)} md:pr-4`}
+              title="Nhấn Enter để submit"
             />
 
             {/* History Toggle Button */}
@@ -237,6 +265,25 @@ export default function GetLinkGoogleSheets({
               </button>
             )}
 
+            {/* Mobile enter hint - chỉ hiển thị khi không có history */}
+            {items.length === 0 && (
+              <div className="md:hidden absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </div>
+            )}
+
             {/* Improved datalist with titles */}
             <datalist id={`${storageKey}-list`}>
               {items.map((item) => (
@@ -247,31 +294,34 @@ export default function GetLinkGoogleSheets({
             </datalist>
           </div>
 
+          {/* Desktop button - ẩn trên mobile */}
           <button
             type="submit"
             disabled={fetchSheet.isPending}
-            className={getButtonClassNames(isHeader)}
+            className={`${getButtonClassNames(
+              isHeader
+            )} hidden md:flex items-center justify-center`}
           >
             {fetchSheet.isPending ? (
               <span className="flex items-center gap-2">
                 <div
                   className={`${spinnerSize} border-2 border-white/30 border-t-white rounded-full animate-spin`}
                 ></div>
-                <span className={`${isHeader ? "hidden" : "md:block hidden"}`}>
+                <span className={`${isHeader ? "hidden" : "block"}`}>
                   Đang tải...
                 </span>
               </span>
             ) : (
-              <>
-                <span className={`${isHeader ? "block" : "md:block hidden"}`}>
-                  {buttonText}
-                </span>
-                <span className={`${isHeader ? "hidden" : "md:hidden block"}`}>
-                  Get
-                </span>
-              </>
+              <span>{buttonText}</span>
             )}
           </button>
+
+          {/* Mobile submit indicator - khi loading */}
+          {fetchSheet.isPending && (
+            <div className="md:hidden absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-lg p-1.5 border border-blue-200/40 z-10">
+              <div className="w-3 h-3 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
       </form>
 
@@ -321,6 +371,14 @@ export default function GetLinkGoogleSheets({
         onClose={() => setAutoFixDialog((prev) => ({ ...prev, isOpen: false }))}
         spreadsheetId={autoFixDialog.spreadsheetId}
         validationIssues={autoFixDialog.validationIssues}
+      />
+
+      {/* Auth Modal */}
+      <AuthRequiredModal
+        isOpen={showAuthModal}
+        onClose={closeAuthModal}
+        message={authError?.message}
+        onSuccess={onAuthSuccess}
       />
     </div>
   )

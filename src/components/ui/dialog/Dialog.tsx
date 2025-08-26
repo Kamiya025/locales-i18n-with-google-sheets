@@ -1,19 +1,20 @@
 "use client"
 
-import { Fragment, ReactNode } from "react"
 import {
-  Dialog as HeadlessDialog,
+  Description,
   DialogPanel,
   DialogTitle,
-  DialogDescription,
+  Dialog as HeadlessDialog,
   Transition,
+  TransitionChild,
 } from "@headlessui/react"
+import { Fragment, ReactNode } from "react"
 import Card from "../card"
 
 interface DialogProps {
   readonly isOpen: boolean
   readonly onClose: () => void
-  readonly title: string
+  readonly title?: string
   readonly subtitle?: string
   readonly icon?: ReactNode | string
   readonly iconColor?: "emerald" | "amber" | "blue" | "red" | "slate"
@@ -64,7 +65,7 @@ export default function Dialog({
     <Transition appear show={isOpen} as={Fragment}>
       <HeadlessDialog as="div" className="relative z-[99999]" onClose={onClose}>
         {/* Backdrop with animation */}
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -73,14 +74,14 @@ export default function Dialog({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-xl" />
-        </Transition.Child>
+          <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm" />
+        </TransitionChild>
 
         {/* Modal container */}
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4">
             {/* Modal content with animation */}
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95 translate-y-4"
@@ -92,82 +93,86 @@ export default function Dialog({
               <DialogPanel
                 className={`${sizeClass} transform transition-all ${className}`}
               >
-                <Card
-                  variant="glass"
-                  size="lg"
-                  shadow="lg"
-                  className="flex flex-col h-full border-white/30 shadow-2xl shadow-slate-500/25"
-                >
-                  {/* Header */}
-                  <div className="flex-shrink-0 bg-gradient-to-r from-white/90 via-slate-50/85 to-blue-50/80 backdrop-blur-xl border-b border-slate-200/40 p-6 rounded-t-xl relative">
-                    <div className="flex items-center gap-3">
-                      {icon && (
-                        <div
-                          className={`w-10 h-10 rounded-lg bg-gradient-to-br ${iconColorClasses[iconColor]} flex items-center justify-center soft-shadow`}
-                        >
-                          {typeof icon === "string" ? (
-                            <span className="text-white text-lg">{icon}</span>
-                          ) : (
-                            icon
+                {/* Clean Dialog Container */}
+                <div className="bg-white/95 backdrop-blur-xl border border-blue-200/30 rounded-2xl shadow-xl shadow-blue-500/15 flex flex-col h-full overflow-hidden">
+                  {/* Minimal Header */}
+                  {(title || showCloseButton) && (
+                    <div className="flex-shrink-0 px-6 py-4 border-b border-blue-100/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {icon && (
+                            <div
+                              className={`w-8 h-8 rounded-lg bg-gradient-to-br ${iconColorClasses[iconColor]} flex items-center justify-center`}
+                            >
+                              {typeof icon === "string" ? (
+                                <span className="text-white text-sm font-semibold">
+                                  {icon}
+                                </span>
+                              ) : (
+                                icon
+                              )}
+                            </div>
+                          )}
+                          {title && (
+                            <div>
+                              <DialogTitle
+                                as="h2"
+                                className="text-lg font-semibold text-slate-800"
+                              >
+                                {title}
+                              </DialogTitle>
+                              {subtitle && (
+                                <Description
+                                  as="p"
+                                  className="text-sm text-slate-600 mt-0.5"
+                                >
+                                  {subtitle}
+                                </Description>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
-                      <div className="flex-1">
-                        <DialogTitle
-                          as="h2"
-                          className="text-xl font-bold text-slate-800"
-                        >
-                          {title}
-                        </DialogTitle>
-                        {subtitle && (
-                          <DialogDescription
-                            as="p"
-                            className="text-sm text-slate-600"
+
+                        {/* Clean Close Button */}
+                        {showCloseButton && (
+                          <button
+                            onClick={onClose}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors duration-200"
+                            aria-label="Đóng"
                           >
-                            {subtitle}
-                          </DialogDescription>
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
                         )}
                       </div>
-
-                      {/* Close Button */}
-                      {showCloseButton && (
-                        <button
-                          onClick={onClose}
-                          className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100/50 hover:bg-slate-200/50 text-slate-400 hover:text-slate-600 transition-all duration-200"
-                          aria-label="Đóng"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      )}
                     </div>
-                  </div>
+                  )}
 
-                  {/* Content */}
+                  {/* Clean Content */}
                   <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                     {children}
                   </div>
 
-                  {/* Footer */}
+                  {/* Minimal Footer */}
                   {footer && (
-                    <div className="flex-shrink-0 bg-gradient-to-r from-white/90 via-slate-50/85 to-blue-50/80 backdrop-blur-xl border-t border-slate-200/40 p-6 rounded-b-xl">
+                    <div className="flex-shrink-0 px-6 py-4 border-t border-blue-100/50 bg-slate-50/30">
                       {footer}
                     </div>
                   )}
-                </Card>
+                </div>
               </DialogPanel>
-            </Transition.Child>
+            </TransitionChild>
           </div>
         </div>
       </HeadlessDialog>

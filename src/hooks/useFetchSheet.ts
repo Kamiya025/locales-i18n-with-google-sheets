@@ -33,7 +33,11 @@ interface ValidationResult {
 
 export const useFetchSheet = (
   onSuccess: (data: SpreadsheetResponse, url: string) => void,
-  onValidationIssues?: (validationResult: ValidationResult, url: string) => void
+  onValidationIssues?: (
+    validationResult: ValidationResult,
+    url: string
+  ) => void,
+  onError?: (error: any) => boolean // Return true if error was handled
 ) => {
   return useMutation<
     SpreadsheetResponse, // Kiểu dữ liệu trả về
@@ -63,6 +67,15 @@ export const useFetchSheet = (
           throw new Error(`Format validation failed:\n${errorMessages}`)
         }
       } catch (error: any) {
+        // Check if onError handler can handle this error (for auth errors)
+        if (onError) {
+          const handled = onError(error)
+          if (handled) {
+            // Error was handled by onError callback (likely auth error)
+            throw error
+          }
+        }
+
         // Handle format validation errors with detailed suggestions
         if (error.name === "FormatValidationError" && error.suggestion) {
           // Show detailed error with suggestion

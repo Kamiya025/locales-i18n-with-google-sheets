@@ -98,9 +98,9 @@ class RateLimiter {
 }
 
 export class GoogleSheetsService {
-  private readonly auth: JWT
+  protected readonly auth: JWT
   private readonly cache = new SimpleCache()
-  private readonly rateLimiter = new RateLimiter()
+  protected readonly rateLimiter = new RateLimiter()
 
   constructor() {
     this.auth = new JWT({
@@ -121,7 +121,9 @@ export class GoogleSheetsService {
     console.log(`🗑️ Cache invalidated for spreadsheet: ${spreadsheetId}`)
   }
 
-  private async getDocument(spreadsheetId: string): Promise<GoogleSpreadsheet> {
+  protected async getDocument(
+    spreadsheetId: string
+  ): Promise<GoogleSpreadsheet> {
     return this.withRetry(async () => {
       // Apply rate limiting before API call
       await this.rateLimiter.checkLimit()
@@ -133,7 +135,7 @@ export class GoogleSheetsService {
   }
 
   // Retry mechanism với exponential backoff cho Google API errors
-  private async withRetry<T>(
+  protected async withRetry<T>(
     apiCall: () => Promise<T>,
     maxRetries: number = 3,
     baseDelay: number = 1000
@@ -197,11 +199,9 @@ export class GoogleSheetsService {
     const cacheKey = `spreadsheet:${spreadsheetId}`
     const cached = this.cache.get(cacheKey)
     if (cached) {
-      console.log(`🚀 Cache hit for spreadsheet: ${spreadsheetId}`)
       return cached
     }
 
-    console.log(`📚 Fetching spreadsheet from API: ${spreadsheetId}`)
     const doc = await this.getDocument(spreadsheetId)
 
     const sheets = await Promise.all(
@@ -270,11 +270,9 @@ export class GoogleSheetsService {
     const cacheKey = `validation:${spreadsheetId}`
     const cached = this.cache.get(cacheKey)
     if (cached) {
-      console.log(`🚀 Cache hit for validation: ${spreadsheetId}`)
       return cached
     }
 
-    console.log(`🔍 Validating spreadsheet from API: ${spreadsheetId}`)
     const doc = await this.getDocument(spreadsheetId)
     const validationIssues: Array<{
       sheetTitle: string

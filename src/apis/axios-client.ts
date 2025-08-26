@@ -59,6 +59,12 @@ axiosClient.interceptors.response.use(
         throw enhancedError
       }
 
+      // Handle 403 auth errors specially - preserve response data
+      if (error.response?.status === 403 && errorData.needsAuth !== undefined) {
+        // Keep original axios error with response data for auth handling
+        throw error
+      }
+
       // Handle regular errors
       if (errorData.message) {
         const regularError = new Error(errorData.message)

@@ -182,14 +182,6 @@ export class DataValidator {
     result: ValidationResult,
     context: string = "Data validation"
   ): void {
-    if (!result.isValid) {
-      console.error(`❌ ${context} failed:`, result.errors)
-    } else {
-      console.log(`✅ ${context} passed`)
-    }
-
-    if (result.warnings.length > 0) {
-      console.warn(`⚠️ ${context} warnings:`, result.warnings)
-    }
+    // Validation logging removed for production
   }
 }

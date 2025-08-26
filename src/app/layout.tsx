@@ -1,7 +1,9 @@
 import ReactQueryProvider from "@/providers/QueryClientProvider"
+
+import { CustomToaster } from "@/components/ui/toast"
+import AuthProvider from "@/providers/AuthProvider"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import { CustomToaster } from "@/components/ui/toast"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -29,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <AuthProvider>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </AuthProvider>
         <CustomToaster />
       </body>
     </html>
