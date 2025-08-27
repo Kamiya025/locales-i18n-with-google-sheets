@@ -21,9 +21,29 @@ function setNestedKey(obj: Record<string, any>, path: string, value: any) {
 /**
  * Convert SpreadsheetResponse -> { lang: { sheetName: { ...keys } } }
  */
-export function transformToI18n(sheet: SpreadsheetResponse) {
+export function transformToI18n(
+  sheet: SpreadsheetResponse,
+  fallbackLanguage?: string
+) {
   const translations: Record<string, any> = {}
 
+  // Collect all available languages first
+  const allLanguages = new Set<string>()
+  sheet.sheets.forEach((sheetItem) => {
+    sheetItem.rows.forEach((row) => {
+      Object.keys(row.data).forEach((lang) => allLanguages.add(lang))
+    })
+  })
+
+  // Initialize all language objects
+  allLanguages.forEach((lang) => {
+    translations[lang] = {}
+    sheet.sheets.forEach((sheetItem) => {
+      translations[lang][sheetItem.title] = {}
+    })
+  })
+
+  // First pass: populate with actual values
   sheet.sheets.forEach((sheetItem) => {
     sheetItem.rows.forEach((row) => {
       Object.entries(row.data).forEach(([lang, value]) => {
@@ -36,6 +56,34 @@ export function transformToI18n(sheet: SpreadsheetResponse) {
       })
     })
   })
+
+  // Second pass: apply fallback language for missing values
+  if (fallbackLanguage && translations[fallbackLanguage]) {
+    sheet.sheets.forEach((sheetItem) => {
+      sheetItem.rows.forEach((row) => {
+        allLanguages.forEach((lang) => {
+          // Skip if this is the fallback language itself
+          if (lang === fallbackLanguage) return
+
+          const currentValue = row.data[lang]
+          const fallbackValue = row.data[fallbackLanguage]
+
+          // If current language is missing or empty, use fallback
+          if (
+            (!currentValue || !currentValue.trim()) &&
+            fallbackValue &&
+            fallbackValue.trim()
+          ) {
+            setNestedKey(
+              translations[lang][sheetItem.title],
+              row.key,
+              fallbackValue
+            )
+          }
+        })
+      })
+    })
+  }
 
   return translations
 }

@@ -14,9 +14,11 @@ import { useCallback, useMemo, useState } from "react"
 import SearchCombobox from "../ui/search-combobox"
 import NamespaceSelector from "../ui/namespace-selector"
 import AddSheetModal from "../ui/add-sheet-modal"
+import ExportConfirmationModal from "../ui/export-confirmation-modal"
 export default function SpreadsheetViewer() {
   const { data, listLocales, selectedLocales } = useSpreadsheet()
   const [isAddSheetModalOpen, setIsAddSheetModalOpen] = useState(false)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const {
     filtered,
     search,
@@ -113,14 +115,22 @@ export default function SpreadsheetViewer() {
 
   const handleDownload = useCallback(() => {
     if (!data) return
-    const translations = transformToI18n(data)
-
-    // tạo từng file vi.json, en.json...
-    Object.entries(translations).forEach(([lang, data]) => {
-      const langName = lang.toLowerCase().trim()
-      downloadJSON(`${langName}.json`, data)
-    })
+    setIsExportModalOpen(true)
   }, [data])
+
+  const handleConfirmExport = useCallback(
+    (fallbackLanguage?: string) => {
+      if (!data) return
+      const translations = transformToI18n(data, fallbackLanguage)
+
+      // tạo từng file vi.json, en.json...
+      Object.entries(translations).forEach(([lang, data]) => {
+        const langName = lang.toLowerCase().trim()
+        downloadJSON(`${langName}.json`, data)
+      })
+    },
+    [data]
+  )
 
   if (!data) return null
   return (
@@ -283,6 +293,16 @@ export default function SpreadsheetViewer() {
         isOpen={isAddSheetModalOpen}
         onClose={() => setIsAddSheetModalOpen(false)}
       />
+
+      {/* Export Confirmation Modal */}
+      {data && (
+        <ExportConfirmationModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          onConfirm={handleConfirmExport}
+          data={data}
+        />
+      )}
     </div>
   )
 }
