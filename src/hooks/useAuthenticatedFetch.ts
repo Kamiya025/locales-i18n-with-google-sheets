@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { useSession } from "next-auth/react"
 import { customToast } from "@/components/ui/toast"
 
@@ -14,6 +14,18 @@ export const useAuthenticatedFetch = (onRetry?: () => void) => {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authError, setAuthError] = useState<AuthError | null>(null)
   const { data: session, status } = useSession()
+
+  // Kiểm tra nếu session có lỗi refresh token, tự động hiển thị auth modal
+  React.useEffect(() => {
+    if (session?.error === "RefreshAccessTokenError") {
+      setAuthError({
+        message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+        needsAuth: true,
+        authType: "user",
+      })
+      setShowAuthModal(true)
+    }
+  }, [session?.error])
 
   const handleAuthError = (error: any) => {
     if (error.response?.status === 403) {
