@@ -1,17 +1,11 @@
 "use client"
 
-import { useFetchSheet } from "@/hooks/useFetchSheet"
 import { useHistory } from "@/hooks/useHistory"
-import { useBatchAutoFix } from "@/hooks/useBatchAutoFix"
-
-import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { customToast } from "@/components/ui/toast"
 import HistoryPanel from "../ui/history/HistoryPanel"
 import FavoriteQuickAccess from "../ui/history/FavoriteQuickAccess"
-import AutoFixDialog from "../ui/auto-fix-dialog"
-import FormatWarningModal from "../ui/format-warning-modal"
-import { useAuthenticatedFetch } from "@/hooks/useAuthenticatedFetch"
-import AuthRequiredModal from "../auth/AuthRequiredModal"
 
 interface GetLinkGoogleSheetsProps {
   isHeader?: boolean
@@ -32,59 +26,20 @@ const getButtonClassNames = (isHeader: boolean) =>
       : "px-6 py-3.5 rounded-xl text-base min-h-[44px] min-w-[120px]"
   } disabled:opacity-50 transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2`
 
+// Helper function to extract spreadsheet ID from Google Sheets URL
+function extractSpreadsheetId(url: string): string | null {
+  const match = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+  return match?.[1] || null
+}
+
 export default function GetLinkGoogleSheets({
   isHeader = false,
 }: Readonly<GetLinkGoogleSheetsProps>) {
+  const router = useRouter()
   const storageKey = "sheet-url-history"
   const [url, setUrl] = useState("")
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
-  const [formatWarningModal, setFormatWarningModal] = useState<{
-    isOpen: boolean
-    spreadsheetId: string
-    validationIssues: Array<{
-      sheetTitle: string
-      errors: string[]
-      fixes: Array<{
-        type:
-          | "missing_key"
-          | "duplicate_keys"
-          | "empty_keys"
-          | "no_languages"
-          | "no_headers"
-        title: string
-        description: string
-        action: string
-      }>
-    }>
-  }>({
-    isOpen: false,
-    spreadsheetId: "",
-    validationIssues: [],
-  })
-  const [autoFixDialog, setAutoFixDialog] = useState<{
-    isOpen: boolean
-    spreadsheetId: string
-    validationIssues: Array<{
-      sheetTitle: string
-      errors: string[]
-      fixes: Array<{
-        type:
-          | "missing_key"
-          | "duplicate_keys"
-          | "empty_keys"
-          | "no_languages"
-          | "no_headers"
-        title: string
-        description: string
-        action: string
-      }>
-    }>
-  }>({
-    isOpen: false,
-    spreadsheetId: "",
-    validationIssues: [],
-  })
-  const { setResponse } = useSpreadsheet()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const {
     items,
     favorites,
@@ -96,109 +51,87 @@ export default function GetLinkGoogleSheets({
     debugHistory,
   } = useHistory(storageKey, 15)
 
-  // Authentication handling
-  const {
-    showAuthModal,
-    authError,
-    handleAuthError,
-    closeAuthModal,
-    onAuthSuccess,
-    isAuthenticated,
-  } = useAuthenticatedFetch(() => {
-    // Retry callback: re-submit the same URL
-    if (url) {
-      fetchSheet.mutate(url)
-    }
-  })
-
-  // Auto-fix hook for applying batch fixes with better performance
-  const batchAutoFixMutation = useBatchAutoFix((updatedData) => {
-    setResponse(updatedData)
-    // Close both modals after successful fix
-    setFormatWarningModal((prev) => ({ ...prev, isOpen: false }))
-    setAutoFixDialog((prev) => ({ ...prev, isOpen: false }))
-  })
-
   // Debug helper - call debugHistory() in console to troubleshoot
   if (typeof window !== "undefined") {
     ;(window as any).debugHistory = debugHistory
   }
 
-  const fetchSheet = useFetchSheet(
-    (data, url) => {
-      setResponse(data)
-      // Save with title if available, otherwise will use URL extraction
-      save(url, data?.title || undefined)
-    },
-    (validationResult, sheetUrl) => {
-      // Extract spreadsheet ID from URL
-      const match = sheetUrl.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
-      const spreadsheetId = match?.[1] || ""
-
-      // Show format warning modal first (for user confirmation)
-      setFormatWarningModal({
-        isOpen: true,
-        spreadsheetId,
-        validationIssues: validationResult.validationIssues,
-      })
-    },
-    // Add error handling for authentication
-    (error) => {
-      const authHandled = handleAuthError(error)
-      return authHandled // Return true if auth error was handled
-    }
-  )
-
-  // Format Warning Modal handlers
-  const handleViewAndFix = () => {
-    // Transfer data from warning modal to auto-fix dialog
-    setAutoFixDialog({
-      isOpen: true,
-      spreadsheetId: formatWarningModal.spreadsheetId,
-      validationIssues: formatWarningModal.validationIssues,
-    })
-
-    // Close warning modal
-    setFormatWarningModal((prev) => ({ ...prev, isOpen: false }))
-  }
-
-  const handleAutoFixAll = async () => {
-    try {
-      // Collect all fixes for batch processing
-      const allFixes: Array<{ sheetTitle: string; fixType: string }> = []
-
-      for (const issue of formatWarningModal.validationIssues) {
-        for (const fix of issue.fixes) {
-          allFixes.push({
-            sheetTitle: issue.sheetTitle,
-            fixType: fix.type,
-          })
-        }
+  // Simple URL validation function
+  const validateGoogleSheetsUrl = (
+    url: string
+  ): { isValid: boolean; spreadsheetId: string | null; error?: string } => {
+    if (!url.trim()) {
+      return {
+        isValid: false,
+        spreadsheetId: null,
+        error: "Vui lòng nhập URL Google Sheets",
       }
-
-      // Apply all fixes in parallel via batch API
-      await batchAutoFixMutation.mutateAsync({
-        spreadsheetId: formatWarningModal.spreadsheetId,
-        fixes: allFixes,
-      })
-
-      // Success is handled by the mutation's onSuccess callback
-      // which will close the modals and update the data
-    } catch (error) {
-      // Error handling is done by the mutation (toast notifications)
-      console.error("Auto-fix all failed:", error)
     }
+
+    // Check if it's a Google Sheets URL
+    if (!url.includes("docs.google.com/spreadsheets")) {
+      return {
+        isValid: false,
+        spreadsheetId: null,
+        error: "URL phải là link Google Sheets",
+      }
+    }
+
+    // Extract spreadsheet ID
+    const spreadsheetId = extractSpreadsheetId(url)
+    if (!spreadsheetId) {
+      return {
+        isValid: false,
+        spreadsheetId: null,
+        error: "Không thể lấy ID từ URL này",
+      }
+    }
+
+    return { isValid: true, spreadsheetId }
   }
 
-  const handleWarningClose = () => {
-    setFormatWarningModal((prev) => ({ ...prev, isOpen: false }))
+  const handleSubmit = async (submitUrl: string) => {
+    const validation = validateGoogleSheetsUrl(submitUrl)
+
+    if (!validation.isValid) {
+      customToast.error(validation.error!)
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      // Save URL to history (without title for now)
+      save(submitUrl)
+
+      // Small delay for UX feedback
+      await new Promise((resolve) => setTimeout(resolve, 300))
+
+      // Redirect to detail page with original URL in query params
+      const params = new URLSearchParams({ url: encodeURIComponent(submitUrl) })
+      router.push(`/sheet/${validation.spreadsheetId}?${params.toString()}`)
+    } catch (error) {
+      customToast.error("Có lỗi xảy ra khi chuyển trang")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleHistorySelect = (selectedUrl: string, title?: string) => {
     setUrl(selectedUrl)
     setIsHistoryOpen(false)
-    // Auto fetch
-    fetchSheet.mutate(selectedUrl)
+
+    // For history items, redirect directly since they're already validated
+    const spreadsheetId = extractSpreadsheetId(selectedUrl)
+    if (spreadsheetId) {
+      const params = new URLSearchParams({
+        url: encodeURIComponent(selectedUrl),
+      })
+      router.push(`/sheet/${spreadsheetId}?${params.toString()}`)
+    } else {
+      // Fallback to validation if can't extract ID
+      handleSubmit(selectedUrl)
+    }
   }
 
   // Computed values to reduce complexity
@@ -225,7 +158,7 @@ export default function GetLinkGoogleSheets({
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          fetchSheet.mutate(url)
+          handleSubmit(url)
         }}
         className="w-full"
       >
@@ -297,18 +230,18 @@ export default function GetLinkGoogleSheets({
           {/* Desktop button - ẩn trên mobile */}
           <button
             type="submit"
-            disabled={fetchSheet.isPending}
+            disabled={isSubmitting}
             className={`${getButtonClassNames(
               isHeader
             )} hidden md:flex items-center justify-center`}
           >
-            {fetchSheet.isPending ? (
+            {isSubmitting ? (
               <span className="flex items-center gap-2">
                 <div
                   className={`${spinnerSize} border-2 border-white/30 border-t-white rounded-full animate-spin`}
                 ></div>
                 <span className={`${isHeader ? "hidden" : "block"}`}>
-                  Đang tải...
+                  Đang xử lý...
                 </span>
               </span>
             ) : (
@@ -317,7 +250,7 @@ export default function GetLinkGoogleSheets({
           </button>
 
           {/* Mobile submit indicator - khi loading */}
-          {fetchSheet.isPending && (
+          {isSubmitting && (
             <div className="md:hidden absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-lg p-1.5 border border-blue-200/40 z-10">
               <div className="w-3 h-3 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
             </div>
@@ -345,40 +278,6 @@ export default function GetLinkGoogleSheets({
         onClear={clear}
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
-      />
-
-      {fetchSheet.isError && (
-        <div className="glass-effect border border-red-200/30 rounded-lg px-4 py-3 text-red-600 text-sm backdrop-blur-sm">
-          <span className="font-medium">Lỗi:</span>{" "}
-          {(fetchSheet.error as Error).message}
-        </div>
-      )}
-
-      {/* Format Warning Modal */}
-      <FormatWarningModal
-        isOpen={formatWarningModal.isOpen}
-        onClose={handleWarningClose}
-        spreadsheetId={formatWarningModal.spreadsheetId}
-        validationIssues={formatWarningModal.validationIssues}
-        onViewAndFix={handleViewAndFix}
-        onAutoFixAll={handleAutoFixAll}
-        isAutoFixing={batchAutoFixMutation.isPending}
-      />
-
-      {/* Auto Fix Dialog */}
-      <AutoFixDialog
-        isOpen={autoFixDialog.isOpen}
-        onClose={() => setAutoFixDialog((prev) => ({ ...prev, isOpen: false }))}
-        spreadsheetId={autoFixDialog.spreadsheetId}
-        validationIssues={autoFixDialog.validationIssues}
-      />
-
-      {/* Auth Modal */}
-      <AuthRequiredModal
-        isOpen={showAuthModal}
-        onClose={closeAuthModal}
-        message={authError?.message}
-        onSuccess={onAuthSuccess}
       />
     </div>
   )

@@ -1,10 +1,12 @@
 import ReactQueryProvider from "@/providers/QueryClientProvider"
+import { SpreadsheetProvider } from "@/providers/preadsheetProvider"
 
 import { CustomToaster } from "@/components/ui/toast"
 import AuthProvider from "@/providers/AuthProvider"
 import type { Metadata } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
+import Footer from "@/components/ui/footer"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,7 +34,14 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <AuthProvider>
-          <ReactQueryProvider>{children}</ReactQueryProvider>
+          <ReactQueryProvider>
+            <SpreadsheetProvider>
+              <div className="flex flex-col">
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </SpreadsheetProvider>
+          </ReactQueryProvider>
         </AuthProvider>
         <CustomToaster />
       </body>

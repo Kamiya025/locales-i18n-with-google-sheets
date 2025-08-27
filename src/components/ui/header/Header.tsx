@@ -10,8 +10,8 @@ interface HeaderProps {
 
 export default function Header({ isHeader }: HeaderProps) {
   return (
-    <div className="fixed top-0 z-[80] w-full">
-      <div className="w-full bg-gradient-to-r from-white/95 via-slate-50/90 to-blue-50/95 backdrop-blur-xl border-b border-blue-200/40 relative overflow-hidden">
+    <div className="fixed top-0 z-[999] w-full">
+      <div className="w-full bg-gradient-to-r from-white/95 via-slate-50/90 to-blue-50/95 backdrop-blur-xl border-b border-blue-200/40 relative">
         {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-blue-100/20 pointer-events-none"></div>
 

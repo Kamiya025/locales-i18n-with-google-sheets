@@ -115,109 +115,117 @@ export function useHistory(key: string, maxItems: number = 10) {
       console.debug("Saving to history:", { url, title })
 
       const now = Date.now()
-      const existingIndex = history.findIndex((item) => item.url === url)
 
-      let newHistory: HistoryItem[]
+      setHistory((prevHistory) => {
+        const existingIndex = prevHistory.findIndex((item) => item.url === url)
+        let newHistory: HistoryItem[]
 
-      if (existingIndex >= 0) {
-        // Update existing item
-        const existing = history[existingIndex]
-        const updated = {
-          ...existing,
-          title: title ?? existing.title,
-          lastAccessed: now,
-          accessCount: existing.accessCount + 1,
-        }
-        // Move to front
-        newHistory = [
-          updated,
-          ...history.filter((_, index) => index !== existingIndex),
-        ]
-        console.debug("Updated existing history item:", updated)
-      } else {
-        // Create new item
-        const newItem: HistoryItem = {
-          id: `sheet-${now}`,
-          url,
-          title: title ?? extractTitleFromUrl(url),
-          createdAt: now,
-          lastAccessed: now,
-          isFavorite: false,
-          accessCount: 1,
-        }
-        newHistory = [newItem, ...history]
-        console.debug("Created new history item:", newItem)
-      }
-
-      // Keep only maxItems
-      newHistory = newHistory.slice(0, maxItems)
-
-      if (!checkLocalStorageAvailable()) {
-        console.warn("localStorage is not available, cannot save history")
-        return
-      }
-
-      try {
-        const historyData = JSON.stringify(newHistory)
-        console.debug(
-          "Attempting to save history data size:",
-          historyData.length,
-          "chars"
-        )
-        console.debug(
-          "Current localStorage size:",
-          getLocalStorageSize(),
-          "chars"
-        )
-
-        localStorage.setItem(key, historyData)
-        setHistory(newHistory)
-        console.debug(
-          "History saved successfully, total items:",
-          newHistory.length
-        )
-      } catch (error) {
-        console.error("Failed to save history:", error)
-
-        // If quota exceeded, try to save only recent items
-        if (error instanceof Error && error.name === "QuotaExceededError") {
-          console.warn(
-            "Storage quota exceeded, trying to save only recent 5 items"
-          )
-          try {
-            const reducedHistory = newHistory.slice(0, 5)
-            localStorage.setItem(key, JSON.stringify(reducedHistory))
-            setHistory(reducedHistory)
-            console.debug("Reduced history saved successfully")
-          } catch (retryError) {
-            console.error("Failed to save even reduced history:", retryError)
+        if (existingIndex >= 0) {
+          // Update existing item
+          const existing = prevHistory[existingIndex]
+          const updated = {
+            ...existing,
+            title: title ?? existing.title,
+            lastAccessed: now,
+            accessCount: existing.accessCount + 1,
           }
+          // Move to front
+          newHistory = [
+            updated,
+            ...prevHistory.filter((_, index) => index !== existingIndex),
+          ]
+          console.debug("Updated existing history item:", updated)
+        } else {
+          // Create new item
+          const newItem: HistoryItem = {
+            id: `sheet-${now}`,
+            url,
+            title: title ?? extractTitleFromUrl(url),
+            createdAt: now,
+            lastAccessed: now,
+            isFavorite: false,
+            accessCount: 1,
+          }
+          newHistory = [newItem, ...prevHistory]
+          console.debug("Created new history item:", newItem)
         }
-      }
+
+        // Keep only maxItems
+        newHistory = newHistory.slice(0, maxItems)
+
+        if (!checkLocalStorageAvailable()) {
+          console.warn("localStorage is not available, cannot save history")
+          return prevHistory
+        }
+
+        try {
+          const historyData = JSON.stringify(newHistory)
+          console.debug(
+            "Attempting to save history data size:",
+            historyData.length,
+            "chars"
+          )
+          console.debug(
+            "Current localStorage size:",
+            getLocalStorageSize(),
+            "chars"
+          )
+
+          localStorage.setItem(key, historyData)
+          console.debug(
+            "History saved successfully, total items:",
+            newHistory.length
+          )
+          return newHistory
+        } catch (error) {
+          console.error("Failed to save history:", error)
+
+          // If quota exceeded, try to save only recent items
+          if (error instanceof Error && error.name === "QuotaExceededError") {
+            console.warn(
+              "Storage quota exceeded, trying to save only recent 5 items"
+            )
+            try {
+              const reducedHistory = newHistory.slice(0, 5)
+              localStorage.setItem(key, JSON.stringify(reducedHistory))
+              console.debug("Reduced history saved successfully")
+              return reducedHistory
+            } catch (retryError) {
+              console.error("Failed to save even reduced history:", retryError)
+              return prevHistory
+            }
+          }
+          return prevHistory
+        }
+      })
     },
-    [history, key, maxItems, extractTitleFromUrl]
+    [key, maxItems, extractTitleFromUrl]
   )
 
   // Toggle favorite
   const toggleFavorite = useCallback(
     (id: string) => {
-      const newHistory = history.map((item) =>
-        item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
-      )
-      localStorage.setItem(key, JSON.stringify(newHistory))
-      setHistory(newHistory)
+      setHistory((prevHistory) => {
+        const newHistory = prevHistory.map((item) =>
+          item.id === id ? { ...item, isFavorite: !item.isFavorite } : item
+        )
+        localStorage.setItem(key, JSON.stringify(newHistory))
+        return newHistory
+      })
     },
-    [history, key]
+    [key]
   )
 
   // Remove single item
   const remove = useCallback(
     (id: string) => {
-      const newHistory = history.filter((item) => item.id !== id)
-      localStorage.setItem(key, JSON.stringify(newHistory))
-      setHistory(newHistory)
+      setHistory((prevHistory) => {
+        const newHistory = prevHistory.filter((item) => item.id !== id)
+        localStorage.setItem(key, JSON.stringify(newHistory))
+        return newHistory
+      })
     },
-    [history, key]
+    [key]
   )
 
   // Clear all
@@ -267,7 +275,7 @@ export function useHistory(key: string, maxItems: number = 10) {
       console.log("No data in localStorage")
     }
     console.groupEnd()
-  }, [history, favorites, recent, key])
+  }, [key]) // Only depend on key, not on history/favorites/recent to avoid infinite loops
 
   return {
     items: history,
