@@ -9,6 +9,7 @@ import {
   SpreadsheetProvider,
   useSpreadsheet,
 } from "@/providers/preadsheetProvider"
+import { SpreadsheetResponse } from "@/models"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo } from "react"
 
@@ -33,7 +34,7 @@ function SpreadsheetDetailContent({
   // Set data vào provider khi load xong
   useEffect(() => {
     if (loadedData) {
-      setResponse(loadedData)
+      setResponse(loadedData as SpreadsheetResponse)
     }
   }, [loadedData, setResponse])
 
