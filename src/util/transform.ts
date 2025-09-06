@@ -8,12 +8,12 @@ function setNestedKey(obj: Record<string, any>, path: string, value: any) {
 
   parts.forEach((part, index) => {
     if (index === parts.length - 1) {
-      current[part] = value
+      current[part.trim()] = value
     } else {
-      if (!current[part] || typeof current[part] !== "object") {
-        current[part] = {}
+      if (!current[part.trim()] || typeof current[part.trim()] !== "object") {
+        current[part.trim()] = {}
       }
-      current = current[part]
+      current = current[part.trim()]
     }
   })
 }
@@ -61,26 +61,33 @@ export function transformToI18n(
   if (fallbackLanguage && translations[fallbackLanguage]) {
     sheet.sheets.forEach((sheetItem) => {
       sheetItem.rows.forEach((row) => {
-        allLanguages.forEach((lang) => {
-          // Skip if this is the fallback language itself
-          if (lang === fallbackLanguage) return
+        const fallbackValue = row.data[fallbackLanguage]
 
-          const currentValue = row.data[lang]
-          const fallbackValue = row.data[fallbackLanguage]
+        // Only process if fallback has a valid value
+        if (
+          fallbackValue &&
+          typeof fallbackValue === "string" &&
+          fallbackValue.trim() !== ""
+        ) {
+          allLanguages.forEach((lang) => {
+            // Skip if this is the fallback language itself
+            if (lang === fallbackLanguage) return
 
-          // If current language is missing or empty, use fallback
-          if (
-            (!currentValue || !currentValue.trim()) &&
-            fallbackValue &&
-            fallbackValue.trim()
-          ) {
-            setNestedKey(
-              translations[lang][sheetItem.title],
-              row.key,
-              fallbackValue
-            )
-          }
-        })
+            const currentValue = row.data[lang]
+
+            // If current language is missing or empty, use fallback
+            if (
+              !currentValue ||
+              (typeof currentValue === "string" && !currentValue.trim())
+            ) {
+              setNestedKey(
+                translations[lang][sheetItem.title],
+                row.key,
+                fallbackValue
+              )
+            }
+          })
+        }
       })
     })
   }

@@ -28,25 +28,23 @@ export const useAuthenticatedFetch = (onRetry?: () => void) => {
   }, [session?.error])
 
   const handleAuthError = (error: any) => {
-    if (error.response?.status === 403) {
-      const data = error.response.data
+    console.log("🔐 handleAuthError called with:", error)
 
-      if (data.needsAuth) {
-        // Cần đăng nhập
-        setAuthError({
-          message: data.message,
-          needsAuth: true,
-          authType: data.authType,
-        })
-        setShowAuthModal(true)
-        return true // Đã xử lý error
-      } else {
-        // Đã đăng nhập nhưng không có quyền
-        customToast.error(
-          `🔒 ${data.message || "Bạn không có quyền truy cập file này."}`
-        )
-        return true // Đã xử lý error
-      }
+    if (error.response?.status === 403) {
+      const data = error.response.data || {}
+      console.log("🔐 403 error data:", data)
+
+      // Always show auth modal for 403 errors, regardless of needsAuth flag
+      setAuthError({
+        message:
+          data.message ||
+          "Bạn không có quyền truy cập file này. Vui lòng đăng nhập để tiếp tục.",
+        needsAuth: data.needsAuth !== false, // Default to true unless explicitly false
+        authType: data.authType || "none",
+      })
+      setShowAuthModal(true)
+      console.log("🔐 Auth modal should be visible now")
+      return true // Đã xử lý error
     }
 
     return false // Chưa xử lý error, để caller xử lý tiếp
@@ -59,17 +57,15 @@ export const useAuthenticatedFetch = (onRetry?: () => void) => {
 
   const onAuthSuccess = () => {
     closeAuthModal()
-    customToast.success("Đăng nhập thành công! Đang thử lại...")
+    customToast.success("Đăng nhập thành công!")
 
-    // Auto-retry the failed request
+    // Auto-retry the failed request only if onRetry is provided
     if (onRetry) {
       setTimeout(() => {
         onRetry()
       }, 500) // Small delay to let session update
-    } else {
-      // Fallback: reload page
-      window.location.reload()
     }
+    // Removed auto-reload - let user decide to refresh manually if needed
   }
 
   return {

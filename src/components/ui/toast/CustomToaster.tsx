@@ -11,7 +11,7 @@ const CustomToast = ({ t }: { t: any }) => {
   const getIcon = () => {
     if (isSuccess) {
       return (
-        <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+        <div className="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center flex-shrink-0">
           <svg
             className="w-4 h-4 text-white"
             fill="none"
@@ -31,7 +31,7 @@ const CustomToast = ({ t }: { t: any }) => {
 
     if (isError) {
       return (
-        <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+        <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
           <svg
             className="w-4 h-4 text-white"
             fill="none"
@@ -77,15 +77,15 @@ const CustomToast = ({ t }: { t: any }) => {
   }
 
   const getBorderColor = () => {
-    if (isSuccess) return "border-emerald-200/50"
-    if (isError) return "border-red-200/50"
+    if (isSuccess) return "border-slate-200/60"
+    if (isError) return "border-slate-300/60"
     if (isLoading) return "border-slate-200/50"
     return "border-slate-200/50"
   }
 
   const getBackgroundGradient = () => {
-    if (isSuccess) return "from-emerald-50/80 to-white/80"
-    if (isError) return "from-red-50/80 to-white/80"
+    if (isSuccess) return "from-slate-50/90 to-white/90"
+    if (isError) return "from-slate-100/90 to-white/90"
     if (isLoading) return "from-slate-50/80 to-white/80"
     return "from-slate-50/80 to-white/80"
   }

@@ -25,10 +25,9 @@ function extractSpreadsheetId(input: string): string | null {
 }
 
 /**
- * GET /api/sheet/[id] - Lấy thông tin spreadsheet theo ID hoặc URL
+ * GET /api/sheet/[id] - Lấy thông tin spreadsheet theo ID
  * Hỗ trợ:
  * - /api/sheet/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms
- * - /api/sheet/https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
  */
 export async function GET(
   req: NextRequest,
@@ -36,19 +35,21 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(req.url)
-    const urlParam = searchParams.get("url") // Cho phép truyền URL qua query param
+    const loadMode = searchParams.get("mode") // "lazy" | "full" | "first-only" | "aggressive"
+    const specificSheet = searchParams.get("sheet") // Load specific sheet name only
+    const aggressive = searchParams.get("aggressive") === "true" // Force aggressive loading
 
     // Await params trước khi sử dụng (Next.js 15 requirement)
     const resolvedParams = await params
 
-    // Ưu tiên URL từ query param, nếu không có thì dùng params.id
-    const inputValue = urlParam || resolvedParams.id
+    // Chỉ sử dụng ID từ path params
+    const inputValue = resolvedParams.id
 
     if (!inputValue) {
       return NextResponse.json(
         {
           success: false,
-          message: "Missing spreadsheet ID or URL parameter",
+          message: "Missing spreadsheet ID parameter",
         },
         { status: 400 }
       )
@@ -61,7 +62,7 @@ export async function GET(
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid spreadsheet ID or URL format",
+          message: "Invalid spreadsheet ID format",
         },
         { status: 400 }
       )
@@ -73,16 +74,54 @@ export async function GET(
     const session = await getServerSession(authOptions)
 
     try {
-      // Try user auth FIRST (cao priority)
+      // Choose loading strategy based on mode
       if (session?.accessToken) {
         const userService = GoogleSheetsUserService.withUserToken(
           session.accessToken
         )
-        spreadsheet = await userService.getSpreadsheet(spreadsheetId)
+
+        if (loadMode === "lazy" || loadMode === "first-only") {
+          spreadsheet = await userService.getSpreadsheetLazy(spreadsheetId, {
+            mode: loadMode as "lazy" | "first-only",
+            specificSheet: specificSheet ?? undefined,
+          })
+        } else {
+          // Set aggressive mode for this request
+          if (aggressive) {
+            process.env.AGGRESSIVE_LOADING = "true"
+          }
+
+          spreadsheet = await userService.getSpreadsheet(spreadsheetId)
+
+          // Reset aggressive mode
+          if (aggressive) {
+            delete process.env.AGGRESSIVE_LOADING
+          }
+        }
         authType = "user"
       } else {
-        // Fallback to service account (thấp priority)
-        spreadsheet = await googleSheetsService.getSpreadsheet(spreadsheetId)
+        // Fallback to service account
+        if (loadMode === "lazy" || loadMode === "first-only") {
+          spreadsheet = await googleSheetsService.getSpreadsheetLazy(
+            spreadsheetId,
+            {
+              mode: loadMode as "lazy" | "first-only",
+              specificSheet: specificSheet ?? undefined,
+            }
+          )
+        } else {
+          // Set aggressive mode for this request
+          if (aggressive) {
+            process.env.AGGRESSIVE_LOADING = "true"
+          }
+
+          spreadsheet = await googleSheetsService.getSpreadsheet(spreadsheetId)
+
+          // Reset aggressive mode
+          if (aggressive) {
+            delete process.env.AGGRESSIVE_LOADING
+          }
+        }
         authType = "service_account"
       }
     } catch (primaryError: any) {

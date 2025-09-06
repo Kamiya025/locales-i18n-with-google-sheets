@@ -107,9 +107,8 @@ export default function GetLinkGoogleSheets({
       // Small delay for UX feedback
       await new Promise((resolve) => setTimeout(resolve, 300))
 
-      // Redirect to detail page with original URL in query params
-      const params = new URLSearchParams({ url: encodeURIComponent(submitUrl) })
-      router.push(`/sheet/${validation.spreadsheetId}?${params.toString()}`)
+      // Redirect to detail page without URL params
+      router.push(`/sheet/${validation.spreadsheetId}`)
     } catch (error) {
       customToast.error("Có lỗi xảy ra khi chuyển trang")
     } finally {
@@ -124,10 +123,7 @@ export default function GetLinkGoogleSheets({
     // For history items, redirect directly since they're already validated
     const spreadsheetId = extractSpreadsheetId(selectedUrl)
     if (spreadsheetId) {
-      const params = new URLSearchParams({
-        url: encodeURIComponent(selectedUrl),
-      })
-      router.push(`/sheet/${spreadsheetId}?${params.toString()}`)
+      router.push(`/sheet/${spreadsheetId}`)
     } else {
       // Fallback to validation if can't extract ID
       handleSubmit(selectedUrl)

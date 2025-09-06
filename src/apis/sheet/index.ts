@@ -2,9 +2,14 @@ import { SpreadsheetResponse, SpreadsheetUpdateRowRequest } from "@/models"
 import axiosClient from "../axios-client"
 
 const sheetApi = {
-  getAll(sheetId: string): Promise<SpreadsheetResponse> {
+  getAll(
+    sheetId: string,
+    options?: { aggressive?: boolean }
+  ): Promise<SpreadsheetResponse> {
     const url = "/sheet/" + sheetId
-    return axiosClient.get(url)
+    const params = options?.aggressive ? { aggressive: "true" } : undefined
+    console.log("🚀 API call to:", url, "with params:", params)
+    return axiosClient.get(url, { params })
   },
   update(data: SpreadsheetResponse): Promise<any> {
     const url = "/sheet/update"
@@ -52,10 +57,8 @@ const sheetApi = {
     }>
   }> {
     const url = "/sheet/validate"
-    const match = sheetUrl.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
-    if (!match) throw new Error("Không tìm thấy Sheet ID trong link")
-    const sheetId = match[1]
-    return axiosClient.post(url, { sheetId })
+    // Send URL directly to server, let server extract ID
+    return axiosClient.post(url, { sheetUrl })
   },
   autoFix(
     spreadsheetId: string,

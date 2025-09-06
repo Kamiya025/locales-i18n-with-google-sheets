@@ -24,8 +24,8 @@ interface CacheEntry {
 class SimpleCache {
   private cache = new Map<string, CacheEntry>()
 
-  set(key: string, data: any, ttlMs: number = 5 * 60 * 1000) {
-    // 5 phút default
+  set(key: string, data: any, ttlMs: number = 10 * 60 * 1000) {
+    // 10 phút default - tăng cache time để giảm API calls
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -64,8 +64,9 @@ class SimpleCache {
 // Rate limiting để tránh Google API quota exceeded
 class RateLimiter {
   private requestTimes: number[] = []
-  private readonly maxRequests = 80 // Google limit: 100/minute, để buffer
+  private readonly maxRequests = 60 // Google limit: 100/minute, để buffer lớn hơn
   private readonly windowMs = 60 * 1000 // 1 phút
+  private totalRequestsCount = 0 // Track total API calls
 
   async checkLimit(): Promise<void> {
     const now = Date.now()
@@ -82,6 +83,11 @@ class RateLimiter {
       console.log(
         `⏱️ Rate limit reached. Waiting ${Math.round(waitTime / 1000)}s...`
       )
+      console.log(
+        `📊 Current: ${this.requestTimes.length}/${this.maxRequests} requests in last minute`
+      )
+      console.log(`📈 Total API calls this session: ${this.totalRequestsCount}`)
+
       await this.sleep(waitTime)
 
       // Recursive check after waiting
@@ -90,6 +96,14 @@ class RateLimiter {
 
     // Record this request
     this.requestTimes.push(now)
+    this.totalRequestsCount++
+
+    // Log every 10th request để track usage
+    if (this.totalRequestsCount % 10 === 0) {
+      console.log(
+        `📈 API Usage: ${this.totalRequestsCount} total calls, ${this.requestTimes.length}/${this.maxRequests} in last minute`
+      )
+    }
   }
 
   private sleep(ms: number): Promise<void> {
@@ -97,10 +111,25 @@ class RateLimiter {
   }
 }
 
+// Progress tracking interface
+export interface LoadingProgress {
+  spreadsheetId: string
+  totalSheets: number
+  loadedSheets: number
+  currentSheet?: string
+  percentage: number
+  status: "loading" | "completed" | "error"
+  message?: string
+}
+
 export class GoogleSheetsService {
   protected readonly auth: JWT
   private readonly cache = new SimpleCache()
   protected readonly rateLimiter = new RateLimiter()
+  // Request deduplication để tránh multiple concurrent requests cho cùng data
+  private readonly pendingRequests = new Map<string, Promise<any>>()
+  // Progress tracking cho loading process
+  private readonly progressMap = new Map<string, LoadingProgress>()
 
   constructor() {
     this.auth = new JWT({
@@ -138,7 +167,7 @@ export class GoogleSheetsService {
   protected async withRetry<T>(
     apiCall: () => Promise<T>,
     maxRetries: number = 3,
-    baseDelay: number = 1000
+    baseDelay: number = 2000 // Tăng base delay từ 1s lên 2s
   ): Promise<T> {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -147,16 +176,20 @@ export class GoogleSheetsService {
         const isQuotaError =
           error.response?.status === 429 ||
           error.message?.includes("quota") ||
-          error.message?.includes("rate limit")
+          error.message?.includes("rate limit") ||
+          error.message?.includes("Quota exceeded")
 
         if (isQuotaError && attempt < maxRetries) {
-          const delay = baseDelay * Math.pow(2, attempt) // Exponential backoff
+          // Quota errors cần delay lâu hơn - tối thiểu 30s
+          const exponentialDelay = baseDelay * Math.pow(2, attempt)
+          const quotaDelay = Math.max(exponentialDelay, 30000) // Tối thiểu 30s cho quota errors
+
           console.log(
             `🔄 Google API quota error. Retrying in ${
-              delay / 1000
+              quotaDelay / 1000
             }s... (Attempt ${attempt + 1}/${maxRetries + 1})`
           )
-          await this.sleep(delay)
+          await this.sleep(quotaDelay)
           continue
         }
 
@@ -202,38 +235,75 @@ export class GoogleSheetsService {
       return cached
     }
 
+    // Check if request is already in progress (deduplication)
+    if (this.pendingRequests.has(cacheKey)) {
+      console.log(`🔄 Deduplicating request for ${spreadsheetId}`)
+      return this.pendingRequests.get(cacheKey)!
+    }
+
+    // Start new request and store promise
+    const requestPromise = this._fetchSpreadsheetData(spreadsheetId, cacheKey)
+    this.pendingRequests.set(cacheKey, requestPromise)
+
+    try {
+      const result = await requestPromise
+      return result
+    } finally {
+      // Clean up pending request
+      this.pendingRequests.delete(cacheKey)
+    }
+  }
+
+  private async _fetchSpreadsheetData(
+    spreadsheetId: string,
+    cacheKey: string
+  ): Promise<SpreadsheetResponse> {
     const doc = await this.getDocument(spreadsheetId)
 
-    const sheets = await Promise.all(
-      doc.sheetsByIndex.map(async (sheet) => {
-        // Validate sheet format first
-        await this.validateSheetFormat(sheet)
+    const tabCount = doc.sheetsByIndex.length
+    console.log(`📊 Processing spreadsheet with ${tabCount} tabs`)
 
-        const rows = await this.withRetry(async () => {
-          await this.rateLimiter.checkLimit()
-          return sheet.getRows()
-        }).catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
+    // Initialize progress tracking
+    this.initializeProgress(spreadsheetId, tabCount)
 
-        if (rows.length === 0) {
-          return {
-            sheetId: sheet.sheetId,
-            title: sheet.title,
-            rows: [],
-          }
-        }
+    let sheets: any[]
 
-        const parsed = this.parseSheetRows(sheet, rows)
+    // OPTIMIZATION: Chọn strategy dựa vào size và user preference
+    const aggressiveMode = process.env.AGGRESSIVE_LOADING === "true" // Env var to control
 
-        // Validate parsed data
-        this.validateParsedData(parsed, sheet.title)
+    if (tabCount > 25 && !aggressiveMode) {
+      console.log(
+        `⚡ Very large spreadsheet (${tabCount} tabs). Using batch processing...`
+      )
+      sheets = await this.processLargeSpreadsheetSequentially(
+        doc.sheetsByIndex,
+        spreadsheetId
+      )
+    } else if (tabCount > 10) {
+      console.log(
+        `🚀 Medium-large spreadsheet (${tabCount} tabs). Using aggressive parallel with strong retry...`
+      )
+      sheets = await this.processSpreadsheetAggressiveParallel(
+        doc.sheetsByIndex,
+        spreadsheetId
+      )
+    } else {
+      console.log(
+        `⚡ Small spreadsheet (${tabCount} tabs). Using normal parallel processing...`
+      )
+      sheets = await this.processSmallSpreadsheetParallel(
+        doc.sheetsByIndex,
+        spreadsheetId
+      )
+    }
 
-        return {
-          sheetId: sheet.sheetId,
-          title: sheet.title,
-          rows: parsed,
-        }
-      })
-    )
+    // Update progress to completed
+    this.updateProgress(spreadsheetId, {
+      loadedSheets: tabCount,
+      status: "completed",
+      percentage: 100,
+      message: `Successfully loaded all ${tabCount} sheets`,
+    })
 
     const result = {
       title: doc.title,
@@ -241,10 +311,384 @@ export class GoogleSheetsService {
       sheets,
     }
 
-    // Cache for 5 minutes
-    this.cache.set(cacheKey, result, 5 * 60 * 1000)
+    // Cache for 10 minutes - tăng thời gian cache để giảm API calls
+    this.cache.set(cacheKey, result, 10 * 60 * 1000)
+
+    // Clean up progress after successful completion
+    setTimeout(() => this.progressMap.delete(spreadsheetId), 5000) // Keep for 5s for final display
 
     return result
+  }
+
+  // Initialize progress tracking
+  private initializeProgress(spreadsheetId: string, totalSheets: number): void {
+    this.progressMap.set(spreadsheetId, {
+      spreadsheetId,
+      totalSheets,
+      loadedSheets: 0,
+      percentage: 0,
+      status: "loading",
+      message: `Starting to load ${totalSheets} sheets...`,
+    })
+  }
+
+  // Update progress
+  private updateProgress(
+    spreadsheetId: string,
+    updates: Partial<LoadingProgress>
+  ): void {
+    const current = this.progressMap.get(spreadsheetId)
+    if (current) {
+      const updated = { ...current, ...updates }
+      if (updates.loadedSheets !== undefined) {
+        updated.percentage = Math.round(
+          (updates.loadedSheets / updated.totalSheets) * 100
+        )
+      }
+      this.progressMap.set(spreadsheetId, updated)
+      console.log(
+        `📊 Progress: ${updated.percentage}% (${updated.loadedSheets}/${
+          updated.totalSheets
+        }) - ${updates.message || updates.currentSheet || ""}`
+      )
+    }
+  }
+
+  // Get current progress
+  getProgress(spreadsheetId: string): LoadingProgress | null {
+    return this.progressMap.get(spreadsheetId) || null
+  }
+
+  // 🚀 LAZY LOADING cho spreadsheets lớn
+  async getSpreadsheetLazy(
+    spreadsheetId: string,
+    options: {
+      mode: "lazy" | "first-only"
+      specificSheet?: string
+    }
+  ): Promise<SpreadsheetResponse> {
+    const cacheKey = `lazy:${spreadsheetId}:${options.mode}:${
+      options.specificSheet || "all"
+    }`
+    const cached = this.cache.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    const doc = await this.getDocument(spreadsheetId)
+    const tabCount = doc.sheetsByIndex.length
+
+    console.log(`🚀 Lazy loading mode: ${options.mode} for ${tabCount} tabs`)
+
+    let sheets: any[]
+
+    if (options.mode === "first-only") {
+      // Chỉ load sheet đầu tiên
+      console.log(`📄 Loading only first sheet: ${doc.sheetsByIndex[0]?.title}`)
+      const firstSheet = doc.sheetsByIndex[0]
+      if (firstSheet) {
+        const processedSheet = await this.processSingleSheet(firstSheet)
+        sheets = [processedSheet]
+      } else {
+        sheets = []
+      }
+    } else if (options.specificSheet) {
+      // Load sheet cụ thể theo tên
+      console.log(`📄 Loading specific sheet: ${options.specificSheet}`)
+      const targetSheet = doc.sheetsByTitle[options.specificSheet]
+      if (targetSheet) {
+        const processedSheet = await this.processSingleSheet(targetSheet)
+        sheets = [processedSheet]
+      } else {
+        throw new Error(`Sheet "${options.specificSheet}" not found`)
+      }
+    } else {
+      // Lazy mode: Load metadata của tất cả sheets, chỉ load data của sheet đầu tiên
+      console.log(
+        `📋 Lazy mode: Loading metadata for all sheets, data for first sheet only`
+      )
+      sheets = await this.loadSheetsMetadataWithFirstSheetData(
+        doc.sheetsByIndex
+      )
+    }
+
+    const result = {
+      title: doc.title,
+      id: spreadsheetId,
+      sheets,
+      _lazyMode: options.mode,
+      _totalSheets: tabCount,
+      _loadedSheets: sheets.length,
+    }
+
+    // Cache lazy results for shorter time
+    this.cache.set(cacheKey, result, 5 * 60 * 1000) // 5 minutes
+
+    return result
+  }
+
+  // Load metadata cho tất cả sheets, chỉ load data cho sheet đầu tiên
+  private async loadSheetsMetadataWithFirstSheetData(
+    sheetsByIndex: any[]
+  ): Promise<any[]> {
+    const sheets: any[] = []
+
+    for (let i = 0; i < sheetsByIndex.length; i++) {
+      const sheet = sheetsByIndex[i]
+
+      if (i === 0) {
+        // Sheet đầu tiên: load full data
+        console.log(`📊 Loading full data for first sheet: ${sheet.title}`)
+        const fullSheet = await this.processSingleSheet(sheet)
+        sheets.push(fullSheet)
+      } else {
+        // Các sheet khác: chỉ load metadata
+        console.log(`📋 Loading metadata only for sheet: ${sheet.title}`)
+        try {
+          await sheet.loadHeaderRow()
+          sheets.push({
+            sheetId: sheet.sheetId,
+            title: sheet.title,
+            rows: [], // Empty - sẽ load on-demand
+            _isLazyLoaded: true,
+            _headerValues: sheet.headerValues || [],
+          })
+        } catch (error) {
+          // If can't load headers, still include basic info
+          sheets.push({
+            sheetId: sheet.sheetId,
+            title: sheet.title,
+            rows: [],
+            _isLazyLoaded: true,
+            _headerValues: [],
+            _error: "Could not load headers",
+          })
+        }
+      }
+    }
+
+    return sheets
+  }
+
+  // Xử lý sequential cho spreadsheets lớn để tránh quota limits
+  private async processLargeSpreadsheetSequentially(
+    sheetsByIndex: any[],
+    spreadsheetId?: string
+  ): Promise<any[]> {
+    const sheets: any[] = []
+    const batchSize = 5 // Process 5 tabs at a time để không hit rate limit
+
+    for (let i = 0; i < sheetsByIndex.length; i += batchSize) {
+      const batch = sheetsByIndex.slice(i, i + batchSize)
+      const batchNumber = Math.floor(i / batchSize) + 1
+      const totalBatches = Math.ceil(sheetsByIndex.length / batchSize)
+
+      console.log(
+        `📝 Processing batch ${batchNumber}/${totalBatches} (tabs ${
+          i + 1
+        }-${Math.min(i + batchSize, sheetsByIndex.length)})`
+      )
+
+      if (spreadsheetId) {
+        this.updateProgress(spreadsheetId, {
+          message: `Processing batch ${batchNumber}/${totalBatches}...`,
+        })
+      }
+
+      // Process batch in parallel (5 tabs at once max)
+      const batchResults = await Promise.all(
+        batch.map(async (sheet, batchIndex) => {
+          const globalIndex = i + batchIndex
+          const result = await this.processSingleSheet(sheet)
+
+          // Update progress after each sheet in batch
+          if (spreadsheetId) {
+            this.updateProgress(spreadsheetId, {
+              loadedSheets: globalIndex + 1,
+              currentSheet: sheet.title,
+              message: `Completed sheet: ${sheet.title} (batch ${batchNumber}/${totalBatches})`,
+            })
+          }
+
+          return result
+        })
+      )
+
+      sheets.push(...batchResults)
+
+      // Brief pause between batches để respect rate limits
+      if (i + batchSize < sheetsByIndex.length) {
+        console.log(`⏳ Brief pause between batches...`)
+
+        if (spreadsheetId) {
+          this.updateProgress(spreadsheetId, {
+            message: `Pausing between batches... (${sheets.length}/${sheetsByIndex.length} completed)`,
+          })
+        }
+
+        await this.sleep(1000) // 1 second pause
+      }
+    }
+
+    return sheets
+  }
+
+  // Xử lý parallel cho spreadsheets nhỏ (giữ nguyên logic cũ)
+  private async processSmallSpreadsheetParallel(
+    sheetsByIndex: any[],
+    spreadsheetId?: string
+  ): Promise<any[]> {
+    let completedSheets = 0
+
+    return Promise.all(
+      sheetsByIndex.map(async (sheet, index) => {
+        if (spreadsheetId) {
+          this.updateProgress(spreadsheetId, {
+            currentSheet: sheet.title,
+            message: `Loading sheet: ${sheet.title}`,
+          })
+        }
+
+        const result = await this.processSingleSheet(sheet)
+
+        // Update progress after each sheet completes
+        completedSheets++
+        if (spreadsheetId) {
+          this.updateProgress(spreadsheetId, {
+            loadedSheets: completedSheets,
+            currentSheet: sheet.title,
+            message: `Completed sheet: ${sheet.title}`,
+          })
+        }
+
+        return result
+      })
+    )
+  }
+
+  // 🚀 AGGRESSIVE: Parallel processing với retry mạnh cho medium spreadsheets
+  private async processSpreadsheetAggressiveParallel(
+    sheetsByIndex: any[],
+    spreadsheetId?: string
+  ): Promise<any[]> {
+    console.log(
+      `🚀 Aggressive mode: Processing all ${sheetsByIndex.length} tabs in parallel...`
+    )
+    console.log(
+      `⚠️  May hit quota limits, but will retry with intelligent backoff`
+    )
+
+    try {
+      // Track completed sheets for progress
+      let completedSheets = 0
+
+      // Try full parallel first
+      const results = await Promise.all(
+        sheetsByIndex.map(async (sheet, index) => {
+          console.log(
+            `📄 Processing sheet ${index + 1}/${sheetsByIndex.length}: ${
+              sheet.title
+            }`
+          )
+
+          if (spreadsheetId) {
+            this.updateProgress(spreadsheetId, {
+              currentSheet: sheet.title,
+              message: `Loading sheet: ${sheet.title}`,
+            })
+          }
+
+          const result = await this.processSingleSheetWithAggressiveRetry(
+            sheet,
+            index
+          )
+
+          // Update progress after each sheet completes
+          completedSheets++
+          if (spreadsheetId) {
+            this.updateProgress(spreadsheetId, {
+              loadedSheets: completedSheets,
+              currentSheet: sheet.title,
+              message: `Completed sheet: ${sheet.title}`,
+            })
+          }
+
+          return result
+        })
+      )
+
+      console.log(
+        `✅ Success! All ${sheetsByIndex.length} tabs loaded in parallel`
+      )
+      return results
+    } catch (error: any) {
+      console.log(
+        `⚠️  Parallel processing failed, falling back to batch mode...`
+      )
+
+      if (spreadsheetId) {
+        this.updateProgress(spreadsheetId, {
+          message:
+            "Aggressive mode failed, falling back to batch processing...",
+        })
+      }
+
+      // Fallback to batch processing if aggressive fails
+      return this.processLargeSpreadsheetSequentially(
+        sheetsByIndex,
+        spreadsheetId
+      )
+    }
+  }
+
+  // Process single sheet với aggressive retry cho parallel mode
+  private async processSingleSheetWithAggressiveRetry(
+    sheet: any,
+    index: number
+  ): Promise<any> {
+    return this.withRetry(
+      async () => {
+        // Add random delay để tránh tất cả requests hit cùng lúc
+        const randomDelay = Math.random() * 1000 * (index % 3) // 0-3s random delay
+        if (randomDelay > 0) {
+          await this.sleep(randomDelay)
+        }
+
+        return this.processSingleSheet(sheet)
+      },
+      5, // 5 retries instead of 3
+      3000 // 3s base delay instead of 2s
+    )
+  }
+
+  // Xử lý 1 sheet đơn lẻ
+  private async processSingleSheet(sheet: any): Promise<any> {
+    // Validate sheet format first
+    await this.validateSheetFormat(sheet)
+
+    const rows = await this.withRetry(async () => {
+      await this.rateLimiter.checkLimit()
+      return sheet.getRows()
+    }).catch(() => [] as GoogleSpreadsheetRow<Record<string, any>>[])
+
+    if (rows.length === 0) {
+      return {
+        sheetId: sheet.sheetId,
+        title: sheet.title,
+        rows: [],
+      }
+    }
+
+    const parsed = this.parseSheetRows(sheet, rows)
+
+    // Validate parsed data
+    this.validateParsedData(parsed, sheet.title)
+
+    return {
+      sheetId: sheet.sheetId,
+      title: sheet.title,
+      rows: parsed,
+    }
   }
 
   async getSpreadsheetValidation(spreadsheetId: string): Promise<{
@@ -273,6 +717,47 @@ export class GoogleSheetsService {
       return cached
     }
 
+    // Check if validation request is already in progress (deduplication)
+    if (this.pendingRequests.has(cacheKey)) {
+      console.log(`🔄 Deduplicating validation request for ${spreadsheetId}`)
+      return this.pendingRequests.get(cacheKey)!
+    }
+
+    // Start new validation and store promise
+    const validationPromise = this._performValidation(spreadsheetId, cacheKey)
+    this.pendingRequests.set(cacheKey, validationPromise)
+
+    try {
+      const result = await validationPromise
+      return result
+    } finally {
+      // Clean up pending request
+      this.pendingRequests.delete(cacheKey)
+    }
+  }
+
+  private async _performValidation(
+    spreadsheetId: string,
+    cacheKey: string
+  ): Promise<{
+    isValid: boolean
+    spreadsheet?: SpreadsheetResponse
+    validationIssues: Array<{
+      sheetTitle: string
+      errors: string[]
+      fixes: Array<{
+        type:
+          | "missing_key"
+          | "duplicate_keys"
+          | "empty_keys"
+          | "no_languages"
+          | "no_headers"
+        title: string
+        description: string
+        action: string
+      }>
+    }>
+  }> {
     const doc = await this.getDocument(spreadsheetId)
     const validationIssues: Array<{
       sheetTitle: string
@@ -405,8 +890,8 @@ export class GoogleSheetsService {
       validationIssues,
     }
 
-    // Cache validation result for 3 minutes (shorter than data cache)
-    this.cache.set(`validation:${spreadsheetId}`, result, 3 * 60 * 1000)
+    // Cache validation result for 8 minutes (chỉ hơi ngắn hơn data cache)
+    this.cache.set(`validation:${spreadsheetId}`, result, 8 * 60 * 1000)
 
     return result
   }

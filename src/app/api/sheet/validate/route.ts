@@ -4,13 +4,43 @@ import { authOptions } from "@/lib/auth"
 import { googleSheetsService } from "@/lib/google-sheets.service"
 import { GoogleSheetsUserService } from "@/lib/google-sheets-user.service"
 
+/**
+ * Extract spreadsheet ID từ Google Sheets URL hoặc trả về input nếu đã là ID
+ */
+function extractSpreadsheetId(input: string): string | null {
+  // Nếu input chứa URL Google Sheets, extract ID
+  if (input.includes("docs.google.com/spreadsheets")) {
+    const match = input.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+    return match?.[1] || null
+  }
+
+  // Nếu không phải URL, kiểm tra xem có phải là ID hợp lệ không
+  const idPattern = /^[a-zA-Z0-9-_]+$/
+  if (idPattern.test(input) && input.length > 10) {
+    return input
+  }
+
+  return null
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { sheetId } = await req.json()
+    const { sheetId, sheetUrl } = await req.json()
 
-    if (!sheetId) {
+    // Accept either sheetId or sheetUrl
+    const inputValue = sheetId || sheetUrl
+    if (!inputValue) {
       return NextResponse.json(
-        { message: "Missing sheetId parameter" },
+        { message: "Missing sheetId or sheetUrl parameter" },
+        { status: 400 }
+      )
+    }
+
+    // Extract spreadsheet ID from URL or validate ID
+    const spreadsheetId = extractSpreadsheetId(decodeURIComponent(inputValue))
+    if (!spreadsheetId) {
+      return NextResponse.json(
+        { message: "Invalid spreadsheet ID or URL format" },
         { status: 400 }
       )
     }
@@ -25,17 +55,19 @@ export async function POST(req: NextRequest) {
         const userService = GoogleSheetsUserService.withUserToken(
           session.accessToken
         )
-        validation = await userService.getSpreadsheetValidation(sheetId)
+        validation = await userService.getSpreadsheetValidation(spreadsheetId)
         authType = "user"
       } else {
-        validation = await googleSheetsService.getSpreadsheetValidation(sheetId)
+        validation = await googleSheetsService.getSpreadsheetValidation(
+          spreadsheetId
+        )
         authType = "service_account"
       }
     } catch (primaryError: any) {
       if (authType === "user" && primaryError.response?.status === 403) {
         try {
           validation = await googleSheetsService.getSpreadsheetValidation(
-            sheetId
+            spreadsheetId
           )
           authType = "service_account_fallback"
         } catch (fallbackError: any) {

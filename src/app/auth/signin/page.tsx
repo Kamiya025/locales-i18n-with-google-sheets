@@ -10,14 +10,7 @@ export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    // Kiểm tra nếu đã đăng nhập thì redirect về home
-    getSession().then((session) => {
-      if (session) {
-        router.push("/")
-      }
-    })
-  }, [router])
+  // Removed auto-redirect - let user decide whether to go home manually
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)

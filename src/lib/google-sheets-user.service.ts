@@ -186,4 +186,28 @@ export class GoogleSheetsUserService extends GoogleSheetsService {
 
     return super.addLanguageColumn(spreadsheetId, languageName)
   }
+
+  // Inherit lazy loading từ parent class
+  async getSpreadsheetLazy(
+    spreadsheetId: string, 
+    options: {
+      mode: "lazy" | "first-only"
+      specificSheet?: string
+    }
+  ): Promise<any> {
+    if (this.oauth2Client) {
+      try {
+        return await super.getSpreadsheetLazy(spreadsheetId, options)
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          throw new Error(
+            "Bạn không có quyền truy cập file này. Vui lòng kiểm tra quyền chia sẻ."
+          )
+        }
+        throw error
+      }
+    }
+
+    return super.getSpreadsheetLazy(spreadsheetId, options)
+  }
 }
