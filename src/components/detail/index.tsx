@@ -10,7 +10,7 @@ import StatsCard from "../ui/stats-card"
 import { SpreadsheetItemViewer } from "./sheet"
 import { downloadJSON } from "./hook"
 import { transformToI18n } from "@/util/transform"
-import { exportSpreadsheetToExcel } from "@/util/excel"
+import { exportSpreadsheetToStyledExcel } from "@/util/excel-styled"
 import { useCallback, useMemo, useState } from "react"
 import SearchCombobox from "../ui/search-combobox"
 import NamespaceSelector from "../ui/namespace-selector"
@@ -268,7 +268,7 @@ export default function SpreadsheetViewer() {
 
                     <Button
                       onClick={() => {
-                        if (data) exportSpreadsheetToExcel(data)
+                        if (data) exportSpreadsheetToStyledExcel(data)
                       }}
                       variant="primary"
                       icon={
