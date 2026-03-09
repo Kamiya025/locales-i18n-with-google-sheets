@@ -10,6 +10,7 @@ import StatsCard from "../ui/stats-card"
 import { SpreadsheetItemViewer } from "./sheet"
 import { downloadJSON } from "./hook"
 import { transformToI18n } from "@/util/transform"
+import { exportSpreadsheetToExcel } from "@/util/excel"
 import { useCallback, useMemo, useState } from "react"
 import SearchCombobox from "../ui/search-combobox"
 import NamespaceSelector from "../ui/namespace-selector"
@@ -242,27 +243,53 @@ export default function SpreadsheetViewer() {
                   Thêm Danh Mục
                 </Button>
                 {totalKeys > 0 && (
-                  <Button
-                    onClick={handleDownload}
-                    variant="secondary"
-                    icon={
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                      </svg>
-                    }
-                  >
-                    Tải JSON
-                  </Button>
+                  <>
+                    <Button
+                      onClick={handleDownload}
+                      variant="secondary"
+                      icon={
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      }
+                    >
+                      Tải JSON
+                    </Button>
+
+                    <Button
+                      onClick={() => {
+                        if (data) exportSpreadsheetToExcel(data)
+                      }}
+                      variant="primary"
+                      icon={
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                          />
+                        </svg>
+                      }
+                    >
+                      Xuất Excel
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

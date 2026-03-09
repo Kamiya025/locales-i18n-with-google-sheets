@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { customToast } from "@/components/ui/toast"
 import HistoryPanel from "../ui/history/HistoryPanel"
 import FavoriteQuickAccess from "../ui/history/FavoriteQuickAccess"
+import { parseExcelToSpreadsheetResponse } from "@/util/excel"
 
 interface GetLinkGoogleSheetsProps {
   isHeader?: boolean
@@ -58,7 +59,7 @@ export default function GetLinkGoogleSheets({
 
   // Simple URL validation function
   const validateGoogleSheetsUrl = (
-    url: string
+    url: string,
   ): { isValid: boolean; spreadsheetId: string | null; error?: string } => {
     if (!url.trim()) {
       return {
@@ -113,6 +114,31 @@ export default function GetLinkGoogleSheets({
       customToast.error("Có lỗi xảy ra khi chuyển trang")
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsSubmitting(true)
+    try {
+      // Parse file
+      const data = await parseExcelToSpreadsheetResponse(file)
+
+      // Store globally for detail page to read
+      sessionStorage.setItem("temp_excel_data", JSON.stringify(data))
+
+      // Navigate
+      router.push(`/sheet/local-excel`)
+    } catch (error) {
+      console.error(error)
+      customToast.error("Lỗi khi đọc file Excel, vui lòng thử lại.")
+    } finally {
+      setIsSubmitting(false)
+      if (event.target) event.target.value = ""
     }
   }
 
@@ -228,7 +254,7 @@ export default function GetLinkGoogleSheets({
             type="submit"
             disabled={isSubmitting}
             className={`${getButtonClassNames(
-              isHeader
+              isHeader,
             )} hidden md:flex items-center justify-center`}
           >
             {isSubmitting ? (
@@ -253,6 +279,34 @@ export default function GetLinkGoogleSheets({
           )}
         </div>
       </form>
+
+      {/* Upload local file */}
+      {!isHeader && (
+        <div className="flex w-full items-center justify-center pt-2">
+          <label className="cursor-pointer text-slate-500 hover:text-indigo-600 transition-colors flex items-center justify-center text-sm font-medium">
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+              />
+            </svg>
+            Hoặc tải lên file Excel (.xlsx) từ máy tính
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+          </label>
+        </div>
+      )}
 
       {/* Favorite Quick Access - Hidden in header mode */}
       {!isHeader && !isHistoryOpen && favorites.length > 0 && (

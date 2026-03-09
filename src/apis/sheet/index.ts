@@ -6,20 +6,33 @@ const sheetApi = {
     sheetId: string,
     options?: { aggressive?: boolean }
   ): Promise<SpreadsheetResponse> {
+    if (sheetId === "local-excel") {
+      if (typeof window !== "undefined") {
+        const localData = sessionStorage.getItem("temp_excel_data")
+        if (localData) {
+          return Promise.resolve(JSON.parse(localData))
+        }
+      }
+      return Promise.reject(new Error("Không tìm thấy file Excel nào đang được tải lên bộ nhớ tạm."))
+    }
+
     const url = "/sheet/" + sheetId
     const params = options?.aggressive ? { aggressive: "true" } : undefined
     console.log("🚀 API call to:", url, "with params:", params)
     return axiosClient.get(url, { params })
   },
   update(data: SpreadsheetResponse): Promise<any> {
+    if (data.id === "local-excel") return Promise.resolve({ success: true, data })
     const url = "/sheet/update"
     return axiosClient.post(url, data)
   },
   saveRow(data: SpreadsheetUpdateRowRequest): Promise<any> {
+    if (data.spreadsheetId === "local-excel") return Promise.resolve({ success: true, data })
     const url = "/sheet/save-row/"
     return axiosClient.post(url, data)
   },
   saveNewRow(data: SpreadsheetUpdateRowRequest): Promise<SpreadsheetResponse> {
+    if (data.spreadsheetId === "local-excel") return Promise.resolve({ success: true, data } as any)
     const url = "/sheet/add-row/"
     return axiosClient.post(url, data)
   },
@@ -45,11 +58,11 @@ const sheetApi = {
       errors: string[]
       fixes: Array<{
         type:
-          | "missing_key"
-          | "duplicate_keys"
-          | "empty_keys"
-          | "no_languages"
-          | "no_headers"
+        | "missing_key"
+        | "duplicate_keys"
+        | "empty_keys"
+        | "no_languages"
+        | "no_headers"
         title: string
         description: string
         action: string

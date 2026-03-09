@@ -40,12 +40,16 @@ function SpreadsheetDetailContent({
 
   // Tạo Google Sheets URL từ spreadsheetId để update history
   const originalUrl = useMemo(() => {
+    if (spreadsheetId === "local-excel") return null
     // Tạo URL từ spreadsheetId
     return `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`
   }, [spreadsheetId])
 
-  // Cập nhật history với title khi load data thành công
-  useUpdateHistory(data ? originalUrl : null, data?.title || null)
+  // Cập nhật history với title khi load data thành công, chỉ khi url hợp lệ
+  useUpdateHistory(
+    data && originalUrl ? originalUrl : null,
+    data?.title || null,
+  )
 
   // Helper function to extract error message from error object
   const getErrorMessage = (error: any): string => {
@@ -182,10 +186,10 @@ function SpreadsheetDetailContent({
               {errorType === "permission"
                 ? "Quyền truy cập bị từ chối"
                 : errorType === "not-found"
-                ? "Không tìm thấy spreadsheet"
-                : errorType === "invalid-id"
-                ? "ID không hợp lệ"
-                : "Không thể tải spreadsheet"}
+                  ? "Không tìm thấy spreadsheet"
+                  : errorType === "invalid-id"
+                    ? "ID không hợp lệ"
+                    : "Không thể tải spreadsheet"}
             </h1>
             <p className="text-slate-600 mb-6 leading-relaxed">
               {errorMessage}
