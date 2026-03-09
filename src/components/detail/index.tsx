@@ -39,7 +39,7 @@ export default function SpreadsheetViewer() {
       ...data,
       sheets:
         data?.sheets?.filter(
-          (sheet) => sheet && sheet.sheetId.toString() === selectedNamespace
+          (sheet) => sheet && sheet.sheetId.toString() === selectedNamespace,
         ) || [],
     }
   }, [data, selectedNamespace])
@@ -47,7 +47,7 @@ export default function SpreadsheetViewer() {
   const totalKeys =
     statsData?.sheets?.reduce(
       (sum, sheet) => sum + (sheet?.rows?.length || 0),
-      0
+      0,
     ) ?? 0
 
   const totalMissing =
@@ -61,7 +61,7 @@ export default function SpreadsheetViewer() {
             // Chỉ kiểm tra ngôn ngữ được chọn
             row &&
             selectedLocales.length > 0 &&
-            selectedLocales.some((lang) => !(row.data?.[lang] ?? "").trim())
+            selectedLocales.some((lang) => !(row.data?.[lang] ?? "").trim()),
         ).length
       )
     }, 0) ?? 0
@@ -119,17 +119,19 @@ export default function SpreadsheetViewer() {
   }, [data])
 
   const handleConfirmExport = useCallback(
-    (fallbackLanguage?: string) => {
+    (fallbackLanguage: string | undefined, selectedLanguages: string[]) => {
       if (!data) return
       const translations = transformToI18n(data, fallbackLanguage)
 
-      // tạo từng file vi.json, en.json...
+      // tạo từng file vi.json, en.json... dưa trên danh sách người dùng chọn
       Object.entries(translations).forEach(([lang, data]) => {
-        const langName = lang.toLowerCase().trim()
-        downloadJSON(`${langName}.json`, data)
+        if (selectedLanguages.includes(lang)) {
+          const langName = lang.toLowerCase().trim()
+          downloadJSON(`${langName}.json`, data)
+        }
       })
     },
-    [data]
+    [data],
   )
 
   if (!data) return null
@@ -151,7 +153,7 @@ export default function SpreadsheetViewer() {
                   selectedNamespace === "all" ? "Danh mục" : "Danh mục hiện tại"
                 }
                 value={
-                  selectedNamespace === "all" ? data?.sheets?.length ?? 0 : 1
+                  selectedNamespace === "all" ? (data?.sheets?.length ?? 0) : 1
                 }
                 color="emerald"
               />
@@ -283,7 +285,7 @@ export default function SpreadsheetViewer() {
               >
                 <SpreadsheetItemViewer sheet={sheet} />
               </div>
-            ) : null
+            ) : null,
           )}
         </div>
       </div>

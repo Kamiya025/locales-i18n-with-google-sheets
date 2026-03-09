@@ -25,7 +25,10 @@ interface LanguageStats {
 interface ExportConfirmationModalProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm: (fallbackLanguage?: string) => void
+  onConfirm: (
+    fallbackLanguage: string | undefined,
+    selectedLanguages: string[],
+  ) => void
   data: SpreadsheetResponse
 }
 
@@ -36,6 +39,20 @@ export default function ExportConfirmationModal({
   data,
 }: ExportConfirmationModalProps) {
   const [selectedFallback, setSelectedFallback] = useState<string>("")
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
+
+  // Load initially all languages into selectedLanguages when data changes
+  useMemo(() => {
+    if (data) {
+      setSelectedLanguages(getLanguages(data))
+    }
+  }, [data])
+
+  const toggleLanguage = (lang: string) => {
+    setSelectedLanguages((prev) =>
+      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang],
+    )
+  }
 
   // Tính toán thống kê cho từng ngôn ngữ
   const languageStats = useMemo((): LanguageStats[] => {
@@ -80,7 +97,7 @@ export default function ExportConfirmationModal({
   }, [languageStats])
 
   const handleConfirm = () => {
-    onConfirm(selectedFallback || undefined)
+    onConfirm(selectedFallback || undefined, selectedLanguages)
     onClose()
   }
 
@@ -118,7 +135,7 @@ export default function ExportConfirmationModal({
             <div className="text-2xl font-bold text-blue-600">
               {Math.round(
                 languageStats.reduce((sum, stat) => sum + stat.percentage, 0) /
-                  languageStats.length
+                  languageStats.length,
               )}
               %
             </div>
@@ -192,14 +209,29 @@ export default function ExportConfirmationModal({
                     : "border-slate-200 hover:border-blue-300 hover:bg-blue-50/30"
                 }`}
               >
+                {/* Checkbox for selection */}
+                <div
+                  className="relative mr-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    title="Chọn tải file ngôn ngữ này"
+                    checked={selectedLanguages.includes(stat.language)}
+                    onChange={() => toggleLanguage(stat.language)}
+                    className="w-6 h-6 rounded text-indigo-600 focus:ring-indigo-500 focus:ring-2 cursor-pointer"
+                  />
+                </div>
+
                 <div className="relative">
                   <input
                     type="radio"
                     name="fallback"
+                    title="Chọn làm ngôn ngữ thay thế cho các trường trống"
                     value={stat.language}
                     checked={selectedFallback === stat.language}
                     onChange={(e) => setSelectedFallback(e.target.value)}
-                    className="w-5 h-5 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                    className="w-5 h-5 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer"
                   />
                 </div>
 
@@ -211,10 +243,10 @@ export default function ExportConfirmationModal({
                           stat.percentage === 100
                             ? "bg-emerald-100 text-emerald-700"
                             : stat.percentage >= 80
-                            ? "bg-blue-100 text-blue-700"
-                            : stat.percentage >= 60
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-red-100 text-red-700"
+                              ? "bg-blue-100 text-blue-700"
+                              : stat.percentage >= 60
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-red-100 text-red-700"
                         }`}
                       >
                         {stat.language.slice(0, 2).toUpperCase()}
@@ -235,10 +267,10 @@ export default function ExportConfirmationModal({
                           stat.percentage === 100
                             ? "bg-emerald-500 text-white"
                             : stat.percentage >= 80
-                            ? "bg-blue-500 text-white"
-                            : stat.percentage >= 60
-                            ? "bg-yellow-500 text-white"
-                            : "bg-red-500 text-white"
+                              ? "bg-blue-500 text-white"
+                              : stat.percentage >= 60
+                                ? "bg-yellow-500 text-white"
+                                : "bg-red-500 text-white"
                         }`}
                       >
                         {stat.percentage}%
@@ -259,7 +291,7 @@ export default function ExportConfirmationModal({
                   <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ease-out shadow-sm ${getProgressColor(
-                        stat.percentage
+                        stat.percentage,
                       )}`}
                       style={{ width: `${stat.percentage}%` }}
                     />
@@ -299,7 +331,7 @@ export default function ExportConfirmationModal({
               </div>
               <div>
                 <div className="font-semibold text-slate-800">
-                  Sẽ tạo {languageStats.length} file JSON
+                  Sẽ tạo {selectedLanguages.length} file JSON
                 </div>
                 <div className="text-sm text-slate-600">
                   Fallback:{" "}
@@ -311,7 +343,7 @@ export default function ExportConfirmationModal({
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-indigo-600">
-                {languageStats.length}
+                {selectedLanguages.length}
               </div>
               <div className="text-xs text-indigo-600/70">files</div>
             </div>
@@ -327,10 +359,11 @@ export default function ExportConfirmationModal({
           <Button
             onClick={handleConfirm}
             variant="primary"
-            className="flex-1 h-12 text-lg font-semibold"
+            disabled={selectedLanguages.length === 0}
+            className={`flex-1 h-12 text-lg font-semibold ${selectedLanguages.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
             icon={<DownloadIcon className="w-5 h-5" />}
           >
-            Xuất {languageStats.length} file JSON
+            Xuất {selectedLanguages.length} file JSON
           </Button>
         </div>
       </div>
