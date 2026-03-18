@@ -28,12 +28,12 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Google Sheet Translation Manager",
+  title: "Translator Tool - Quản lý dịch thuật chuyên nghiệp",
   description: "Quản lý và dịch Google Sheet dễ dàng, nhanh chóng, tiện lợi.",
-  applicationName: "Translate PWA",
+  applicationName: "Translator Tool",
   appleWebApp: {
     capable: true,
-    title: "Translate PWA",
+    title: "Translator Tool",
     statusBarStyle: "default",
   },
   formatDetection: {

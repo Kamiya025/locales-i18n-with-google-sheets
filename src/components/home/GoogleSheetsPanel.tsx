@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { customToast } from "@/components/ui/toast"
 import HistoryPanel from "../ui/history/HistoryPanel"
 import FavoriteQuickAccess from "../ui/history/FavoriteQuickAccess"
+import { useCloudHistory } from "@/hooks/useCloudHistory"
 
 function extractSpreadsheetId(url: string): string | null {
   const match = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
@@ -18,6 +19,7 @@ export default function GoogleSheetsPanel() {
   const [url, setUrl] = useState("")
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const {
     items,
     favorites,
@@ -28,6 +30,8 @@ export default function GoogleSheetsPanel() {
     clear,
     debugHistory,
   } = useHistory(storageKey, 15)
+
+  const { cloudProjects } = useCloudHistory()
 
   if (typeof window !== "undefined") {
     ;(window as any).debugHistory = debugHistory
@@ -66,6 +70,10 @@ export default function GoogleSheetsPanel() {
     else validateAndNavigate(selectedUrl)
   }
 
+  const handleCloudSelect = (projectId: string) => {
+    router.push(`/sheet/${projectId}`)
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {/* URL Input row */}
@@ -84,7 +92,7 @@ export default function GoogleSheetsPanel() {
             placeholder="https://docs.google.com/spreadsheets/d/..."
             className="w-full rounded-xl border border-blue-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm text-slate-700 placeholder-slate-400 shadow-sm focus:ring-2 focus:ring-blue-400/40 outline-none transition-all"
           />
-          {items.length > 0 && (
+          {(items.length > 0 || cloudProjects.length > 0) && (
             <button
               type="button"
               onClick={() => setIsHistoryOpen(!isHistoryOpen)}
@@ -132,6 +140,38 @@ export default function GoogleSheetsPanel() {
           Mở
         </button>
       </form>
+
+      {/* Cloud Recent Projects (Sync via MongoDB) */}
+      {!isHistoryOpen && cloudProjects.length > 0 && (
+        <div className="mt-1">
+          <div className="flex items-center gap-2 px-1 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Dự án đồng bộ Cloud</span>
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            {cloudProjects.slice(0, 2).map((proj) => (
+              <button
+                key={proj._id}
+                onClick={() => handleCloudSelect(proj.spreadsheetId)}
+                className="group flex flex-col p-3 rounded-xl bg-white/40 border border-blue-100 hover:border-blue-400 hover:bg-white/80 transition-all text-left relative overflow-hidden"
+              >
+                {/* Text */}
+                <span className="text-xs font-bold text-slate-700 truncate mb-1">
+                  {proj.title}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {new Date(proj.lastAccessedAt).toLocaleDateString("vi-VN")} • {proj.spreadsheetId.slice(0, 8)}...
+                </span>
+                
+                {/* Cloud Badge */}
+                <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-md bg-blue-50 text-[10px] font-black text-blue-600 uppercase border border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  Cloud
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Favorites */}
       {!isHistoryOpen && favorites.length > 0 && (

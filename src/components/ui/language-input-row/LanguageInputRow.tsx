@@ -11,6 +11,7 @@ interface LanguageInputRowProps {
   error?: boolean
   variant?: "default" | "glass"
   referenceValue?: string // Value from the "source" language
+  suggestion?: string // Value from Translation Memory
 }
 
 export default function LanguageInputRow({
@@ -22,6 +23,7 @@ export default function LanguageInputRow({
   error = false,
   variant = "glass",
   referenceValue,
+  suggestion,
 }: Readonly<LanguageInputRowProps>) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -68,6 +70,19 @@ export default function LanguageInputRow({
         
         {/* Helper Action Toolbar (Visible on hover or value match) */}
         <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          {suggestion && value !== suggestion && (
+            <button
+              type="button"
+              onClick={() => onChange(suggestion)}
+              className="p-1 px-2 text-[10px] font-bold bg-emerald-500 text-white rounded-md shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
+              title="Sử dụng gợi ý từ bộ nhớ dịch thuật"
+            >
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.95a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM6.464 16.364a1 1 0 11-1.414-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707z" />
+              </svg>
+              Gợi ý
+            </button>
+          )}
           {referenceValue && value !== referenceValue && (
             <button
               type="button"

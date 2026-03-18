@@ -46,6 +46,12 @@ export default function HomePage() {
           className="text-center mb-3 space-y-4"
           style={{ animation: "fadeUp .5s .08s ease both" }}
         >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-md border border-white/50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm">
+            <div className="w-5 h-5 rounded-md bg-white p-0.5 shadow-sm">
+               <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            Translator Tool
+          </div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
             Quản lý{" "}
             <span className="relative inline-block">
@@ -69,7 +75,7 @@ export default function HomePage() {
 
         {/* =========== 2-PANEL SPLIT =========== */}
         <div
-          className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-5"
+          className="w-full max-w-4xl grid grid-cols-1 gap-5"
           style={{ animation: "fadeUp .5s .24s ease both" }}
         >
           {/* ---- Panel 1: Google Sheets ---- */}
@@ -147,7 +153,12 @@ export default function HomePage() {
             {/* Form */}
             <GoogleSheetsPanel />
           </div>
+        </div>
 
+        <div
+          className="w-full max-w-4xl mt-2 grid grid-cols-1 md:grid-cols-2 gap-2"
+          style={{ animation: "fadeUp .5s .36s ease both" }}
+        >
           {/* ---- Panel 2: Excel Offline ---- */}
           <div className="relative flex flex-col gap-5 rounded-3xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(16,185,129,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
             {/* Top shine */}
@@ -223,13 +234,7 @@ export default function HomePage() {
             {/* Drop Zone */}
             <ExcelPanel />
           </div>
-        </div>
-
-        {/* =========== 3RD PANEL: JSON → EXCEL =========== */}
-        <div
-          className="w-full max-w-4xl mt-2"
-          style={{ animation: "fadeUp .5s .36s ease both" }}
-        >
+          {/* =========== 3RD PANEL: JSON → EXCEL =========== */}
           <div className="relative flex flex-col gap-5 rounded-3xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(139,92,246,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
             {/* Top shine */}
             <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
@@ -237,7 +242,7 @@ export default function HomePage() {
             <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-violet-400/10 blur-3xl pointer-events-none" />
 
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex flex-col sm:items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
                   <svg
@@ -271,13 +276,7 @@ export default function HomePage() {
 
               {/* Feature tags - show on larger screens inline */}
               <div className="sm:ml-auto flex flex-wrap gap-2 text-xs">
-                {[
-                  "vi.json",
-                  "en.json",
-                  "ja.json",
-                  "→",
-                  "translations.xlsx",
-                ].map((tag) => (
+                {["vi.json", "en.json", "→", "translations.xlsx"].map((tag) => (
                   <span
                     key={tag}
                     className={`px-2 py-1 rounded-lg font-mono font-semibold ${

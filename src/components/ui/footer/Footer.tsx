@@ -105,8 +105,8 @@ export default function Footer() {
               <ul className="space-y-3">
                 <li>
                   <a href="https://locales-brown.vercel.app" target="_blank" className="text-sm text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-2 group">
-                    <span className="w-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-full group-hover:w-2 group-hover:bg-blue-600 transition-all"></span>
-                    Translation Manager v1.0.0
+                    <span className="w-1.5 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full group-hover:w-2 group-hover:bg-blue-600 transition-all"></span>
+                    Translator Tool v1.2.0
                   </a>
                 </li>
                 <li>
