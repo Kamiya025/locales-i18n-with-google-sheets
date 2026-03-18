@@ -45,7 +45,6 @@ export default function HomePage() {
       {/* =========== HEADER =========== */}
       <Header />
 
-
       {/* =========== HERO =========== */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 pt-24">
         {/* Headline */}
@@ -55,7 +54,11 @@ export default function HomePage() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-md border border-white/50 text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm">
             <div className="w-5 h-5 rounded-md bg-white p-0.5 shadow-sm">
-               <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
+              <img
+                src="/icon.png"
+                alt="Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
             Translator Tool
           </div>
@@ -81,38 +84,6 @@ export default function HomePage() {
         </p>
 
         {/* =========== RECENT PROJECTS (Logged In Only) =========== */}
-        {session && (isLoading || cloudProjects.length > 0) && (
-          <div 
-            className="w-full max-w-4xl mb-12"
-            style={{ animation: "fadeUp .5s .2s ease both" }}
-          >
-            <div className="flex items-center justify-between mb-4 px-2">
-               <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Dự án đã mở gần đây</h3>
-               </div>
-               {!isLoading && cloudProjects.length > 0 && (
-                 <Link href="/profile" className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors">
-                   Xem tất cả →
-                 </Link>
-               )}
-            </div>
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[1, 2].map((i) => (
-                  <div key={i} className="h-24 rounded-2xl bg-white/50 border border-slate-200 animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {cloudProjects.slice(0, 4).map((proj, idx) => (
-                  <ProjectCard key={proj._id} proj={proj} index={idx} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* =========== 2-PANEL SPLIT =========== */}
         <div
@@ -345,4 +316,3 @@ export default function HomePage() {
     </div>
   )
 }
-
