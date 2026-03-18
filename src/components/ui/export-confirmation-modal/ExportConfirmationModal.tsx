@@ -155,17 +155,17 @@ export default function ExportConfirmationModal({
               </div>
             </div>
 
-            <div className="flex gap-3 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={onClose}
-                className="flex-1 sm:px-6 py-3 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all border border-white/10"
+                className="flex-1 sm:px-4 py-2 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all border border-white/10"
               >
                 Hủy
               </button>
               <button
                 onClick={handleConfirm}
                 disabled={selectedLanguages.length === 0}
-                className="flex-[2] sm:px-10 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-black shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
+                className="sm:px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-black shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
               >
                 Bắt đầu tải về
               </button>
