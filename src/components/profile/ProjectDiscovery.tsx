@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
+import { debounce } from "lodash" 
 
 interface DriveFile {
   id: string
@@ -16,97 +17,198 @@ export default function ProjectDiscovery() {
   const { data: session } = useSession()
   const [files, setFiles] = useState<DriveFile[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null)
+
+  const fetchDriveFiles = async (search: string, token: string | null = null, isLoadMore = false) => {
+    try {
+      if (isLoadMore) setLoadingMore(true)
+      else setLoading(true)
+
+      let url = `/api/google/drive/sheets?search=${encodeURIComponent(search)}`
+      if (token) {
+        url += `&pageToken=${token}`
+      }
+      
+      const res = await fetch(url)
+      if (!res.ok) {
+        if(res.status === 401) throw new Error("Vui lòng đăng nhập để xem danh sách.")
+        throw new Error("Không thể tải danh sách tệp từ Google Drive")
+      }
+      const data = await res.json()
+      
+      if (isLoadMore) {
+        setFiles(prev => [...prev, ...data.files])
+      } else {
+        setFiles(data.files)
+      }
+      setNextPageToken(data.nextPageToken)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }
+
+  // Debounced search function
+  const debouncedFetch = useCallback(
+    debounce((nextValue: string) => fetchDriveFiles(nextValue, null, false), 500),
+    []
+  )
 
   useEffect(() => {
-    async function fetchDriveFiles() {
-      try {
-        setLoading(true)
-        const res = await fetch("/api/google/drive/sheets")
-        if (!res.ok) {
-           if(res.status === 401) throw new Error("Vui lòng đăng nhập để xem danh sách.")
-           throw new Error("Không thể tải danh sách tệp từ Google Drive")
-        }
-        const data = await res.json()
-        setFiles(data)
-      } catch (err: any) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     if (session) {
-      fetchDriveFiles()
+      fetchDriveFiles(searchTerm, null, false)
     }
   }, [session])
 
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-3">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 w-full bg-slate-100/50 animate-pulse rounded-2xl border border-slate-200/40" />
-        ))}
-      </div>
-    )
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchTerm(value)
+    setNextPageToken(null)
+    debouncedFetch(value)
   }
 
-  if (error) {
-    return (
-      <div className="p-6 rounded-2xl bg-red-50/50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-3">
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        {error}
-      </div>
-    )
-  }
-
-  if (files.length === 0) {
-    return (
-      <div className="text-center py-16 px-6 rounded-2xl bg-white border border-dashed border-slate-200">
-        <p className="text-slate-400 font-bold text-sm">Không tìm thấy file Spreadsheet nào trên Drive của bạn.</p>
-      </div>
-    )
+  const handleLoadMore = () => {
+    if (nextPageToken && !loadingMore) {
+      fetchDriveFiles(searchTerm, nextPageToken, true)
+    }
   }
 
   return (
-    <div className="grid grid-cols-1 gap-3">
-      {files.map((file, idx) => (
-        <Link
-          key={file.id}
-          href={`/sheet/${file.id}`}
-          className="group flex items-center justify-between p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 transition-all duration-300"
-          style={{ animation: `fadeUp 0.5s ${idx * 0.05}s ease both` }}
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-               </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">
-                {file.name}
-              </span>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
-                Cập nhật {new Date(file.modifiedTime).toLocaleDateString("vi-VN")}
-              </span>
-            </div>
+    <div className="space-y-6">
+      {/* Search Header */}
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          placeholder="Tìm kiếm Spreadsheet theo tên..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border-2 border-slate-100 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-100 outline-none transition-all font-medium text-slate-800 placeholder:text-slate-400 shadow-sm"
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => { setSearchTerm(""); setNextPageToken(null); fetchDriveFiles("", null, false); }}
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/></svg>
+          </button>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-20 w-full bg-slate-100/50 animate-pulse rounded-2xl border border-slate-200/40" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="p-8 rounded-2xl bg-red-50/50 border border-red-100 text-red-600 text-sm font-medium flex flex-col items-center gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mb-2">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          <div className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white transition-all">
-             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          <p className="font-bold">{error}</p>
+          <button 
+             onClick={() => fetchDriveFiles(searchTerm, null, false)}
+             className="px-6 py-2 bg-white border border-red-200 rounded-xl text-red-600 font-bold text-xs uppercase hover:bg-red-50 transition-colors"
+          >
+             Thử lại
+          </button>
+        </div>
+      ) : files.length === 0 ? (
+        <div className="text-center py-24 px-6 rounded-3xl bg-white border border-dashed border-slate-200">
+          <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-6">
+             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
              </svg>
           </div>
-        </Link>
-      ))}
+          <h3 className="text-slate-800 font-black text-lg mb-1">Không tìm thấy kết quả</h3>
+          <p className="text-slate-400 font-bold text-sm">Thử với từ khóa khác hoặc dán ID Spreadsheet để tìm kiếm.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            {files.map((file, idx) => (
+              <Link
+                key={`${file.id}-${idx}`}
+                href={`/sheet/${file.id}`}
+                className="group relative flex items-center justify-between p-5 rounded-2xl bg-white hover:bg-blue-50/10 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300 overflow-hidden"
+                style={{ animation: `fadeUp 0.6s ${idx % 20 * 0.05}s cubic-bezier(0.16, 1, 0.3, 1) both` }}
+              >
+                <div className="flex items-center gap-5">
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors tracking-tight uppercase">
+                      {file.name}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {new Date(file.modifiedTime).toLocaleDateString("vi-VN")}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-slate-200" />
+                      <span className="text-[10px] text-slate-400 font-mono opacity-60">ID: {file.id.slice(0, 8)}...</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 shadow-sm bg-slate-50/50">
+                      <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                      </svg>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {nextPageToken && (
+            <div className="pt-6 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="group relative px-8 py-3 rounded-2xl bg-white border-2 border-slate-100 text-slate-600 font-bold text-sm uppercase tracking-widest hover:border-blue-500/50 hover:text-blue-600 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm overflow-hidden"
+              >
+                <div className="relative z-10 flex items-center gap-3">
+                  {loadingMore ? (
+                    <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
+                  ) : (
+                    <svg className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                  {loadingMore ? "Đang tải..." : "Xem thêm file"}
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(10px); }
+          from { opacity: 0; transform: translateY(15px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
   )
 }
+
+
