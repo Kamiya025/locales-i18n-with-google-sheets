@@ -20,24 +20,6 @@ export function RowItemViewer(
     customToast.success(`Đã cập nhật: ${row.key}`)
   })
 
-  const [suggestions, setSuggestions] = useState<Record<string, string> | null>(null)
-
-  // Fetch translation memory suggestions from MongoDB
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      try {
-        const resp = await fetch(`/api/user/glossary/lookup?key=${encodeURIComponent(row.key)}`)
-        if (resp.ok) {
-          const data = await resp.json()
-          setSuggestions(data.suggestions)
-        }
-      } catch (e) {
-        console.error("Glossary fetch error", e)
-      }
-    }
-    fetchSuggestions()
-  }, [row.key])
-
   useEffect(() => {
     setState(row)
   }, [row])
@@ -80,7 +62,6 @@ export function RowItemViewer(
                   language={lang}
                   value={state.data[lang] || ""}
                   referenceValue={referenceValue}
-                  suggestion={suggestions?.[lang]}
                   onChange={(value) =>
                     setState((prev) => ({
                       ...prev,

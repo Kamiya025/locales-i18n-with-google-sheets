@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useCloudHistory } from "@/hooks/useCloudHistory"
 import ProjectDiscovery from "@/components/profile/ProjectDiscovery"
+import Header from "@/components/ui/header"
+
 
 export default function ProfilePage() {
   const { data: session, status } = useSession()
@@ -42,24 +44,12 @@ export default function ProfilePage() {
       </div>
 
       {/* =========== FIXED TOP NAV =========== */}
-      <nav className="sticky top-0 z-50 w-full px-6 py-4 backdrop-blur-xl bg-white/60 border-b border-slate-200/40">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-white shadow-sm p-1.5 group-hover:scale-105 transition-all duration-300 border border-slate-200/50">
-               <img src="/icon.png" alt="Logo" className="w-full h-full object-contain" />
-            </div>
-            <span className="font-bold text-slate-800 tracking-tight text-base uppercase">
-               Translator<span className="text-blue-600 ml-1">Tool</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <SubtleAuthButton />
-          </div>
-        </div>
-      </nav>
+      <Header />
+
 
       {/* =========== DASHBOARD LAYOUT =========== */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-10">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-10 pt-24 sm:pt-32">
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* ---- LEFT SIDEBAR: PROFILE SUMMARY ---- */}

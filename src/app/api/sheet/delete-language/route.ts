@@ -1,0 +1,104 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
+import { googleSheetsService } from "@/lib/google-sheets.service"
+import { GoogleSheetsUserService } from "@/lib/google-sheets-user.service"
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+
+    if (!body.spreadsheetId || !body.languageName) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing required fields: spreadsheetId, languageName",
+        },
+        { status: 400 }
+      )
+    }
+
+    const { spreadsheetId, languageName } = body
+
+    // Dual authentication: prioritize user auth, fallback to service account
+    const session = await getServerSession(authOptions)
+    let authType = "service_account"
+    let updatedSpreadsheet
+
+    try {
+      // Try user auth FIRST
+      if (session?.accessToken) {
+        const userService = GoogleSheetsUserService.withUserToken(
+          session.accessToken
+        )
+        updatedSpreadsheet = await userService.deleteLanguageColumn(
+          spreadsheetId,
+          languageName
+        )
+        authType = "user"
+      } else {
+        // Fallback to service account
+        updatedSpreadsheet = await googleSheetsService.deleteLanguageColumn(
+          spreadsheetId,
+          languageName
+        )
+        authType = "service_account"
+      }
+    } catch (primaryError: any) {
+      // If user auth fails, try fallback service account
+      if (authType === "user" && primaryError.response?.status === 403) {
+        try {
+          updatedSpreadsheet = await googleSheetsService.deleteLanguageColumn(
+            spreadsheetId,
+            languageName
+          )
+          authType = "service_account_fallback"
+        } catch (fallbackError: any) {
+          // Both failed, throw original error
+          throw primaryError
+        }
+      } else {
+        throw primaryError
+      }
+    }
+
+    // Return the updated spreadsheet data
+    return NextResponse.json(updatedSpreadsheet)
+  } catch (err: any) {
+    if (err.response?.status === 403) {
+      const session = await getServerSession(authOptions)
+
+      if (session?.accessToken) {
+        // User is logged in but lacks permission
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Bạn không có quyền chỉnh sửa file này. Vui lòng kiểm tra quyền chia sẻ.",
+            needsAuth: false,
+            authType: "user",
+          },
+          { status: 403 }
+        )
+      } else {
+        // Not logged in
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Không có quyền truy cập file. Vui lòng đăng nhập bằng tài khoản Google hoặc thêm quyền cho email: " +
+              process.env.GOOGLE_CLIENT_EMAIL,
+            needsAuth: true,
+            authType: "none",
+          },
+          { status: 403 }
+        )
+      }
+    }
+
+    return NextResponse.json(
+      { success: false, error: err.message ?? "Unknown error" },
+      { status: 500 }
+    )
+  }
+}

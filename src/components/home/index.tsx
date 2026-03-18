@@ -2,6 +2,8 @@
 "use client"
 
 import SubtleAuthButton from "../auth/SubtleAuthButton"
+import Header from "../ui/header"
+
 import GoogleSheetsPanel from "./GoogleSheetsPanel"
 import ExcelPanel from "./ExcelPanel"
 import JsonToExcelPanel from "./JsonToExcelPanel"
@@ -34,10 +36,9 @@ export default function HomePage() {
         />
       </div>
 
-      {/* =========== FIXED AUTH =========== */}
-      <div className="fixed top-4 right-4 z-50">
-        <SubtleAuthButton />
-      </div>
+      {/* =========== HEADER =========== */}
+      <Header />
+
 
       {/* =========== HERO =========== */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">

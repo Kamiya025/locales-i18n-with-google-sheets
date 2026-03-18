@@ -15,6 +15,7 @@ export const useAddLanguage = (
     { spreadsheetId: string; languageName: string }
   >({
     mutationFn: async ({ spreadsheetId, languageName }) => {
+      const isLocal = spreadsheetId === "local-excel"
       return toast.promise(sheetApi.addLanguage(spreadsheetId, languageName), {
         loading: `Đang thêm ngôn ngữ "${languageName}"...`,
         success: `Thêm ngôn ngữ "${languageName}" thành công!`,

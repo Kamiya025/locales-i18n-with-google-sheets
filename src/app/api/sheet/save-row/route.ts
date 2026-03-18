@@ -32,25 +32,6 @@ export async function POST(req: NextRequest) {
       }
     )
 
-    // Also update Translation Memory (Glossary) in MongoDB
-    const session = await (await import("next-auth/next")).getServerSession((await import("@/lib/auth")).authOptions)
-    if (session?.user?.email && row.key && row.data) {
-      try {
-        const dbConnect = (await import("@/lib/mongodb")).default
-        const Glossary = (await import("@/models/Glossary")).default
-        await dbConnect()
-        await Glossary.findOneAndUpdate(
-          { userEmail: session.user.email, key: row.key },
-          { 
-            $set: { translations: row.data },
-          },
-          { upsert: true, new: true }
-        )
-      } catch (dbError) {
-        console.error("Failed to update Glossary in MongoDB:", dbError)
-      }
-    }
-
     // Return simple success response for backward compatibility
     return NextResponse.json({ success: true })
   } catch (err: any) {

@@ -185,8 +185,7 @@ export class GoogleSheetsService {
           const quotaDelay = Math.max(exponentialDelay, 30000) // Tối thiểu 30s cho quota errors
 
           console.log(
-            `🔄 Google API quota error. Retrying in ${
-              quotaDelay / 1000
+            `🔄 Google API quota error. Retrying in ${quotaDelay / 1000
             }s... (Attempt ${attempt + 1}/${maxRetries + 1})`
           )
           await this.sleep(quotaDelay)
@@ -346,11 +345,6 @@ export class GoogleSheetsService {
         )
       }
       this.progressMap.set(spreadsheetId, updated)
-      console.log(
-        `📊 Progress: ${updated.percentage}% (${updated.loadedSheets}/${
-          updated.totalSheets
-        }) - ${updates.message || updates.currentSheet || ""}`
-      )
     }
   }
 
@@ -367,9 +361,8 @@ export class GoogleSheetsService {
       specificSheet?: string
     }
   ): Promise<SpreadsheetResponse> {
-    const cacheKey = `lazy:${spreadsheetId}:${options.mode}:${
-      options.specificSheet || "all"
-    }`
+    const cacheKey = `lazy:${spreadsheetId}:${options.mode}:${options.specificSheet || "all"
+      }`
     const cached = this.cache.get(cacheKey)
     if (cached) {
       return cached
@@ -484,8 +477,7 @@ export class GoogleSheetsService {
       const totalBatches = Math.ceil(sheetsByIndex.length / batchSize)
 
       console.log(
-        `📝 Processing batch ${batchNumber}/${totalBatches} (tabs ${
-          i + 1
+        `📝 Processing batch ${batchNumber}/${totalBatches} (tabs ${i + 1
         }-${Math.min(i + batchSize, sheetsByIndex.length)})`
       )
 
@@ -586,8 +578,7 @@ export class GoogleSheetsService {
       const results = await Promise.all(
         sheetsByIndex.map(async (sheet, index) => {
           console.log(
-            `📄 Processing sheet ${index + 1}/${sheetsByIndex.length}: ${
-              sheet.title
+            `📄 Processing sheet ${index + 1}/${sheetsByIndex.length}: ${sheet.title
             }`
           )
 
@@ -699,11 +690,11 @@ export class GoogleSheetsService {
       errors: string[]
       fixes: Array<{
         type:
-          | "missing_key"
-          | "duplicate_keys"
-          | "empty_keys"
-          | "no_languages"
-          | "no_headers"
+        | "missing_key"
+        | "duplicate_keys"
+        | "empty_keys"
+        | "no_languages"
+        | "no_headers"
         title: string
         description: string
         action: string
@@ -747,11 +738,11 @@ export class GoogleSheetsService {
       errors: string[]
       fixes: Array<{
         type:
-          | "missing_key"
-          | "duplicate_keys"
-          | "empty_keys"
-          | "no_languages"
-          | "no_headers"
+        | "missing_key"
+        | "duplicate_keys"
+        | "empty_keys"
+        | "no_languages"
+        | "no_headers"
         title: string
         description: string
         action: string
@@ -764,11 +755,11 @@ export class GoogleSheetsService {
       errors: string[]
       fixes: Array<{
         type:
-          | "missing_key"
-          | "duplicate_keys"
-          | "empty_keys"
-          | "no_languages"
-          | "no_headers"
+        | "missing_key"
+        | "duplicate_keys"
+        | "empty_keys"
+        | "no_languages"
+        | "no_headers"
         title: string
         description: string
         action: string
@@ -1082,6 +1073,38 @@ export class GoogleSheetsService {
     return this.getSpreadsheet(spreadsheetId)
   }
 
+  async deleteSheet(
+    spreadsheetId: string,
+    sheetId: number
+  ): Promise<SpreadsheetResponse> {
+    const doc = await this.getDocument(spreadsheetId)
+
+    const sheet = doc.sheetsById[sheetId]
+    if (!sheet) {
+      throw new Error(`Sheet with ID ${sheetId} not found`)
+    }
+
+    // Google Sheets requires at least one sheet to remain
+    if (doc.sheetsByIndex.length <= 1) {
+      throw new Error(
+        "Không thể xóa danh mục cuối cùng. Bảng tính phải có ít nhất một danh mục."
+      )
+    }
+
+    console.log(
+      `🗑️ Deleting sheet: ${sheet.title} (${sheetId}) from ${spreadsheetId}`
+    )
+
+    // Delete the sheet
+    await sheet.delete()
+
+    // Invalidate cache
+    this.invalidateSpreadsheetCache(spreadsheetId)
+
+    // Return updated spreadsheet data
+    return this.getSpreadsheet(spreadsheetId)
+  }
+
   async addLanguageColumn(
     spreadsheetId: string,
     languageName: string
@@ -1143,6 +1166,50 @@ export class GoogleSheetsService {
     return this.getSpreadsheet(spreadsheetId)
   }
 
+  async deleteLanguageColumn(
+    spreadsheetId: string,
+    languageName: string
+  ): Promise<SpreadsheetResponse> {
+    const doc = await this.getDocument(spreadsheetId)
+
+    // Validate language name
+    if (!languageName.trim()) {
+      throw new Error("Tên ngôn ngữ không được để trống")
+    }
+
+    console.log(`🗑️ Deleting language column: ${languageName} from all sheets in ${spreadsheetId}`)
+
+    // Delete the language column from all sheets
+    for (const sheet of doc.sheetsByIndex) {
+      await sheet.loadHeaderRow()
+
+      // Find the column index for this language
+      const colIndex = sheet.headerValues.findIndex(
+        (h) => h.toLowerCase() === languageName.toLowerCase()
+      )
+
+      if (colIndex !== -1) {
+        console.log(`📍 Removing column ${colIndex} from sheet: ${sheet.title}`)
+
+        // Delete column by index
+        // Correct signature for some versions of google-spreadsheet: deleteDimension(type, start, end)
+        // @ts-ignore
+        await sheet.deleteDimension("COLUMNS", colIndex, colIndex + 1)
+
+
+        // Force reload headers for the sheet
+        await sheet.loadHeaderRow()
+      }
+    }
+
+    // Invalidate local cache 
+    this.invalidateSpreadsheetCache(spreadsheetId)
+
+    // Return the updated spreadsheet data
+    return this.getSpreadsheet(spreadsheetId)
+  }
+
+
   private async validateSheetFormat(sheet: any): Promise<void> {
     await sheet.loadHeaderRow()
 
@@ -1163,10 +1230,10 @@ export class GoogleSheetsService {
     if (!hasKeyColumn) {
       throw new Error(
         `Sheet "${sheet.title}" thiếu column KEY.\n\n` +
-          `Format mong đợi:\n` +
-          `| KEY | Language1 | Language2 |\n` +
-          `| key1 | value1 | value2 |\n\n` +
-          `Headers hiện tại: ${headers.join(", ")}`
+        `Format mong đợi:\n` +
+        `| KEY | Language1 | Language2 |\n` +
+        `| key1 | value1 | value2 |\n\n` +
+        `Headers hiện tại: ${headers.join(", ")}`
       )
     }
 
@@ -1178,7 +1245,7 @@ export class GoogleSheetsService {
     if (languageColumns.length === 0) {
       throw new Error(
         `Sheet "${sheet.title}" chỉ có column KEY mà không có ngôn ngữ nào.\n` +
-          `Vui lòng thêm ít nhất 1 column ngôn ngữ.`
+        `Vui lòng thêm ít nhất 1 column ngôn ngữ.`
       )
     }
 
@@ -1215,8 +1282,7 @@ export class GoogleSheetsService {
       // Check for empty keys
       if (!row.key?.trim()) {
         throw new Error(
-          `Sheet "${sheetTitle}", Row ${
-            index + 2
+          `Sheet "${sheetTitle}", Row ${index + 2
           }: KEY không được để trống.\n` + `Mỗi row phải có KEY duy nhất.`
         )
       }
@@ -1246,7 +1312,7 @@ export class GoogleSheetsService {
     if (emptyRows.length > 0) {
       console.warn(
         `Sheet "${sheetTitle}": ${emptyRows.length} rows có tất cả translations trống: ` +
-          emptyRows.map((r) => r.key).join(", ")
+        emptyRows.map((r) => r.key).join(", ")
       )
     }
   }

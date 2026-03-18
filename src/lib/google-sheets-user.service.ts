@@ -167,6 +167,26 @@ export class GoogleSheetsUserService extends GoogleSheetsService {
     return super.addSheet(spreadsheetId, sheetTitle)
   }
 
+  async deleteSheet(
+    spreadsheetId: string,
+    sheetId: number
+  ): Promise<SpreadsheetResponse> {
+    if (this.oauth2Client) {
+      try {
+        return await super.deleteSheet(spreadsheetId, sheetId)
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          throw new Error(
+            "Bạn không có quyền chỉnh sửa file này. Vui lòng kiểm tra quyền chia sẻ."
+          )
+        }
+        throw error
+      }
+    }
+
+    return super.deleteSheet(spreadsheetId, sheetId)
+  }
+
   async addLanguageColumn(
     spreadsheetId: string,
     languageName: string
@@ -186,6 +206,27 @@ export class GoogleSheetsUserService extends GoogleSheetsService {
 
     return super.addLanguageColumn(spreadsheetId, languageName)
   }
+
+  async deleteLanguageColumn(
+    spreadsheetId: string,
+    languageName: string
+  ): Promise<SpreadsheetResponse> {
+    if (this.oauth2Client) {
+      try {
+        return await super.deleteLanguageColumn(spreadsheetId, languageName)
+      } catch (error: any) {
+        if (error.response?.status === 403) {
+          throw new Error(
+            "Bạn không có quyền chỉnh sửa file này. Vui lòng kiểm tra quyền chia sẻ."
+          )
+        }
+        throw error
+      }
+    }
+
+    return super.deleteLanguageColumn(spreadsheetId, languageName)
+  }
+
 
   // Inherit lazy loading từ parent class
   async getSpreadsheetLazy(

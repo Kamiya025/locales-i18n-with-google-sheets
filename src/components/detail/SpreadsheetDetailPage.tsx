@@ -127,8 +127,9 @@ function SpreadsheetDetailContent({
   return (
     <div className="relative flex flex-col w-full min-h-screen selection:bg-blue-500/20 bg-slate-50 overflow-hidden">
       <ImmersiveBackground />
-      <Header isHeader={true} />
-      <div className="flex-1 min-h-0 pt-16 relative z-10 h-screen overflow-hidden">
+      <Header />
+      <div className="flex-1 min-h-0 pt-16 sm:pt-20 relative z-10 h-screen overflow-hidden">
+
         <SpreadsheetViewer />
       </div>
       <style jsx>{`

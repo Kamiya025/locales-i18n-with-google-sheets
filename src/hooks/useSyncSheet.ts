@@ -15,12 +15,14 @@ export const useSyncSheet = (
     SpreadsheetResponse // Biến truyền vào
   >({
     mutationFn: async (data: SpreadsheetResponse) => {
+      const isLocal = data.id === "local-excel"
       return toast.promise(sheetApi.update(data), {
-        loading: "Đang đẩy dữ liệu lên Google Sheet...",
-        success: "Đẩy dữ liệu thành công!",
+        loading: isLocal ? "Đang lưu dữ liệu..." : "Đang đẩy dữ liệu lên Google Sheet...",
+        success: isLocal ? "Đã lưu dữ liệu!" : "Đẩy dữ liệu thành công!",
         error: (err) => err.response?.data?.message || "Có lỗi xảy ra",
       })
     },
     onSuccess: onSuccess,
   })
 }
+

@@ -13,8 +13,9 @@ export const useSyncSheetSaveRow = (onSuccess: () => void) => {
     SpreadsheetUpdateRowRequest // Biến truyền vào
   >({
     mutationFn: async (data) => {
+      const isLocal = data.spreadsheetId === "local-excel"
       return toast.promise(sheetApi.saveRow(data), {
-        loading: "Đang cập nhật bản dịch lên Google Sheet...",
+        loading: isLocal ? "Đang lưu bản dịch..." : "Đang cập nhật bản dịch lên Google Sheet...",
         success: "Lưu bản dịch thành công!",
         error: (err) => err.response?.data?.message || "Có lỗi xảy ra",
       })
@@ -22,6 +23,7 @@ export const useSyncSheetSaveRow = (onSuccess: () => void) => {
     onSuccess,
   })
 }
+
 export const useSyncSheetAddNewRow = (
   onSuccess: (data: SpreadsheetResponse) => void
 ) => {
@@ -31,8 +33,9 @@ export const useSyncSheetAddNewRow = (
     SpreadsheetUpdateRowRequest // Biến truyền vào
   >({
     mutationFn: async (data) => {
+      const isLocal = data.spreadsheetId === "local-excel"
       return toast.promise(sheetApi.saveNewRow(data), {
-        loading: "Đang thêm bản dịch lên Google Sheet...",
+        loading: isLocal ? "Đang thêm bản dịch..." : "Đang thêm bản dịch lên Google Sheet...",
         success: "Thêm bản dịch thành công!",
         error: (err) => err.response?.data?.message || "Có lỗi xảy ra",
       })
@@ -40,3 +43,4 @@ export const useSyncSheetAddNewRow = (
     onSuccess,
   })
 }
+
