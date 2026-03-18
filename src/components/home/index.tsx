@@ -79,7 +79,7 @@ export default function HomePage() {
           style={{ animation: "fadeUp .5s .24s ease both" }}
         >
           {/* ---- Panel 1: Google Sheets ---- */}
-          <div className="relative flex flex-col gap-5 rounded-3xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(59,130,246,0.12),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
+          <div className="relative flex flex-col gap-5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(59,130,246,0.12),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
             {/* Top shine */}
             <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
             {/* Blue accent blob inside */}
@@ -160,7 +160,7 @@ export default function HomePage() {
           style={{ animation: "fadeUp .5s .36s ease both" }}
         >
           {/* ---- Panel 2: Excel Offline ---- */}
-          <div className="relative flex flex-col gap-5 rounded-3xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(16,185,129,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
+          <div className="relative flex flex-col gap-5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(16,185,129,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
             {/* Top shine */}
             <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
             {/* Green accent blob */}
@@ -235,7 +235,7 @@ export default function HomePage() {
             <ExcelPanel />
           </div>
           {/* =========== 3RD PANEL: JSON → EXCEL =========== */}
-          <div className="relative flex flex-col gap-5 rounded-3xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(139,92,246,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
+          <div className="relative flex flex-col gap-5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(139,92,246,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
             {/* Top shine */}
             <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
             {/* Violet accent blob */}
