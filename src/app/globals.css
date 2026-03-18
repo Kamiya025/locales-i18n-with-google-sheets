@@ -313,6 +313,17 @@ html {
 }
 
 /* Staggered Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes fade-in-up {
   0% {
     opacity: 0;
@@ -329,6 +340,18 @@ html {
 }
 
 /* Ocean Blue Special Animations 🌊 */
+@keyframes drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(5%, 5%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
 @keyframes wave-pulse {
   0%,
   100% {

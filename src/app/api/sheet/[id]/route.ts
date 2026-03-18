@@ -139,6 +139,26 @@ export async function GET(
       }
     }
 
+    // Only save to MongoDB if user is authenticated and spreadsheet loaded successfully
+    if (session?.user?.email && spreadsheet) {
+      try {
+        const dbConnect = (await import("@/lib/mongodb")).default
+        const UserProject = (await import("@/models/UserProject")).default
+        await dbConnect()
+        await UserProject.findOneAndUpdate(
+          { userEmail: session.user.email, spreadsheetId },
+          { 
+            title: spreadsheet.title, 
+            lastAccessedAt: new Date() 
+          },
+          { upsert: true, new: true }
+        )
+      } catch (dbError) {
+        console.error("Failed to save recent project to MongoDB:", dbError)
+        // Don't fail the whole request if DB logging fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {

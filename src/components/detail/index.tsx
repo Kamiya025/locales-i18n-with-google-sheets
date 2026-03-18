@@ -121,7 +121,7 @@ export default function SpreadsheetViewer() {
               href="/profile"
               className="hover:text-blue-600 transition-colors"
             >
-              Dự án
+              Dự án của tôi
             </Link>
             <span className="opacity-40">/</span>
             <span className="text-slate-600">Chi tiết bảng tính</span>

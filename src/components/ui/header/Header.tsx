@@ -51,7 +51,7 @@ export default function Header({ isHeader = true }: HeaderProps) {
               <NavLink
                 href="/profile"
                 active={isProfilePath}
-                label="Bảng điều khiển"
+                label="Dự án của tôi"
               />
             </nav>
           </div>

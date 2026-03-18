@@ -1,4 +1,3 @@
-// app/page.tsx
 "use client"
 
 import SubtleAuthButton from "../auth/SubtleAuthButton"
@@ -7,8 +6,15 @@ import Header from "../ui/header"
 import GoogleSheetsPanel from "./GoogleSheetsPanel"
 import ExcelPanel from "./ExcelPanel"
 import JsonToExcelPanel from "./JsonToExcelPanel"
+import { useSession } from "next-auth/react"
+import { useCloudHistory } from "@/hooks/useCloudHistory"
+import ProjectCard from "../ui/card/ProjectCard"
+import Link from "next/link"
 
 export default function HomePage() {
+  const { data: session } = useSession()
+  const { cloudProjects, isLoading } = useCloudHistory()
+
   return (
     <div className="relative flex flex-col w-full min-h-screen overflow-hidden">
       {/* =========== ANIMATED BACKGROUND =========== */}
@@ -41,7 +47,7 @@ export default function HomePage() {
 
 
       {/* =========== HERO =========== */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-20">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 pt-24">
         {/* Headline */}
         <div
           className="text-center mb-3 space-y-4"
@@ -53,7 +59,7 @@ export default function HomePage() {
             </div>
             Translator Tool
           </div>
-          <h1 className="text-5xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
             Quản lý{" "}
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 bg-clip-text text-transparent">
@@ -62,17 +68,51 @@ export default function HomePage() {
               <span className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-blue-500 via-indigo-400 to-violet-500 opacity-60" />
             </span>
           </h1>
-          <h2 className="text-5xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1] mt-1">
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1] mt-1">
             chưa bao giờ dễ hơn
           </h2>
         </div>
 
         <p
-          className="max-w-md text-center text-slate-500 text-base font-medium mb-12 leading-relaxed"
+          className="max-w-md text-center text-slate-500 text-sm md:text-base font-medium mb-10 leading-relaxed"
           style={{ animation: "fadeUp .5s .16s ease both" }}
         >
           Chọn nguồn dữ liệu phù hợp với quy trình làm việc của bạn
         </p>
+
+        {/* =========== RECENT PROJECTS (Logged In Only) =========== */}
+        {session && (isLoading || cloudProjects.length > 0) && (
+          <div 
+            className="w-full max-w-4xl mb-12"
+            style={{ animation: "fadeUp .5s .2s ease both" }}
+          >
+            <div className="flex items-center justify-between mb-4 px-2">
+               <div className="flex items-center gap-2">
+                 <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Dự án đã mở gần đây</h3>
+               </div>
+               {!isLoading && cloudProjects.length > 0 && (
+                 <Link href="/profile" className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors">
+                   Xem tất cả →
+                 </Link>
+               )}
+            </div>
+            
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-24 rounded-2xl bg-white/50 border border-slate-200 animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {cloudProjects.slice(0, 4).map((proj, idx) => (
+                  <ProjectCard key={proj._id} proj={proj} index={idx} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* =========== 2-PANEL SPLIT =========== */}
         <div
@@ -157,7 +197,7 @@ export default function HomePage() {
         </div>
 
         <div
-          className="w-full max-w-4xl mt-2 grid grid-cols-1 md:grid-cols-2 gap-2"
+          className="w-full max-w-4xl mt-5 grid grid-cols-1 md:grid-cols-2 gap-5"
           style={{ animation: "fadeUp .5s .36s ease both" }}
         >
           {/* ---- Panel 2: Excel Offline ---- */}
@@ -305,3 +345,4 @@ export default function HomePage() {
     </div>
   )
 }
+
