@@ -7,6 +7,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 import Footer from "@/components/ui/footer"
+import GoogleOneTap from "@/components/auth/GoogleOneTap"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -51,6 +52,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <AuthProvider>
+          <GoogleOneTap />
           <ReactQueryProvider>
             <SpreadsheetProvider>
               <div className="flex flex-col">

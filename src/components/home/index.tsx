@@ -301,52 +301,7 @@ export default function HomePage() {
             <JsonToExcelPanel />
           </div>
         </div>
-
-        {/* Footer links */}
-        <div
-          className="mt-10 flex gap-6 text-sm text-slate-400"
-          style={{ animation: "fadeUp .5s .36s ease both" }}
-        >
-          <a
-            href="/privacy-policy"
-            className="hover:text-slate-600 transition-colors"
-          >
-            Chính sách bảo mật
-          </a>
-          <span>·</span>
-          <a
-            href="/terms-of-service"
-            className="hover:text-slate-600 transition-colors"
-          >
-            Điều khoản sử dụng
-          </a>
-        </div>
       </div>
-
-      <style jsx>{`
-        @keyframes drift {
-          0%,
-          100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(25px, -25px) scale(1.04);
-          }
-          66% {
-            transform: translate(-18px, 18px) scale(0.97);
-          }
-        }
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(18px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   )
 }
