@@ -113,8 +113,8 @@ export default function SpreadsheetViewer() {
   return (
     <div className="flex flex-col h-screen bg-slate-50 overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-700">
       {/* 1. Immersive Header */}
-      <div className="h-24 flex-shrink-0 bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 flex items-center justify-between z-30">
-        <div className="space-y-1">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 flex flex-col md:flex-row gap-2 items-center justify-between z-30">
+        <div className="space-y-4">
           <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
             <Link
               href="/profile"
@@ -125,7 +125,7 @@ export default function SpreadsheetViewer() {
             <span className="opacity-40">/</span>
             <span className="text-slate-600">Chi tiết bảng tính</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+          <div className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
             <span className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
               <svg
                 className="w-5 h-5"
@@ -141,8 +141,8 @@ export default function SpreadsheetViewer() {
                 />
               </svg>
             </span>
-            {data.title}
-          </h1>
+            <h1>{data.title}</h1>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">

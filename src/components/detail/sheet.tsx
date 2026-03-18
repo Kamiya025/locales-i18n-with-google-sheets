@@ -87,17 +87,17 @@ export function SpreadsheetItemViewer(
       <Disclosure as="div" key={sheet.sheetId}>
         {({ open }) => (
           <div
-            className={`overflow-hidden transition-all duration-300 border border-slate-200/60 bg-white/80 backdrop-blur-sm rounded-[32px] ${open ? "shadow-xl shadow-slate-200/60 ring-1 ring-blue-500/10" : "hover:shadow-lg hover:shadow-slate-200/40"}`}
+            className={`overflow-hidden transition-all duration-300 border border-slate-200/60 bg-white/80 backdrop-blur-sm rounded-3xl ${open ? "shadow-xl shadow-slate-200/60 ring-1 ring-blue-500/10" : "hover:shadow-lg hover:shadow-slate-200/40"}`}
           >
             <DisclosureButton className="w-full text-left">
-              <div className="px-8 py-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
+              <div className="px-4 py-4 sm:px-8 sm:py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${open ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}
+                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-colors ${open ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}
                     >
                       <svg
-                        className="w-6 h-6"
+                        className="w-5 h-5 sm:w-6 sm:h-6"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -111,16 +111,16 @@ export function SpreadsheetItemViewer(
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase">
+                      <h3 className="text-sm sm:text-lg font-black text-slate-800 tracking-tight uppercase line-clamp-1">
                         {sheet.title}
                       </h3>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                           {sheet.rows.length} từ khóa
                         </span>
-                        <span className="w-1 h-1 rounded-full bg-slate-200" />
+                        <span className="w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full bg-slate-200" />
                         <span
-                          className={`text-[10px] font-black uppercase tracking-widest ${missingCount === 0 ? "text-emerald-500" : "text-amber-500"}`}
+                          className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest ${missingCount === 0 ? "text-emerald-500" : "text-amber-500"}`}
                         >
                           {missingCount === 0
                             ? "Hoàn thành"
@@ -130,17 +130,17 @@ export function SpreadsheetItemViewer(
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-6">
-                    <div className="hidden sm:flex flex-col items-end gap-1.5 min-w-[120px]">
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 mt-2 sm:mt-0">
+                    <div className="flex flex-col items-start sm:items-end gap-1 sm:gap-1.5 min-w-[80px] sm:min-w-[120px] flex-1 sm:flex-none">
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           Tiến độ
                         </span>
-                        <span className="text-xs font-black text-blue-600">
+                        <span className="text-[10px] sm:text-xs font-black text-blue-600">
                           {progress}%
                         </span>
                       </div>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="w-full h-1 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-600 transition-all duration-500"
                           style={{ width: `${progress}%` }}
@@ -148,10 +148,10 @@ export function SpreadsheetItemViewer(
                       </div>
                     </div>
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${open ? "bg-slate-900 text-white rotate-180" : "bg-slate-50 text-slate-400"}`}
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center transition-all ${open ? "bg-slate-900 text-white rotate-180" : "bg-slate-50 text-slate-400"}`}
                     >
                       <svg
-                        className="w-5 h-5"
+                        className="w-4 h-4 sm:w-5 sm:h-5"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -178,10 +178,10 @@ export function SpreadsheetItemViewer(
               leaveTo="transform scale-95 opacity-0"
               afterLeave={() => setVisibleRowsCount(INITIAL_ROWS)}
             >
-              <DisclosurePanel className="w-full px-6 pb-6 text-sm text-slate-600">
+              <DisclosurePanel className="w-full px-4 pb-4 sm:px-6 sm:pb-6 text-sm text-slate-600">
                 {/* Header Actions */}
-                <div className="flex justify-between items-center my-4 px-2">
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center my-3 sm:my-4 gap-3 px-1">
+                  <div className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     Hiển thị {Math.min(visibleRowsCount, sheet.rows.length)} /{" "}
                     {sheet.rows.length} từ khóa
                   </div>
