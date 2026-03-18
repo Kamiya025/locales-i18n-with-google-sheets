@@ -5,6 +5,7 @@ import SubtleAuthButton from "@/components/auth/SubtleAuthButton"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslation } from "@/providers/I18nProvider"
 
 interface HeaderProps {
   isHeader?: boolean
@@ -12,13 +13,13 @@ interface HeaderProps {
 
 export default function Header({ isHeader = true }: HeaderProps) {
   const pathname = usePathname()
+  const { locale, setLocale, t } = useTranslation()
   const isDetailPath = pathname.startsWith("/sheet/")
   const isProfilePath = pathname.startsWith("/profile")
   const isHomePage = pathname === "/"
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] w-full">
-
       {/* Immersive backdrop with refined border */}
       <div className="w-full bg-white/70 backdrop-blur-xl border-b border-slate-200/50 transition-all duration-300 relative group/header">
         {/* Subtle accent line on top */}
@@ -47,11 +48,15 @@ export default function Header({ isHeader = true }: HeaderProps) {
 
             {/* Navigation Links - Desktop Only */}
             <nav className="hidden lg:flex items-center gap-1">
-              <NavLink href="/" active={pathname === "/"} label="Trang chủ" />
+              <NavLink
+                href="/"
+                active={pathname === "/"}
+                label={t("home.header.home")}
+              />
               <NavLink
                 href="/profile"
                 active={isProfilePath}
-                label="Dự án của tôi"
+                label={t("home.header.projects")}
               />
             </nav>
           </div>
@@ -65,10 +70,34 @@ export default function Header({ isHeader = true }: HeaderProps) {
 
           {/* 3. Essential Actions */}
           <div className="flex items-center gap-4">
+            {/* Language Switcher */}
+            <div className="flex items-center bg-slate-100 rounded-lg p-1 mr-2">
+              <button
+                onClick={() => setLocale("vi")}
+                className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
+                  locale === "vi"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                VI
+              </button>
+              <button
+                onClick={() => setLocale("en")}
+                className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
+                  locale === "en"
+                    ? "bg-white text-blue-600 shadow-sm"
+                    : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                EN
+              </button>
+            </div>
+
             {/* Action Group */}
             <div className="hidden sm:flex items-center gap-2 pr-4 border-r border-slate-200/60 h-8">
-              <TooltipButton icon={<GithubIcon />} label="Docs" />
-              <TooltipButton icon={<HelpIcon />} label="Hỗ trợ" />
+              <TooltipButton icon={<GithubIcon />} label={t("home.header.docs")} />
+              <TooltipButton icon={<HelpIcon />} label={t("home.header.support")} />
             </div>
 
             {/* User Profile / Auth */}

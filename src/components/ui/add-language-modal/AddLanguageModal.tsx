@@ -12,10 +12,13 @@ interface AddLanguageModalProps {
   onClose: () => void
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function AddLanguageModal({
   isOpen,
   onClose,
 }: AddLanguageModalProps) {
+  const { t } = useTranslation()
   const [languageName, setLanguageName] = useState("")
   const { data, setResponse } = useSpreadsheet()
 
@@ -33,7 +36,7 @@ export default function AddLanguageModal({
     }
 
     if (!data?.id) {
-      console.error("No spreadsheet loaded")
+      console.error(t("detail.addLanguage.errorNoSpreadsheet"))
       return
     }
 
@@ -58,7 +61,7 @@ export default function AddLanguageModal({
         onClick={handleClose}
         disabled={addLanguageMutation.isPending}
       >
-        Hủy
+        {t("detail.addLanguage.cancelButton")}
       </Button>
       <Button
         type="submit"
@@ -83,7 +86,7 @@ export default function AddLanguageModal({
           ) : undefined
         }
       >
-        Thêm Ngôn Ngữ
+        {t("detail.addLanguage.addLanguageButton")}
       </Button>
     </div>
   )
@@ -92,8 +95,8 @@ export default function AddLanguageModal({
     <Dialog
       isOpen={isOpen}
       onClose={handleClose}
-      title="Thêm Ngôn Ngữ Mới"
-      subtitle="Thêm cột ngôn ngữ mới vào Google Sheets"
+      title={t("detail.addLanguage.title")}
+      subtitle={t("detail.addLanguage.subtitle")}
       icon="🌍"
       iconColor="emerald"
       size="sm"
@@ -107,19 +110,19 @@ export default function AddLanguageModal({
               htmlFor="language-name"
               className="block text-sm font-medium text-slate-700 mb-2"
             >
-              Tên ngôn ngữ
+              {t("detail.addLanguage.label")}
             </label>
             <Input
               id="language-name"
               type="text"
               value={languageName}
               onChange={(e) => setLanguageName(e.target.value)}
-              placeholder="Ví dụ: English, Français, 日本語..."
+              placeholder={t("detail.addLanguage.placeholder")}
               disabled={addLanguageMutation.isPending}
               className="w-full"
             />
             <p className="text-xs text-slate-500 mt-1">
-              Tên ngôn ngữ sẽ trở thành header column trong Google Sheets
+              {t("detail.addLanguage.hint")}
             </p>
           </div>
         </div>

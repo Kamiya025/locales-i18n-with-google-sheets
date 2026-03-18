@@ -1,8 +1,8 @@
-"use client"
-
-import React from "react"
+import { useTranslation } from "@/providers/I18nProvider"
 
 export default function HeroSection() {
+  const { t } = useTranslation()
+
   return (
     <div className="flex flex-col items-center justify-center px-4 py-12 pt-24 text-center">
       <div
@@ -17,26 +17,26 @@ export default function HeroSection() {
               className="w-full h-full object-contain"
             />
           </div>
-          Translator Tool
+          {t("common.appTitle")}
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1]">
-          Quản lý{" "}
+          {t("home.hero.title_prefix")}{" "}
           <span className="relative inline-block">
             <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 bg-clip-text text-transparent">
-              Bản Dịch
+              {t("home.hero.title_highlight")}
             </span>
             <span className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-blue-500 via-indigo-400 to-violet-500 opacity-60" />
           </span>
         </h1>
         <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 leading-[1.1] mt-1">
-          chưa bao giờ dễ hơn
+          {t("home.hero.subtitle")}
         </h2>
       </div>
       <p
         className="max-w-md mx-auto text-slate-500 text-sm md:text-base font-medium mb-10 leading-relaxed"
         style={{ animation: "fadeUp .5s .16s ease both" }}
       >
-        Chọn nguồn dữ liệu phù hợp với quy trình làm việc của bạn
+        {t("home.hero.description")}
       </p>
     </div>
   )

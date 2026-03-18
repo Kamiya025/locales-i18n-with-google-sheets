@@ -14,6 +14,7 @@ import Button from "../ui/button"
 import DeleteSheetModal from "../ui/delete-sheet-modal/DeleteSheetModal"
 import { customToast } from "../ui/toast"
 import { RowItemViewer } from "./row"
+import { useTranslation } from "@/providers/I18nProvider"
 
 // Helper function to calculate missing translations
 const calculateMissingTranslations = (
@@ -40,6 +41,7 @@ export function SpreadsheetItemViewer(
 ) {
   const { sheet } = props
   const { data, setResponse, selectedLocales } = useSpreadsheet()
+  const { t } = useTranslation()
   const [newTranslate, setNewTranslate] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [visibleRowsCount, setVisibleRowsCount] = useState(INITIAL_ROWS)
@@ -48,7 +50,7 @@ export function SpreadsheetItemViewer(
     (updatedData) => {
       setResponse(updatedData)
       setIsDeleteModalOpen(false)
-      customToast.success(`Đã xóa danh mục "${sheet.title}" thành công`)
+      customToast.success(t("detail.sheet.deleteSuccess").replace("{title}", sheet.title))
     },
     (error) => {
       customToast.error(error)
@@ -116,15 +118,15 @@ export function SpreadsheetItemViewer(
                       </h3>
                       <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
                         <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          {sheet.rows.length} từ khóa
+                          {sheet.rows.length} {t("detail.sheet.keywords")}
                         </span>
                         <span className="w-0.5 h-0.5 sm:w-1 sm:h-1 rounded-full bg-slate-200" />
                         <span
                           className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest ${missingCount === 0 ? "text-emerald-500" : "text-amber-500"}`}
                         >
                           {missingCount === 0
-                            ? "Hoàn thành"
-                            : `${missingCount} cần dịch`}
+                            ? t("detail.sheet.completed")
+                            : `${missingCount} ${t("detail.sheet.needTranslate")}`}
                         </span>
                       </div>
                     </div>
@@ -134,7 +136,7 @@ export function SpreadsheetItemViewer(
                     <div className="flex flex-col items-start sm:items-end gap-1 sm:gap-1.5 min-w-[80px] sm:min-w-[120px] flex-1 sm:flex-none">
                       <div className="flex items-center justify-between w-full gap-2">
                         <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          Tiến độ
+                          {t("detail.sheet.progress")}
                         </span>
                         <span className="text-[10px] sm:text-xs font-black text-blue-600">
                           {progress}%
@@ -182,8 +184,8 @@ export function SpreadsheetItemViewer(
                 {/* Header Actions */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center my-3 sm:my-4 gap-3 px-1">
                   <div className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Hiển thị {Math.min(visibleRowsCount, sheet.rows.length)} /{" "}
-                    {sheet.rows.length} từ khóa
+                    {t("detail.sheet.showing")} {Math.min(visibleRowsCount, sheet.rows.length)} /{" "}
+                    {sheet.rows.length} {t("detail.sheet.keywords")}
                   </div>
                   <div className="flex gap-4">
                     <Button
@@ -206,7 +208,7 @@ export function SpreadsheetItemViewer(
                         </svg>
                       }
                     >
-                      Xóa Danh Mục
+                      {t("detail.sheet.deleteCategory")}
                     </Button>
                     {!newTranslate && (
                       <Button
@@ -229,7 +231,7 @@ export function SpreadsheetItemViewer(
                           </svg>
                         }
                       >
-                        Thêm từ khóa
+                        {t("detail.sheet.addKeyword")}
                       </Button>
                     )}
                   </div>
@@ -267,11 +269,10 @@ export function SpreadsheetItemViewer(
                         </svg>
                       </div>
                       <h3 className="text-lg font-black text-slate-800 tracking-tight">
-                        Trống trơn
+                        {t("detail.sheet.emptyTitle")}
                       </h3>
                       <p className="text-slate-500 text-sm mt-1 max-w-xs mx-auto">
-                        Chưa có từ khóa nào trong danh mục này. Hãy bắt đầu bằng
-                        cách thêm từ khóa đầu tiên!
+                        {t("detail.sheet.emptyDesc")}
                       </p>
                     </div>
                   )}
@@ -294,12 +295,12 @@ export function SpreadsheetItemViewer(
                         onClick={handleLoadMore}
                         className="px-8 py-3 rounded-2xl bg-white border-2 border-slate-100 text-slate-600 font-bold text-xs uppercase tracking-widest hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm active:scale-95"
                       >
-                        Xem thêm{" "}
+                        {t("detail.sheet.loadMore")}{" "}
                         {Math.min(
                           BATCH_SIZE,
                           sheet.rows.length - visibleRowsCount,
                         )}{" "}
-                        từ khóa
+                        {t("detail.sheet.keywords")}
                       </button>
                     </div>
                   )}

@@ -1,9 +1,9 @@
-"use client"
-
-import React from "react"
+import { useTranslation } from "@/providers/I18nProvider"
 import JsonToExcelPanel from "./JsonToExcelPanel"
 
 export default function JsonToExcelCard() {
+  const { t } = useTranslation()
+
   return (
     <div className="relative flex flex-col gap-5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(139,92,246,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
       {/* Top shine */}
@@ -32,14 +32,14 @@ export default function JsonToExcelCard() {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-slate-800">
-                Chuyển JSON → Excel
+                {t("home.cards.json.title")}
               </h3>
               <span className="text-xs px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-semibold border border-violet-200/60">
-                Công cụ
+                {t("common.tag_tool")}
               </span>
             </div>
             <p className="text-sm text-slate-500">
-              Gộp nhiều file i18n JSON thành 1 file XLSX duy nhất
+              {t("home.cards.json.desc")}
             </p>
           </div>
         </div>

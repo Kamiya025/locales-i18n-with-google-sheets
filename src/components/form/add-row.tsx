@@ -14,6 +14,8 @@ interface ValidationError {
   message: string
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export function RowNewItemViewer(
   props: Readonly<{
     sheetId: number
@@ -22,6 +24,7 @@ export function RowNewItemViewer(
   }>
 ) {
   const { sheetId, lastIndexRow, onSaveSuccess } = props
+  const { t } = useTranslation()
   const { data, selectedLocales, updateTranslation } = useSpreadsheet()
   const initialData = toKeyObject(selectedLocales)
 
@@ -40,7 +43,7 @@ export function RowNewItemViewer(
     const errors: ValidationError[] = []
 
     if (!key.trim()) {
-      errors.push({ field: "key", message: "Key không được để trống" })
+      errors.push({ field: "key", message: t("detail.sheet.addForm.errors.keyEmpty") })
     } else {
       // Kiểm tra key trùng lặp
       if (data) {
@@ -52,7 +55,7 @@ export function RowNewItemViewer(
         if (existingKeys.includes(key.trim())) {
           errors.push({
             field: "key",
-            message: "Key này đã tồn tại trong sheet",
+            message: t("detail.sheet.addForm.errors.keyExists"),
           })
         }
       }
@@ -73,7 +76,7 @@ export function RowNewItemViewer(
     if (!hasNonEmptyTranslation) {
       errors.push({
         field: "translations",
-        message: "Phải có ít nhất một bản dịch không rỗng",
+        message: t("detail.sheet.addForm.errors.translationEmpty"),
       })
     }
 
@@ -139,16 +142,16 @@ export function RowNewItemViewer(
           <FieldWrapper
             label={
               <div className="flex items-center gap-2">
-                <span>Từ khóa</span>
+                <span>{t("detail.sheet.addForm.keyLabel")}</span>
                 <Tooltip
                   content={
                     <div className="space-y-1">
                       <div className="font-medium">
-                        Quy tắc đặt tên từ khóa:
+                        {t("detail.sheet.addForm.keyRulesTitle")}
                       </div>
-                      <div>• Sử dụng dấu chấm (.) để phân cấp</div>
-                      <div>• Ví dụ: home.title, button.save</div>
-                      <div>• Không được trùng lặp</div>
+                      <div>{t("detail.sheet.addForm.keyRuleDots")}</div>
+                      <div>{t("detail.sheet.addForm.keyRuleExamples")}</div>
+                      <div>{t("detail.sheet.addForm.keyRuleUnique")}</div>
                     </div>
                   }
                   placement="top"
@@ -170,7 +173,7 @@ export function RowNewItemViewer(
                 </Tooltip>
               </div>
             }
-            description="Nhập key để định danh bản dịch (vd: home.title, button.save)"
+            description={t("detail.sheet.addForm.keyDesc")}
             error={validationErrors
               .filter((err) => err.field === "key")
               .map((err) => err.message)}
@@ -178,7 +181,7 @@ export function RowNewItemViewer(
           >
             <Input
               type="text"
-              placeholder="Nhập từ khóa (vd: home.title)"
+              placeholder={t("detail.sheet.addForm.keyPlaceholder")}
               value={state?.key}
               onChange={(e) => {
                 setState((prev) => ({
@@ -206,15 +209,15 @@ export function RowNewItemViewer(
         <FieldWrapper
           label={
             <div className="flex items-center gap-2">
-              <span>Bản dịch</span>
+              <span>{t("detail.sheet.addForm.translationLabel")}</span>
               <Tooltip
                 content={
                   <div className="space-y-1">
-                    <div className="font-medium">Tips bản dịch:</div>
-                    <div>• Phải có ít nhất 1 bản dịch</div>
-                    <div>• Giữ ý nghĩa nhất quán</div>
-                    <div>• Tránh dịch quá dài</div>
-                    <div>• Kiểm tra ngữ cảnh sử dụng</div>
+                    <div className="font-medium">{t("detail.sheet.addForm.translationTipsTitle")}</div>
+                    <div>{t("detail.sheet.addForm.translationTipAtLeastOne")}</div>
+                    <div>{t("detail.sheet.addForm.translationTipConsistent")}</div>
+                    <div>{t("detail.sheet.addForm.translationTipAvoidLong")}</div>
+                    <div>{t("detail.sheet.addForm.translationTipContext")}</div>
                   </div>
                 }
                 placement="top"
@@ -236,7 +239,7 @@ export function RowNewItemViewer(
               </Tooltip>
             </div>
           }
-          description="Nhập bản dịch cho từng ngôn ngữ. Ít nhất phải có một bản dịch không trống."
+          description={t("detail.sheet.addForm.translationDesc")}
           error={validationErrors
             .filter((err) => err.field === "translations")
             .map((err) => err.message)}
@@ -301,7 +304,7 @@ export function RowNewItemViewer(
                 )
               }
             >
-              {mutationSaveRow.isPending ? "Đang lưu..." : "Lưu"}
+              {mutationSaveRow.isPending ? t("detail.sheet.addForm.saving") : t("detail.sheet.addForm.saveButton")}
             </Button>
           )}
         </div>

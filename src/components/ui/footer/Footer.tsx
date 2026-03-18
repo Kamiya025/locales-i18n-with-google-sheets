@@ -1,8 +1,10 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslation } from "@/providers/I18nProvider"
 
 export default function Footer() {
+  const { t } = useTranslation()
   const currentYear = useMemo(() => new Date().getFullYear(), [])
 
   const socialLinks = [
@@ -78,7 +80,7 @@ export default function Footer() {
                 </div>
               </div>
               <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed max-w-xs">
-                A passionate <span className="text-blue-600 dark:text-blue-400 font-semibold">Frontend Developer</span> dedicated to crafting exceptional digital experiences with modern technologies and luxury UI/UX design.
+                {t("common.footer.bio").replace("{role}", t("common.footer.devRole"))}
               </p>
               <div className="flex items-center gap-3">
                 {socialLinks.map((social) => (
@@ -100,7 +102,7 @@ export default function Footer() {
             <div className="space-y-6">
               <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-3">
                 <span className="w-6 h-[2px] bg-blue-600"></span>
-                Projects & Tools
+                {t("common.footer.projectsTitle")}
               </h4>
               <ul className="space-y-3">
                 <li>
@@ -118,7 +120,7 @@ export default function Footer() {
                 <li>
                   <div className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
                     <span className="w-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></span>
-                    Currently building...
+                    {t("common.footer.currentlyBuilding")}
                   </div>
                 </li>
               </ul>
@@ -128,7 +130,7 @@ export default function Footer() {
             <div className="space-y-6">
               <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-3">
                 <span className="w-6 h-[2px] bg-emerald-600"></span>
-                Tech Mastery
+                {t("common.footer.techTitle")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {techStack.map((tech) => (
@@ -149,7 +151,7 @@ export default function Footer() {
                    ))}
                  </div>
                  <p className="text-xs text-slate-500 font-medium italic">
-                    Trusted by developers worldwide
+                    {t("common.footer.trustedBy")}
                  </p>
               </div>
             </div>
@@ -158,21 +160,21 @@ export default function Footer() {
             <div className="space-y-6">
               <h4 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-3">
                 <span className="w-6 h-[2px] bg-purple-600"></span>
-                Quick Connect
+                {t("common.footer.connectTitle")}
               </h4>
               <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100 dark:border-blue-900/20">
                 <p className="text-xs text-slate-600 dark:text-slate-400 mb-4 font-medium">
-                  Have a vision? Let's bring it to life with modern code.
+                  {t("common.footer.vision")}
                 </p>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">Available for freelance</span>
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tighter">{t("common.footer.available")}</span>
                 </div>
                 <button className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all">
-                   Start a Conversation
+                   {t("common.footer.startConversation")}
                 </button>
               </div>
             </div>
@@ -191,13 +193,13 @@ export default function Footer() {
 
             <div className="flex items-center gap-6">
               <a href="/privacy-policy" className="text-[11px] font-bold text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-widest">
-                Privacy
+                {t("common.footer.privacy")}
               </a>
               <a href="/terms-of-service" className="text-[11px] font-bold text-slate-500 hover:text-blue-600 transition-colors uppercase tracking-widest">
-                Terms
+                {t("common.footer.terms")}
               </a>
               <a href="https://github.com/Kamiya025" target="_blank" className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline decoration-emerald-500/30 underline-offset-4 uppercase tracking-widest">
-                Open Source
+                {t("common.footer.openSource")}
               </a>
             </div>
           </div>

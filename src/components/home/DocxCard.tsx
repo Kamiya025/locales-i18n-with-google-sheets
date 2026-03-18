@@ -1,9 +1,9 @@
-"use client"
-
-import React from "react"
+import { useTranslation } from "@/providers/I18nProvider"
 import DocxPanel from "./DocxPanel"
 
 export default function DocxCard() {
+  const { t } = useTranslation()
+
   return (
     <div className="relative flex flex-col gap-5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(245,158,11,0.08),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
       {/* Top shine */}
@@ -30,12 +30,14 @@ export default function DocxCard() {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-slate-800">Dịch file Word</h3>
+            <h3 className="text-lg font-bold text-slate-800">
+              {t("home.cards.docx.title")}
+            </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold border border-amber-200/60">
-              Mới
+              {t("common.tag_new")}
             </span>
           </div>
-          <p className="text-sm text-slate-500">Dịch tài liệu .docx theo từng đoạn</p>
+          <p className="text-sm text-slate-500">{t("home.cards.docx.desc")}</p>
         </div>
       </div>
 

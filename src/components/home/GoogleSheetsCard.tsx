@@ -1,9 +1,9 @@
-"use client"
-
-import React from "react"
+import { useTranslation } from "@/providers/I18nProvider"
 import GoogleSheetsPanel from "./GoogleSheetsPanel"
 
 export default function GoogleSheetsCard() {
+  const { t } = useTranslation()
+
   return (
     <div className="relative flex flex-col gap-5 rounded-2xl border border-white/60 bg-white/70 backdrop-blur-2xl shadow-[0_24px_48px_rgba(59,130,246,0.12),0_0_0_1px_rgba(255,255,255,0.5)] p-7 overflow-hidden">
       {/* Top shine */}
@@ -30,12 +30,14 @@ export default function GoogleSheetsCard() {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-slate-800">Google Sheets</h3>
+            <h3 className="text-lg font-bold text-slate-800">
+              {t("home.cards.google.title")}
+            </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold border border-blue-200/60">
               Online
             </span>
           </div>
-          <p className="text-sm text-slate-500">Đồng bộ real-time với cloud</p>
+          <p className="text-sm text-slate-500">{t("home.cards.google.desc")}</p>
         </div>
       </div>
 
@@ -44,13 +46,10 @@ export default function GoogleSheetsCard() {
 
       {/* Features */}
       <ul className="flex flex-col gap-2">
-        {[
-          "Kết nối trực tiếp qua URL",
-          "Lưu & đồng bộ tự động",
-          "Hỗ trợ chia sẻ nhiều người",
-          "Đăng nhập Google để chỉnh sửa",
-        ].map((t) => (
-          <li key={t} className="flex items-center gap-2 text-sm text-slate-600">
+        {(
+          t("home.cards.google.features") as unknown as string[]
+        ).map((text) => (
+          <li key={text} className="flex items-center gap-2 text-sm text-slate-600">
             <span className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
               <svg
                 className="w-2.5 h-2.5 text-blue-600"
@@ -64,7 +63,7 @@ export default function GoogleSheetsCard() {
                 />
               </svg>
             </span>
-            {t}
+            {text}
           </li>
         ))}
       </ul>

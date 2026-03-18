@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation"
 import { customToast } from "@/components/ui/toast"
 import { parseExcelToSpreadsheetResponse } from "@/util/excel"
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function ExcelPanel() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -14,7 +17,7 @@ export default function ExcelPanel() {
 
   const processFile = async (file: File) => {
     if (!file.name.match(/\.(xlsx|xls)$/i)) {
-      customToast.error("Vui lòng chọn file .xlsx hoặc .xls")
+      customToast.error(t("home.excelPanel.invalidFile"))
       return
     }
     setIsProcessing(true)
@@ -26,7 +29,7 @@ export default function ExcelPanel() {
       router.push("/sheet/local-excel")
     } catch (err) {
       console.error(err)
-      customToast.error("Lỗi khi đọc file Excel, vui lòng thử lại.")
+      customToast.error(t("home.excelPanel.errorReading"))
       setFileName(null)
     } finally {
       setIsProcessing(false)
@@ -68,9 +71,7 @@ export default function ExcelPanel() {
           <>
             <div className="w-10 h-10 border-3 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
             <p className="text-sm font-medium text-slate-600">
-              Đang xử lý{" "}
-              <span className="text-emerald-600 font-semibold">{fileName}</span>
-              ...
+              {t("home.excelPanel.processing").replace("{name}", fileName || "")}
             </p>
           </>
         ) : (
@@ -94,14 +95,20 @@ export default function ExcelPanel() {
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-slate-700">
-                Kéo thả file vào đây
+                {t("home.excelPanel.dropTitle")}
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                hoặc{" "}
-                <span className="text-emerald-600 font-medium underline underline-offset-2">
-                  chọn từ máy tính
-                </span>{" "}
-                · .xlsx, .xls
+                {t("home.excelPanel.dropSubtitle").split("{choose}").map((part, index) => {
+                  if (index === 0) return part
+                  return (
+                    <span key={index} className="contents">
+                      <span className="text-emerald-600 font-medium underline underline-offset-2">
+                        {t("home.excelPanel.chooseFromComputer")}
+                      </span>
+                      {part}
+                    </span>
+                  )
+                })}
               </p>
             </div>
           </>
@@ -118,11 +125,7 @@ export default function ExcelPanel() {
 
       {/* Info badges */}
       <div className="flex flex-wrap gap-2">
-        {[
-          "Không cần đăng nhập",
-          "Xử lý trên máy tính",
-          "Dữ liệu không gửi đi",
-        ].map((txt) => (
+        {(t("home.excelPanel.features") as any as string[]).map((txt) => (
           <span
             key={txt}
             className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-medium"

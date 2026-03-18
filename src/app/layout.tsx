@@ -41,6 +41,8 @@ export const metadata: Metadata = {
   },
 }
 
+import { I18nProvider } from "@/providers/I18nProvider"
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,18 +53,20 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <GoogleOneTap />
-          <ReactQueryProvider>
-            <SpreadsheetProvider>
-              <div className="flex flex-col">
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-            </SpreadsheetProvider>
-          </ReactQueryProvider>
-        </AuthProvider>
-        <CustomToaster />
+        <I18nProvider>
+          <AuthProvider>
+            <GoogleOneTap />
+            <ReactQueryProvider>
+              <SpreadsheetProvider>
+                <div className="flex flex-col">
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+              </SpreadsheetProvider>
+            </ReactQueryProvider>
+          </AuthProvider>
+          <CustomToaster />
+        </I18nProvider>
       </body>
     </html>
   )

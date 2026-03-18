@@ -33,10 +33,13 @@ function extractSpreadsheetId(url: string): string | null {
   return match?.[1] || null
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function GetLinkGoogleSheets({
   isHeader = false,
 }: Readonly<GetLinkGoogleSheetsProps>) {
   const router = useRouter()
+  const { t } = useTranslation()
   const storageKey = "sheet-url-history"
   const [url, setUrl] = useState("")
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -65,7 +68,7 @@ export default function GetLinkGoogleSheets({
       return {
         isValid: false,
         spreadsheetId: null,
-        error: "Vui lòng nhập URL Google Sheets",
+        error: t("home.getLink.invalidUrl"),
       }
     }
 
@@ -74,7 +77,7 @@ export default function GetLinkGoogleSheets({
       return {
         isValid: false,
         spreadsheetId: null,
-        error: "URL phải là link Google Sheets",
+        error: t("home.getLink.notGoogleSheets"),
       }
     }
 
@@ -84,7 +87,7 @@ export default function GetLinkGoogleSheets({
       return {
         isValid: false,
         spreadsheetId: null,
-        error: "Không thể lấy ID từ URL này",
+        error: t("home.getLink.invalidId"),
       }
     }
 
@@ -111,7 +114,7 @@ export default function GetLinkGoogleSheets({
       // Redirect to detail page without URL params
       router.push(`/sheet/${validation.spreadsheetId}`)
     } catch (error) {
-      customToast.error("Có lỗi xảy ra khi chuyển trang")
+      customToast.error(t("home.getLink.redirectError"))
     } finally {
       setIsSubmitting(false)
     }
@@ -135,7 +138,7 @@ export default function GetLinkGoogleSheets({
       router.push(`/sheet/local-excel`)
     } catch (error) {
       console.error(error)
-      customToast.error("Lỗi khi đọc file Excel, vui lòng thử lại.")
+      customToast.error(t("home.getLink.excelReadError"))
     } finally {
       setIsSubmitting(false)
       if (event.target) event.target.value = ""
@@ -162,14 +165,13 @@ export default function GetLinkGoogleSheets({
     isHeader ? "right-2 p-1.5" : "right-3 p-2"
   } top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-white/50`
   const spinnerSize = isHeader ? "w-3 h-3" : "w-4 h-4"
-  const placeholder = isHeader
-    ? "Dán link Google Sheets..."
-    : "Dán link Google Sheets vào đây..."
+  const placeholderText = isHeader
+    ? t("home.getLink.placeholder")
+    : t("home.getLink.placeholderLong")
 
-  const mobilePlaceholder = isHeader
-    ? "Dán link Google Sheets... (Enter để submit)"
-    : "Dán link Google Sheets vào đây... (Enter để submit)"
-  const buttonText = isHeader ? "Get" : "Lấy dữ liệu"
+  const buttonText = isHeader 
+    ? t("home.getLink.buttonTextShort") 
+    : t("home.getLink.buttonTextLong")
 
   return (
     <div
@@ -191,7 +193,7 @@ export default function GetLinkGoogleSheets({
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder={placeholder}
+              placeholder={placeholderText}
               className={`${getInputClassNames(isHeader)} md:pr-4`}
               title="Nhấn Enter để submit"
             />
@@ -263,7 +265,7 @@ export default function GetLinkGoogleSheets({
                   className={`${spinnerSize} border-2 border-white/30 border-t-white rounded-full animate-spin`}
                 ></div>
                 <span className={`${isHeader ? "hidden" : "block"}`}>
-                  Đang xử lý...
+                  {t("home.getLink.processing")}
                 </span>
               </span>
             ) : (
@@ -297,7 +299,7 @@ export default function GetLinkGoogleSheets({
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
               />
             </svg>
-            Hoặc tải lên file Excel (.xlsx) từ máy tính
+              {t("home.getLink.uploadExcel")}
             <input
               type="file"
               accept=".xlsx,.xls"

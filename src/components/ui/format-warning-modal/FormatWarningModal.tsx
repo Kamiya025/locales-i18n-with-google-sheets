@@ -29,6 +29,8 @@ interface FormatWarningModalProps {
   readonly isAutoFixing?: boolean
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function FormatWarningModal({
   isOpen,
   onClose,
@@ -38,6 +40,7 @@ export default function FormatWarningModal({
   onAutoFixAll,
   isAutoFixing = false,
 }: FormatWarningModalProps) {
+  const { t } = useTranslation()
   const totalIssues = validationIssues.reduce(
     (sum, issue) => sum + issue.errors.length,
     0
@@ -50,7 +53,7 @@ export default function FormatWarningModal({
   const footer = (
     <div className="flex justify-between items-center">
       <Button variant="outline" onClick={onClose}>
-        Hủy
+        {t("detail.formatWarning.cancelButton")}
       </Button>
 
       <div className="flex flex-wrap gap-3">
@@ -78,7 +81,7 @@ export default function FormatWarningModal({
             </svg>
           }
         >
-          Mở Sheets
+          {t("detail.formatWarning.openSheetsButton")}
         </Button>
 
         <Button
@@ -106,7 +109,7 @@ export default function FormatWarningModal({
             </svg>
           }
         >
-          Xem & Sửa ({totalFixes})
+          {t("detail.formatWarning.viewAndFixButton").replace("{count}", totalFixes.toString())}
         </Button>
 
         <Button
@@ -132,7 +135,7 @@ export default function FormatWarningModal({
             ) : undefined
           }
         >
-          {isAutoFixing ? "Đang sửa..." : `Tự động sửa(${totalFixes})`}
+          {isAutoFixing ? t("detail.formatWarning.fixingState") : t("detail.formatWarning.autoFixButton").replace("{count}", totalFixes.toString())}
         </Button>
       </div>
     </div>
@@ -142,8 +145,8 @@ export default function FormatWarningModal({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Google Sheets Format Warning"
-      subtitle="Phát hiện vấn đề format cần được sửa"
+      title={t("detail.formatWarning.title")}
+      subtitle={t("detail.formatWarning.subtitle")}
       icon="⚠️"
       iconColor="amber"
       size="lg"
@@ -170,28 +173,18 @@ export default function FormatWarningModal({
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-slate-800 text-xl mb-3">
-                Phát hiện vấn đề format trong Google Sheets
+                {t("detail.formatWarning.summaryTitle")}
               </h3>
-              <p className="text-slate-600 mb-4 leading-relaxed">
-                Google Sheets của bạn có{" "}
-                <span className="font-semibold text-amber-600">
-                  {totalIssues} vấn đề format
-                </span>{" "}
-                cần được sửa để có thể sử dụng với ứng dụng translation này.
-              </p>
+              <p 
+                className="text-slate-600 mb-4 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: t("detail.formatWarning.summaryDesc").replace("{count}", totalIssues.toString()) }}
+              />
               <div className="glass-effect border border-emerald-200/30 rounded-lg p-3 backdrop-blur-sm">
                 <div className="flex items-center gap-2 text-sm text-slate-700">
                   <div className="w-5 h-5 rounded bg-emerald-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-emerald-600 text-xs">💡</span>
                   </div>
-                  <span>
-                    <span className="font-medium">Đừng lo!</span> Chúng tôi có
-                    thể tự động sửa{" "}
-                    <span className="font-semibold text-emerald-600">
-                      {totalFixes} vấn đề
-                    </span>{" "}
-                    này cho bạn.
-                  </span>
+                  <span dangerouslySetInnerHTML={{ __html: t("detail.formatWarning.summaryTip").replace("{count}", totalFixes.toString()) }} />
                 </div>
               </div>
             </div>
@@ -216,7 +209,7 @@ export default function FormatWarningModal({
                 />
               </svg>
             </div>
-            <span>Chi tiết vấn đề theo sheet:</span>
+            <span>{t("detail.formatWarning.sheetDetailTitle")}</span>
           </h4>
 
           {validationIssues.map((issue) => (
@@ -241,7 +234,7 @@ export default function FormatWarningModal({
                   </svg>
                 </div>
                 <span>
-                  Sheet:{" "}
+                  {t("detail.formatWarning.sheetLabel")}
                   <span className="text-blue-600">"{issue.sheetTitle}"</span>
                 </span>
               </h5>
@@ -267,12 +260,10 @@ export default function FormatWarningModal({
                     <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-xs">✓</span>
                     </div>
-                    <span className="text-slate-700">
-                      <span className="font-semibold text-emerald-600">
-                        {issue.fixes.length} vấn đề
-                      </span>{" "}
-                      có thể tự động sửa
-                    </span>
+                    <span 
+                      className="text-slate-700"
+                      dangerouslySetInnerHTML={{ __html: t("detail.formatWarning.fixableCount").replace("{count}", issue.fixes.length.toString()) }}
+                    />
                   </div>
                 </div>
               )}
@@ -288,33 +279,20 @@ export default function FormatWarningModal({
             </div>
             <div className="flex-1">
               <h4 className="font-semibold text-slate-800 mb-4 text-lg">
-                Bạn muốn chúng tôi làm gì?
+                {t("detail.formatWarning.actionTitle")}
               </h4>
               <div className="space-y-3 text-sm text-slate-600">
                 <div className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0"></div>
-                  <span>
-                    <span className="font-medium text-slate-700">Hủy:</span>{" "}
-                    Đóng và không thay đổi gì
-                  </span>
+                  <span dangerouslySetInnerHTML={{ __html: t("detail.formatWarning.actionCancel") }} />
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0"></div>
-                  <span>
-                    <span className="font-medium text-slate-700">
-                      Xem & Sửa:
-                    </span>{" "}
-                    Xem chi tiết và chọn từng vấn đề cần sửa
-                  </span>
+                  <span dangerouslySetInnerHTML={{ __html: t("detail.formatWarning.actionView") }} />
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-2 flex-shrink-0"></div>
-                  <span>
-                    <span className="font-medium text-slate-700">
-                      Tự động sửa tất cả:
-                    </span>{" "}
-                    Sửa tất cả vấn đề ngay lập tức
-                  </span>
+                  <span dangerouslySetInnerHTML={{ __html: t("detail.formatWarning.actionAuto") }} />
                 </div>
               </div>
             </div>

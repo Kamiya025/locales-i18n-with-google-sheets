@@ -4,8 +4,10 @@ import { useState } from "react"
 import Button from "../button"
 import { Dialog } from "../dialog"
 import TemplateCreator from "../template-creator"
+import { useTranslation } from "@/providers/I18nProvider"
 
 export default function FormatGuide() {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [showTemplateCreator, setShowTemplateCreator] = useState(false)
 
@@ -28,7 +30,7 @@ export default function FormatGuide() {
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        Hướng dẫn format Google Sheets
+        {t("detail.formatGuide.trigger")}
       </button>
     )
   }
@@ -36,7 +38,7 @@ export default function FormatGuide() {
   const footer = (
     <div className="flex justify-end gap-3">
       <Button variant="outline" onClick={() => setIsOpen(false)}>
-        Đóng
+        {t("detail.formatGuide.close")}
       </Button>
       <Button
         variant="gradient"
@@ -60,7 +62,7 @@ export default function FormatGuide() {
           </svg>
         }
       >
-        Tạo Template với Style Đẹp
+        {t("detail.formatGuide.createTemplate")}
       </Button>
     </div>
   )
@@ -70,8 +72,8 @@ export default function FormatGuide() {
       <Dialog
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        title="Hướng dẫn Format Google Sheets"
-        subtitle="Cách format Google Sheets để sử dụng với app"
+        title={t("detail.formatGuide.title")}
+        subtitle={t("detail.formatGuide.subtitle")}
         icon="📋"
         iconColor="blue"
         size="xl"
@@ -81,7 +83,7 @@ export default function FormatGuide() {
           {/* Required Format */}
           <div>
             <h3 className="text-lg font-semibold text-slate-800 mb-3">
-              ✅ Format bắt buộc
+              {t("detail.formatGuide.requiredFormat")}
             </h3>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <pre className="text-sm text-green-800 font-mono overflow-x-auto">
@@ -94,18 +96,18 @@ export default function FormatGuide() {
             </div>
             <div className="mt-3 text-sm text-slate-600">
               <p>
-                <strong>Quy tắc:</strong>
+                <strong>{t("detail.formatGuide.rulesTitle")}</strong>
               </p>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li>
-                  Column đầu tiên phải có tên{" "}
+                  {t("detail.formatGuide.ruleKeyColumn")}{" "}
                   <code className="bg-slate-100 px-1 rounded">KEY</code> hoặc{" "}
                   <code className="bg-slate-100 px-1 rounded">key</code>
                 </li>
-                <li>Mỗi KEY phải duy nhất (không trùng lặp)</li>
-                <li>KEY không được để trống</li>
-                <li>Các columns khác là tên ngôn ngữ</li>
-                <li>Ít nhất phải có 1 column ngôn ngữ</li>
+                <li>{t("detail.formatGuide.ruleUnique")}</li>
+                <li>{t("detail.formatGuide.ruleNotEmpty")}</li>
+                <li>{t("detail.formatGuide.ruleLocales")}</li>
+                <li>{t("detail.formatGuide.ruleAtLeastOne")}</li>
               </ul>
             </div>
           </div>
@@ -113,13 +115,13 @@ export default function FormatGuide() {
           {/* Common Errors */}
           <div>
             <h3 className="text-lg font-semibold text-slate-800 mb-3">
-              ❌ Các lỗi thường gặp
+              {t("detail.formatGuide.commonErrors")}
             </h3>
 
             <div className="space-y-4">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <h4 className="font-medium text-red-800 mb-2">
-                  1. Thiếu column KEY
+                  {t("detail.formatGuide.errorMissingKey")}
                 </h4>
                 <pre className="text-sm text-red-700 font-mono">
                   {`| English | Vietnamese |  ← ❌ Không có column KEY
@@ -127,13 +129,13 @@ export default function FormatGuide() {
 | Hello   | Xin chào   |`}
                 </pre>
                 <p className="text-sm text-red-600 mt-2">
-                  <strong>Khắc phục:</strong> Thêm column đầu tiên với tên "KEY"
+                  <strong>{t("detail.formatGuide.errorMissingKeyFix")}</strong>
                 </p>
               </div>
 
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <h4 className="font-medium text-red-800 mb-2">
-                  2. KEY trùng lặp
+                  {t("detail.formatGuide.errorDuplicateKey")}
                 </h4>
                 <pre className="text-sm text-red-700 font-mono">
                   {`| KEY   | English | Vietnamese |
@@ -142,13 +144,14 @@ export default function FormatGuide() {
 | hello | Hi      | Chào       |  ← ❌ Trùng key "hello"`}
                 </pre>
                 <p className="text-sm text-red-600 mt-2">
-                  <strong>Khắc phục:</strong> Đổi tên thành "hello",
-                  "hello_casual" hoặc "hi"
+                  <strong>{t("detail.formatGuide.errorDuplicateKeyFix")}</strong>
                 </p>
               </div>
 
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h4 className="font-medium text-red-800 mb-2">3. KEY trống</h4>
+                <h4 className="font-medium text-red-800 mb-2">
+                  {t("detail.formatGuide.errorEmptyKey")}
+                </h4>
                 <pre className="text-sm text-red-700 font-mono">
                   {`| KEY   | English | Vietnamese |
 |-------|---------|------------|
@@ -156,8 +159,7 @@ export default function FormatGuide() {
 |       | Goodbye | Tạm biệt   |  ← ❌ KEY trống`}
                 </pre>
                 <p className="text-sm text-red-600 mt-2">
-                  <strong>Khắc phục:</strong> Điền KEY cho row này, ví dụ:
-                  "goodbye"
+                  <strong>{t("detail.formatGuide.errorEmptyKeyFix")}</strong>
                 </p>
               </div>
             </div>
@@ -166,23 +168,14 @@ export default function FormatGuide() {
           {/* Tips */}
           <div>
             <h3 className="text-lg font-semibold text-slate-800 mb-3">
-              💡 Mẹo hay
+              {t("detail.formatGuide.proTips")}
             </h3>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <ul className="text-sm text-blue-800 space-y-2">
-                <li>
-                  • KEY nên ngắn gọn và có ý nghĩa: <code>menu.home</code>,{" "}
-                  <code>button.save</code>
-                </li>
-                <li>• Có thể để trống translation trong khi làm việc</li>
-                <li>
-                  • Sử dụng naming convention: <code>page.section.element</code>
-                </li>
-                <li>
-                  • Headers tên ngôn ngữ có thể là: <code>English</code>,{" "}
-                  <code>en</code>, <code>EN</code>, <code>Vietnamese</code>,{" "}
-                  <code>vi</code>
-                </li>
+                <li>{t("detail.formatGuide.tipNaming")}</li>
+                <li>{t("detail.formatGuide.tipEmptyTranslation")}</li>
+                <li>{t("detail.formatGuide.tipConvention")}</li>
+                <li>{t("detail.formatGuide.tipHeaders")}</li>
               </ul>
             </div>
           </div>

@@ -13,8 +13,11 @@ function extractSpreadsheetId(url: string): string | null {
   return match?.[1] || null
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function GoogleSheetsPanel() {
   const router = useRouter()
+  const { t } = useTranslation()
   const storageKey = "sheet-url-history"
   const [url, setUrl] = useState("")
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -40,16 +43,16 @@ export default function GoogleSheetsPanel() {
   const validateAndNavigate = async (submitUrl: string) => {
     const trimmed = submitUrl.trim()
     if (!trimmed) {
-      customToast.error("Vui lòng nhập URL Google Sheets")
+      customToast.error(t("home.googleSheetsPanel.invalidUrl"))
       return
     }
     if (!trimmed.includes("docs.google.com/spreadsheets")) {
-      customToast.error("URL phải là link Google Sheets")
+      customToast.error(t("home.googleSheetsPanel.notGoogleSheets"))
       return
     }
     const id = extractSpreadsheetId(trimmed)
     if (!id) {
-      customToast.error("Không thể lấy ID từ URL này")
+      customToast.error(t("home.googleSheetsPanel.invalidId"))
       return
     }
     setIsSubmitting(true)
@@ -89,14 +92,14 @@ export default function GoogleSheetsPanel() {
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://docs.google.com/spreadsheets/d/..."
+            placeholder={t("home.googleSheetsPanel.placeholder")}
             className="w-full rounded-xl border border-blue-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm text-slate-700 placeholder-slate-400 shadow-sm focus:ring-2 focus:ring-blue-400/40 outline-none transition-all"
           />
           {(items.length > 0 || cloudProjects.length > 0) && (
             <button
               type="button"
               onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-              title="Xem lịch sử"
+              title={t("home.googleSheetsPanel.historyTip")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors"
             >
               <svg
@@ -137,7 +140,7 @@ export default function GoogleSheetsPanel() {
               />
             </svg>
           )}
-          Mở
+          {t("home.googleSheetsPanel.openButton")}
         </button>
       </form>
 
@@ -146,7 +149,7 @@ export default function GoogleSheetsPanel() {
         <div className="mt-1">
           <div className="flex items-center gap-2 px-1 mb-2">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Dự án đồng bộ Cloud</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{t("home.googleSheetsPanel.cloudSyncProjects")}</span>
           </div>
           <div className="grid grid-cols-1 gap-2">
             {cloudProjects.slice(0, 2).map((proj) => (

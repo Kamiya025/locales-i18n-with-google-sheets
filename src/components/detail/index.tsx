@@ -14,8 +14,10 @@ import ExportConfirmationModal from "../ui/export-confirmation-modal"
 import LanguageFilter from "../ui/language-filter"
 import SearchCombobox from "../ui/search-combobox"
 import { SpreadsheetItemViewer } from "./sheet"
+import { useTranslation } from "@/providers/I18nProvider"
 
 export default function SpreadsheetViewer() {
+  const { t } = useTranslation()
   const { data, listLocales, selectedLocales } = useSpreadsheet()
   const [isAddSheetModalOpen, setIsAddSheetModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
@@ -48,14 +50,14 @@ export default function SpreadsheetViewer() {
 
   // Memoize namespace options for selector
   const namespaceOptions = useMemo(() => {
-    const options = [{ value: "all", label: "Tất cả danh mục" }]
+    const options = [{ value: "all", label: t("detail.sidebar.allCategories") }]
     if (data?.sheets) {
       data.sheets.forEach((sheet) =>
         options.push({ value: sheet.sheetId.toString(), label: sheet.title }),
       )
     }
     return options
-  }, [data])
+  }, [data, t])
 
   // Statistics Calculation
   const stats = useMemo(() => {
@@ -121,10 +123,10 @@ export default function SpreadsheetViewer() {
               href="/profile"
               className="hover:text-blue-600 transition-colors"
             >
-              Dự án của tôi
+              {t("detail.header.myProjects")}
             </Link>
             <span className="opacity-40">/</span>
-            <span className="text-slate-600">Chi tiết bảng tính</span>
+            <span className="text-slate-600">{t("detail.header.sheetDetail")}</span>
           </div>
           <div className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
             <span className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
@@ -168,7 +170,7 @@ export default function SpreadsheetViewer() {
               </svg>
             }
           >
-            Thêm Danh Mục
+            {t("detail.header.addCategory")}
           </Button>
           <Button
             onClick={() => setIsExportModalOpen(true)}
@@ -191,7 +193,7 @@ export default function SpreadsheetViewer() {
               </svg>
             }
           >
-            Xuất JSON
+            {t("detail.header.exportJson")}
           </Button>
 
           {data && (
@@ -216,7 +218,7 @@ export default function SpreadsheetViewer() {
                 </svg>
               }
             >
-              Xuất Excel
+              {t("detail.header.exportExcel")}
             </Button>
           )}
         </div>
@@ -229,7 +231,7 @@ export default function SpreadsheetViewer() {
           {/* Section: Status */}
           <div className="space-y-4">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
-              Tiến độ tổng quan
+              {t("detail.sidebar.overallProgress")}
             </label>
             <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-end justify-between">
@@ -247,8 +249,8 @@ export default function SpreadsheetViewer() {
                 />
               </div>
               <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
-                <span>{stats.completed} Hoàn thành</span>
-                <span>{stats.total} Tổng số</span>
+                <span>{stats.completed} {t("detail.sidebar.completed")}</span>
+                <span>{stats.total} {t("detail.sidebar.total")}</span>
               </div>
             </div>
           </div>
@@ -256,7 +258,7 @@ export default function SpreadsheetViewer() {
           {/* Section: Quick Access */}
           <div className="space-y-4">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
-              Danh mục nhanh
+              {t("detail.sidebar.quickAccess")}
             </label>
             <div className="flex flex-col gap-1">
               {namespaceOptions.map((opt) => (
@@ -278,10 +280,10 @@ export default function SpreadsheetViewer() {
           <div className="pt-4 mt-auto">
             <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-blue-800 text-center">
               <p className="text-[10px] font-black uppercase tracking-widest mb-1">
-                Mẹo hay
+                {t("detail.sidebar.proTip")}
               </p>
               <p className="text-[10px] font-medium leading-relaxed opacity-80">
-                Sử dụng phím ⌘/Ctrl + F để tìm kiếm nhanh từ khóa.
+                {t("detail.sidebar.fKeyTip")}
               </p>
             </div>
           </div>
@@ -295,7 +297,7 @@ export default function SpreadsheetViewer() {
               <SearchCombobox
                 value={search}
                 onChange={setSearch}
-                placeholder="Tìm kiếm từ khóa (Key) hoặc nội dung dịch..."
+                placeholder={t("detail.filters.searchPlaceholder")}
                 suggestions={searchSuggestions}
                 isLoading={isSearching}
                 className="!rounded-2xl !bg-white/80 !border-slate-200/60 focus:!ring-blue-100 shadow-sm"
@@ -307,13 +309,13 @@ export default function SpreadsheetViewer() {
                   onClick={() => setShowOnlyMissing(false)}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${!showOnlyMissing ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
                 >
-                  Tất cả
+                  {t("detail.filters.all")}
                 </button>
                 <button
                   onClick={() => setShowOnlyMissing(true)}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${showOnlyMissing ? "bg-white text-amber-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
                 >
-                  Chưa dịch
+                  {t("detail.filters.untranslated")}
                 </button>
               </div>
               <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block" />
@@ -325,42 +327,6 @@ export default function SpreadsheetViewer() {
           <div
             className={`flex-1 overflow-y-auto px-6 py-6 space-y-6 custom-scrollbar transition-opacity duration-300 ${isSearching ? "opacity-50" : "opacity-100"}`}
           >
-            {/* Stats Bar (Mobile/Tablets) */}
-            <div className="lg:hidden grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center">
-                <div className="text-xs font-bold text-slate-400 uppercase mb-1">
-                  Dự án
-                </div>
-                <div className="text-xl font-black text-slate-800">
-                  {stats.percent}%
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center">
-                <div className="text-xs font-bold text-slate-400 uppercase mb-1">
-                  Hoàn thành
-                </div>
-                <div className="text-xl font-black text-blue-600">
-                  {stats.completed}
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center">
-                <div className="text-xs font-bold text-slate-400 uppercase mb-1">
-                  Cần dịch
-                </div>
-                <div className="text-xl font-black text-amber-600">
-                  {stats.missing}
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white border border-slate-200 text-center">
-                <div className="text-xs font-bold text-slate-400 uppercase mb-1">
-                  Tổng cộng
-                </div>
-                <div className="text-xl font-black text-slate-800">
-                  {stats.total}
-                </div>
-              </div>
-            </div>
-
             {/* Sheet Lists */}
             {filtered?.sheets?.length === 0 ? (
               <div
@@ -386,10 +352,10 @@ export default function SpreadsheetViewer() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    Không tìm thấy kết quả
+                    {t("detail.emptyState.noResults")}
                   </h3>
                   <p className="text-slate-500 font-medium">
-                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn.
+                    {t("detail.emptyState.adjustFilter")}
                   </p>
                 </div>
               </div>

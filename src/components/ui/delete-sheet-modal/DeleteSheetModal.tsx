@@ -12,6 +12,8 @@ interface DeleteSheetModalProps {
   isDeleting: boolean
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function DeleteSheetModal({
   isOpen,
   onClose,
@@ -19,12 +21,14 @@ export default function DeleteSheetModal({
   sheetTitle,
   isDeleting,
 }: DeleteSheetModalProps) {
+  const { t } = useTranslation()
+
   return (
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="🗑️ Xóa Danh Mục"
-      subtitle="Hành động này không thể hoàn tác"
+      title={t("detail.deleteModal.title")}
+      subtitle={t("detail.deleteModal.subtitle")}
       size="md"
     >
       <div className="space-y-6 pb-2">
@@ -39,10 +43,10 @@ export default function DeleteSheetModal({
           
           <div className="space-y-2">
             <h3 className="text-xl font-black text-slate-900 dark:text-white">
-              Xác nhận xóa: <span className="text-rose-500">{sheetTitle}</span>?
+              {t("detail.deleteModal.confirmText").replace("{title}", sheetTitle)}
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium max-w-xs mx-auto">
-              Toàn bộ dữ liệu bản dịch bên trong danh mục này sẽ bị xóa vĩnh viễn khỏi Google Sheet / Excel.
+              {t("detail.deleteModal.description")}
             </p>
           </div>
         </div>
@@ -54,7 +58,7 @@ export default function DeleteSheetModal({
               <span className="text-[10px] font-bold">!</span>
             </div>
             <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-              Chúng tôi khuyên bạn nên xuất dữ liệu (Export) trước khi thực hiện xóa để lưu trữ dự phòng.
+              {t("detail.deleteModal.advice")}
             </p>
           </div>
         </div>
@@ -67,7 +71,7 @@ export default function DeleteSheetModal({
             className="flex-1 rounded-2xl border-2 py-4"
             disabled={isDeleting}
           >
-             Hủy bỏ
+             {t("detail.deleteModal.cancel")}
           </Button>
           <Button
             onClick={onConfirm}
@@ -76,7 +80,7 @@ export default function DeleteSheetModal({
             disabled={isDeleting}
             loading={isDeleting}
           >
-            Xác nhận xóa
+            {t("detail.deleteModal.confirm")}
           </Button>
         </div>
       </div>

@@ -8,7 +8,10 @@ import {
 } from "@/util/excel-styled"
 import { customToast } from "@/components/ui/toast"
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function JsonToExcelPanel() {
+  const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)
   const [isConverting, setIsConverting] = useState(false)
   const [parsedFiles, setParsedFiles] = useState<ParsedJsonFile[]>([])
@@ -18,7 +21,7 @@ export default function JsonToExcelPanel() {
     const arr = Array.from(files)
     const jsonFiles = arr.filter((f) => f.name.endsWith(".json"))
     if (jsonFiles.length === 0) {
-      customToast.error("Vui lòng chọn ít nhất 1 file .json")
+      customToast.error(t("home.jsonToExcelPanel.invalidFile"))
       return
     }
     setIsConverting(true)
@@ -30,14 +33,14 @@ export default function JsonToExcelPanel() {
         results.forEach((r) => existing.set(r.language, r))
         return Array.from(existing.values())
       })
-      customToast.success(`Đã đọc ${results.length} file thành công!`)
+      customToast.success(t("home.jsonToExcelPanel.readSuccess").replace("{count}", results.length.toString()))
     } catch (err: any) {
-      customToast.error(err.message ?? "Lỗi khi đọc file JSON")
+      customToast.error(err.message ?? t("home.jsonToExcelPanel.readError"))
     } finally {
       setIsConverting(false)
       if (inputRef.current) inputRef.current.value = ""
     }
-  }, [])
+  }, [t])
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -51,14 +54,14 @@ export default function JsonToExcelPanel() {
 
   const handleConvert = async () => {
     if (parsedFiles.length === 0) {
-      customToast.error("Chưa có file nào để chuyển đổi")
+      customToast.error(t("home.jsonToExcelPanel.noFilesToConvert"))
       return
     }
     try {
       await convertJsonFilesToStyledXlsx(parsedFiles, "translations")
-      customToast.success("Đã tạo file translations.xlsx với style!")
+      customToast.success(t("home.jsonToExcelPanel.exportSuccess"))
     } catch (e: any) {
-      customToast.error(e.message ?? "Lỗi khi xuất file")
+      customToast.error(e.message ?? t("home.jsonToExcelPanel.exportError"))
     }
   }
 
@@ -89,7 +92,7 @@ export default function JsonToExcelPanel() {
           <>
             <div className="w-9 h-9 border-2 border-violet-200 border-t-violet-500 rounded-full animate-spin" />
             <p className="text-sm font-medium text-slate-600">
-              Đang đọc file...
+              {t("home.jsonToExcelPanel.processing")}
             </p>
           </>
         ) : (
@@ -113,14 +116,20 @@ export default function JsonToExcelPanel() {
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-slate-700">
-                Kéo thả file JSON vào đây
+                {t("home.jsonToExcelPanel.dropTitle")}
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                hoặc{" "}
-                <span className="text-violet-600 font-medium underline underline-offset-2">
-                  chọn file
-                </span>{" "}
-                · Hỗ trợ nhiều file cùng lúc
+                {t("home.jsonToExcelPanel.dropSubtitle").split("{choose}").map((part, index) => {
+                  if (index === 0) return part
+                  return (
+                    <span key={index} className="contents">
+                      <span className="text-violet-600 font-medium underline underline-offset-2">
+                        {t("home.jsonToExcelPanel.chooseFile")}
+                      </span>
+                      {part}
+                    </span>
+                  )
+                })}
               </p>
             </div>
           </>
@@ -141,14 +150,15 @@ export default function JsonToExcelPanel() {
           {/* Stats bar */}
           <div className="flex items-center justify-between text-xs text-slate-500 px-1">
             <span>
-              {parsedFiles.length} ngôn ngữ · {totalKeys.toLocaleString()} từ
-              khóa
+              {t("home.jsonToExcelPanel.stats")
+                .replace("{languages}", parsedFiles.length.toString())
+                .replace("{keywords}", totalKeys.toLocaleString())}
             </span>
             <button
               onClick={() => setParsedFiles([])}
               className="text-red-400 hover:text-red-600 transition-colors"
             >
-              Xóa tất cả
+              {t("home.jsonToExcelPanel.deleteAll")}
             </button>
           </div>
 
@@ -210,18 +220,14 @@ export default function JsonToExcelPanel() {
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
               />
             </svg>
-            Xuất ra Excel (.xlsx)
+            {t("home.jsonToExcelPanel.exportButton")}
           </button>
         </div>
       )}
 
       {/* Info badges */}
       <div className="flex flex-wrap gap-2">
-        {[
-          "Hỗ trợ JSON phẳng & lồng nhau",
-          "Gộp nhiều file ngôn ngữ",
-          "Xuất 1 file XLSX đầy đủ",
-        ].map((txt) => (
+        {(t("home.jsonToExcelPanel.features") as any as string[]).map((txt) => (
           <span
             key={txt}
             className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-200/60 font-medium"

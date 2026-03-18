@@ -12,6 +12,8 @@ interface DeleteLanguageConfirmationModalProps {
   isLoading: boolean
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function DeleteLanguageConfirmationModal({
   isOpen,
   onClose,
@@ -19,6 +21,7 @@ export default function DeleteLanguageConfirmationModal({
   languageName,
   isLoading,
 }: Readonly<DeleteLanguageConfirmationModalProps>) {
+  const { t } = useTranslation()
   const [typedConfirm, setTypedConfirm] = useState("")
 
   const canConfirm = typedConfirm === languageName
@@ -71,15 +74,17 @@ export default function DeleteLanguageConfirmationModal({
                   </div>
                   <div className="mt-6 text-center">
                     <Dialog.Title as="h3" className="text-2xl font-black text-slate-900 tracking-tight uppercase">
-                      Xóa ngôn ngữ?
+                      {t("detail.deleteLanguage.title")}
                     </Dialog.Title>
                     <div className="mt-4">
-                      <p className="text-slate-600 leading-relaxed">
-                        Bạn có chắc chắn muốn xóa ngôn ngữ <strong className="text-slate-900">{languageName}</strong>? 
-                        Hành động này sẽ xóa <span className="text-red-600 font-bold uppercase tracking-tight">VĨNH VIỄN</span> toàn bộ cột và dữ liệu bản dịch liên quan trong tất cả các sheets.
-                      </p>
+                      <p 
+                        className="text-slate-600 leading-relaxed"
+                        dangerouslySetInnerHTML={{ 
+                          __html: t("detail.deleteLanguage.description").replace("{lang}", languageName) 
+                        }}
+                      />
                       <div className="mt-2 p-3 bg-amber-50 rounded-xl border border-amber-100 text-amber-700 text-xs font-semibold">
-                        ⚠️ Bước này không thể hoàn tác. Chỉ thực hiện khi bạn biết chắc chắn mình đang làm gì.
+                        {t("detail.deleteLanguage.warning")}
                       </div>
                     </div>
                   </div>
@@ -88,7 +93,7 @@ export default function DeleteLanguageConfirmationModal({
                 <div className="mt-8 space-y-4">
                   <div>
                     <label htmlFor="confirm-lang" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                       Nhập tên ngôn ngữ để xác nhận
+                       {t("detail.deleteLanguage.inputLabel")}
                     </label>
                     <input
                       type="text"
@@ -106,7 +111,7 @@ export default function DeleteLanguageConfirmationModal({
                       className="flex-1 px-6 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
                       onClick={onClose}
                     >
-                      Hủy bỏ
+                      {t("detail.deleteLanguage.cancelButton")}
                     </button>
                     <button
                       type="button"
@@ -118,7 +123,7 @@ export default function DeleteLanguageConfirmationModal({
                       }`}
                       onClick={onConfirm}
                     >
-                      {isLoading ? "Đang xóa..." : "Xóa vĩnh viễn"}
+                      {isLoading ? t("detail.deleteLanguage.deleting") : t("detail.deleteLanguage.deleteButton")}
                     </button>
                   </div>
                 </div>

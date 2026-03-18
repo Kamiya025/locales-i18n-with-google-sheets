@@ -32,12 +32,15 @@ interface ExportConfirmationModalProps {
   data: SpreadsheetResponse
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function ExportConfirmationModal({
   isOpen,
   onClose,
   onConfirm,
   data,
 }: ExportConfirmationModalProps) {
+  const { t, locale } = useTranslation()
   const [selectedFallback, setSelectedFallback] = useState<string>("")
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 
@@ -100,7 +103,7 @@ export default function ExportConfirmationModal({
         completed,
         missing,
         percentage,
-      })
+        })
     })
 
     return stats.sort((a, b) => b.percentage - a.percentage)
@@ -129,8 +132,8 @@ export default function ExportConfirmationModal({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="📦 Thiết lập Xuất JSON"
-      subtitle="Quản lý ngôn ngữ dự phòng và kiểm tra tỉ lệ dịch thuật"
+      title={t("detail.exportModal.title")}
+      subtitle={t("detail.exportModal.subtitle")}
       size="lg"
       footer={
         <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-black dark:to-indigo-950 text-white shadow-2xl relative overflow-hidden border-t border-white/10">
@@ -144,13 +147,10 @@ export default function ExportConfirmationModal({
               </div>
               <div className="hidden sm:block">
                 <div className="text-xl font-black leading-none mb-1">
-                  Xuất {selectedLanguages.length} File
+                  {t("detail.exportModal.exportCount").replace("{count}", selectedLanguages.length.toString())}
                 </div>
                 <div className="text-sm text-slate-400 font-medium">
-                  Dự phòng bằng{" "}
-                  <span className="text-blue-400 font-bold">
-                    {selectedFallback || "Không có"}
-                  </span>
+                  {t("detail.exportModal.fallbackBy").replace("{lang}", selectedFallback || t("detail.exportModal.none"))}
                 </div>
               </div>
             </div>
@@ -160,14 +160,14 @@ export default function ExportConfirmationModal({
                 onClick={onClose}
                 className="flex-1 sm:px-4 py-2 rounded-2xl bg-white/5 hover:bg-white/10 text-white font-bold transition-all border border-white/10"
               >
-                Hủy
+                {t("detail.exportModal.cancel")}
               </button>
               <button
                 onClick={handleConfirm}
                 disabled={selectedLanguages.length === 0}
                 className="sm:px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-black shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
               >
-                Bắt đầu tải về
+                {t("detail.exportModal.startDownload")}
               </button>
             </div>
           </div>
@@ -179,19 +179,19 @@ export default function ExportConfirmationModal({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             {
-              label: "Ngôn ngữ",
+              label: t("detail.exportModal.stats.languages"),
               value: languageStats.length,
               icon: "🌍",
               color: "from-blue-500/10 to-indigo-500/10",
             },
             {
-              label: "Tổng từ khóa",
+              label: t("detail.exportModal.stats.totalKeywords"),
               value: languageStats[0]?.total || 0,
               icon: "🔖",
               color: "from-purple-500/10 to-violet-500/10",
             },
             {
-              label: "Hoàn thành TB",
+              label: t("detail.exportModal.stats.averageCompleted"),
               value: `${Math.round(languageStats.reduce((sum, s) => sum + s.percentage, 0) / (languageStats.length || 1))}%`,
               icon: "✅",
               color: "from-emerald-500/10 to-teal-500/10",
@@ -220,15 +220,15 @@ export default function ExportConfirmationModal({
         <div className="flex items-center justify-between px-2">
           <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <span className="w-4 h-1 bg-blue-600 rounded-full"></span>
-            Cấu hình Ngôn ngữ
+            {t("detail.exportModal.configTitle")}
           </h3>
           <button
             onClick={toggleAll}
             className="text-[10px] font-black uppercase tracking-tighter px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-blue-600 hover:text-white transition-all border border-slate-200 dark:border-slate-700"
           >
             {selectedLanguages.length === languageStats.length
-              ? "Bỏ chọn tất cả"
-              : "Chọn tất cả"}
+              ? t("detail.exportModal.deselectAll")
+              : t("detail.exportModal.selectAll")}
           </button>
         </div>
 
@@ -250,10 +250,10 @@ export default function ExportConfirmationModal({
             </div>
             <div className="flex-1">
               <div className="font-bold text-slate-900 dark:text-white text-base">
-                Không sử dụng fallback
+                {t("detail.exportModal.noFallback")}
               </div>
               <div className="text-xs text-slate-500">
-                Giữ nguyên các giá trị trống trong file JSON
+                {t("detail.exportModal.noFallbackDesc")}
               </div>
             </div>
             <div
@@ -304,13 +304,12 @@ export default function ExportConfirmationModal({
                       </h4>
                       {suggestedFallback?.language === stat.language && (
                         <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500 text-white tracking-tighter">
-                          Gợi ý
+                          {t("detail.exportModal.suggested")}
                         </span>
                       )}
                     </div>
                     <p className="text-xs font-medium text-slate-500 mt-1">
-                      {stat.completed} từ hoàn thành • {stat.missing} từ còn
-                      thiếu
+                      {t("detail.exportModal.wordsCompleted").replace("{count}", stat.completed.toString())} • {t("detail.exportModal.wordsMissing").replace("{count}", stat.missing.toString())}
                     </p>
                   </div>
                 </div>
@@ -325,7 +324,7 @@ export default function ExportConfirmationModal({
                   }`}
                 >
                   <span className="text-[10px] font-semibold tracking-tighter">
-                    Làm Fallback
+                    {t("detail.exportModal.setAsFallback")}
                   </span>
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedFallback === stat.language ? "border-white" : "border-slate-300 dark:border-slate-600"}`}
@@ -341,7 +340,7 @@ export default function ExportConfirmationModal({
               <div className="relative group/progress">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    Tỉ lệ dịch thuật
+                    {t("detail.exportModal.translationRate")}
                   </span>
                   <span
                     className={`text-[11px] font-black ${stat.percentage === 100 ? "text-emerald-500" : "text-blue-500"}`}

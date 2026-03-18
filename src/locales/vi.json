@@ -1,0 +1,384 @@
+{
+  "common": {
+    "appTitle": "Translator Tool",
+    "googleSheets": "Google Sheets",
+    "excel": "Excel",
+    "jsonToExcel": "JSON → Excel",
+    "docx": "Docx Translation",
+    "tag_tool": "Công cụ",
+    "tag_new": "Mới",
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "loading": "Đang tải...",
+    "comingSoon": "Sắp ra mắt",
+    "auth": {
+      "profile": "Trang cá nhân",
+      "searchDrive": "Tìm kiếm Drive",
+      "logout": "Đăng xuất",
+      "login": "Đăng nhập"
+    },
+    "footer": {
+      "devRole": "Frontend Developer",
+      "bio": "Một {role} đầy nhiệt huyết, tận tâm tạo ra các trải nghiệm kỹ thuật số đặc biệt với công nghệ hiện đại và thiết kế UI/UX cao cấp.",
+      "projectsTitle": "Dự án & Công cụ",
+      "techTitle": "Công nghệ cốt lõi",
+      "connectTitle": "Kết nối nhanh",
+      "currentlyBuilding": "Đang phát triển...",
+      "trustedBy": " Được hàng ngàn lập trình viên tin dùng",
+      "vision": "Bạn đã có ý tưởng? Hãy để chúng tôi biến nó thành hiện thực.",
+      "available": "Đang nhận dự án freelance",
+      "startConversation": "Bắt đầu trò chuyện",
+      "privacy": "Bảo mật",
+      "terms": "Điều khoản",
+      "openSource": "Mã nguồn mở"
+    }
+  },
+  "home": {
+    "hero": {
+      "title_prefix": "Quản lý ",
+      "title_highlight": "Bản Dịch",
+      "subtitle": "chưa bao giờ dễ hơn",
+      "description": "Chọn nguồn dữ liệu phù hợp với quy trình làm việc của bạn"
+    },
+    "cards": {
+      "google": {
+        "title": "Google Sheets",
+        "desc": "Kết nối trực tiếp, đồng bộ thời gian thực",
+        "features": [
+          "Kết nối trực tiếp qua URL",
+          "Lưu & đồng bộ tự động",
+          "Hỗ trợ chia sẻ nhiều người",
+          "Đăng nhập Google để chỉnh sửa"
+        ]
+      },
+      "excel": {
+        "title": "Local Excel",
+        "desc": "Upload & chỉnh sửa file .xlsx nhanh chóng",
+        "features": [
+          "Không cần đăng nhập Google",
+          "Xử lý trực tiếp trên browser",
+          "Xuất file XLSX nguyên bản",
+          "Fast & Offline support"
+        ]
+      },
+      "json": {
+        "title": "Chuyển JSON → Excel",
+        "desc": "Gộp nhiều file i18n JSON thành 1 file XLSX duy nhất",
+        "features": [
+          "Hỗ trợ JSON phẳng & lồng nhau",
+          "Gộp nhiều file ngôn ngữ",
+          "Xuất 1 file XLSX đầy đủ"
+        ]
+      },
+      "docx": {
+        "title": "Dịch file Word",
+        "desc": "Giữ nguyên định dạng, dịch chuyên nghiệp"
+      }
+    },
+    "docxPanel": {
+      "invalidFile": "Vui lòng chọn file .docx",
+      "errorReading": "Lỗi khi đọc file Word, vui lòng thử lại.",
+      "processing": "Đang xử lý {name}...",
+      "dropTitle": "Kéo thả file .docx vào đây",
+      "dropSubtitle": "hoặc {choose} · Bản dịch chia đoạn văn",
+      "chooseFromComputer": "chọn từ máy tính",
+      "features": [
+        "Tự động chia đoạn văn",
+        "Bản dịch bên dưới bản gốc",
+        "Bảo mật tài liệu offline"
+      ]
+    },
+    "excelPanel": {
+      "invalidFile": "Vui lòng chọn file .xlsx hoặc .xls",
+      "errorReading": "Lỗi khi đọc file Excel, vui lòng thử lại.",
+      "processing": "Đang xử lý {name}...",
+      "dropTitle": "Kéo thả file vào đây",
+      "dropSubtitle": "hoặc {choose} · .xlsx, .xls",
+      "chooseFromComputer": "chọn từ máy tính",
+      "features": [
+        "Không cần đăng nhập",
+        "Xử lý trên máy tính",
+        "Dữ liệu không gửi đi"
+      ]
+    },
+    "googleSheetsPanel": {
+      "invalidUrl": "Vui lòng nhập URL Google Sheets",
+      "notGoogleSheets": "URL phải là link Google Sheets",
+      "invalidId": "Không thể lấy ID từ URL này",
+      "placeholder": "https://docs.google.com/spreadsheets/d/...",
+      "historyTip": "Xem lịch sử",
+      "openButton": "Mở",
+      "cloudSyncProjects": "Dự án đồng bộ Cloud"
+    },
+    "jsonToExcelPanel": {
+      "invalidFile": "Vui lòng chọn ít nhất 1 file .json",
+      "readSuccess": "Đã đọc {count} file thành công!",
+      "readError": "Lỗi khi đọc file JSON",
+      "noFilesToConvert": "Chưa có file nào để chuyển đổi",
+      "exportSuccess": "Đã tạo file translations.xlsx với style!",
+      "exportError": "Lỗi khi xuất file",
+      "processing": "Đang đọc file...",
+      "dropTitle": "Kéo thả file JSON vào đây",
+      "dropSubtitle": "hoặc {choose} · Hỗ trợ nhiều file cùng lúc",
+      "chooseFile": "chọn file",
+      "stats": "{languages} ngôn ngữ · {keywords} từ khóa",
+      "deleteAll": "Xóa tất cả",
+      "exportButton": "Xuất ra Excel (.xlsx)",
+      "features": [
+        "Hỗ trợ JSON phẳng & lồng nhau",
+        "Gộp nhiều file ngôn ngữ",
+        "Xuất 1 file XLSX đầy đủ"
+      ]
+    },
+    "getLink": {
+      "invalidUrl": "Vui lòng nhập URL Google Sheets",
+      "notGoogleSheets": "URL phải là link Google Sheets",
+      "invalidId": "Không thể lấy ID từ URL này",
+      "redirectError": "Có lỗi xảy ra khi chuyển trang",
+      "excelReadError": "Lỗi khi đọc file Excel, vui lòng thử lại.",
+      "placeholder": "Dán link Google Sheets...",
+      "placeholderLong": "Dán link Google Sheets vào đây...",
+      "historyTip": "Xem lịch sử",
+      "buttonTextLong": "Lấy dữ liệu",
+      "buttonTextShort": "Get",
+      "processing": "Đang xử lý...",
+      "uploadExcel": "Hoặc tải lên file Excel (.xlsx) từ máy tính"
+    },
+    "header": {
+      "home": "Trang chủ",
+      "projects": "Dự án của tôi",
+      "docs": "Tài liệu",
+      "support": "Hỗ trợ"
+    }
+  },
+  "detail": {
+    "page": {
+      "loading": "Đang tải bảng tính...",
+      "errorTitle": "Oops! Có lỗi xảy ra",
+      "defaultError": "Không thể tải spreadsheet. Vui lòng kiểm tra lại ID.",
+      "retry": "Thử lại ngay",
+      "backHome": "Quay về trang chủ"
+    },
+    "header": {
+      "myProjects": "Dự án của tôi",
+      "sheetDetail": "Chi tiết bảng tính",
+      "addCategory": "Thêm Danh Mục",
+      "exportJson": "Xuất JSON",
+      "exportExcel": "Xuất Excel"
+    },
+    "sidebar": {
+      "overallProgress": "Tiến độ tổng quan",
+      "completed": "Hoàn thành",
+      "total": "Tổng số",
+      "quickAccess": "Danh mục nhanh",
+      "allCategories": "Tất cả danh mục",
+      "proTip": "Mẹo hay",
+      "fKeyTip": "Sử dụng phím ⌘/Ctrl + F để tìm kiếm nhanh từ khóa."
+    },
+    "filters": {
+      "searchPlaceholder": "Tìm kiếm từ khóa (Key) hoặc nội dung dịch...",
+      "all": "Tất cả",
+      "untranslated": "Chưa dịch"
+    },
+    "emptyState": {
+      "noResults": "Không tìm thấy kết quả",
+      "adjustFilter": "Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm của bạn."
+    },
+    "sheet": {
+      "keywords": "từ khóa",
+      "completed": "Hoàn thành",
+      "needTranslate": "cần dịch",
+      "progress": "Tiến độ",
+      "showing": "Hiển thị",
+      "deleteCategory": "Xóa Danh Mục",
+      "addKeyword": "Thêm từ khóa",
+      "emptyTitle": "Trống trơn",
+      "emptyDesc": "Chưa có từ khóa nào trong danh mục này. Hãy bắt đầu bằng cách thêm từ khóa đầu tiên!",
+      "loadMore": "Xem thêm",
+      "deleteSuccess": "Đã xóa danh mục \"{title}\" thành công",
+      "addForm": {
+        "keyLabel": "Từ khóa",
+        "keyDesc": "Nhập key để định danh bản dịch (vd: home.title, button.save)",
+        "keyPlaceholder": "Nhập từ khóa (vd: home.title)",
+        "keyRulesTitle": "Quy tắc đặt tên từ khóa:",
+        "keyRuleDots": "• Sử dụng dấu chấm (.) để phân cấp",
+        "keyRuleExamples": "• Ví dụ: home.title, button.save",
+        "keyRuleUnique": "• Không được trùng lặp",
+        "translationLabel": "Bản dịch",
+        "translationDesc": "Nhập bản dịch cho từng ngôn ngữ. Ít nhất phải có một bản dịch không trống.",
+        "translationTipsTitle": "Tips bản dịch:",
+        "translationTipAtLeastOne": "• Phải có ít nhất 1 bản dịch",
+        "translationTipConsistent": "• Giữ ý nghĩa nhất quán",
+        "translationTipAvoidLong": "• Tránh dịch quá dài",
+        "translationTipContext": "• Kiểm tra ngữ cảnh sử dụng",
+        "saveButton": "Lưu",
+        "saving": "Đang lưu...",
+        "errors": {
+          "keyEmpty": "Key không được để trống",
+          "keyExists": "Key này đã tồn tại trong sheet",
+          "translationEmpty": "Phải có ít nhất một bản dịch không rỗng"
+        }
+      }
+    },
+    "exportModal": {
+      "title": "📦 Thiết lập Xuất JSON",
+      "subtitle": "Quản lý ngôn ngữ dự phòng và kiểm tra tỉ lệ dịch thuật",
+      "exportCount": "Xuất {count} File",
+      "fallbackBy": "Dự phòng bằng {lang}",
+      "none": "Không có",
+      "cancel": "Hủy",
+      "startDownload": "Bắt đầu tải về",
+      "stats": {
+        "languages": "Ngôn ngữ",
+        "totalKeywords": "Tổng từ khóa",
+        "averageCompleted": "Hoàn thành TB"
+      },
+      "configTitle": "Cấu hình Ngôn ngữ",
+      "deselectAll": "Bỏ chọn tất cả",
+      "selectAll": "Chọn tất cả",
+      "noFallback": "Không sử dụng fallback",
+      "noFallbackDesc": "Giữ nguyên các giá trị trống trong file JSON",
+      "suggested": "Gợi ý",
+      "wordsCompleted": "{count} từ hoàn thành",
+      "wordsMissing": "{count} từ còn thiếu",
+      "setAsFallback": "Làm Fallback",
+      "translationRate": "Tỉ lệ dịch thuật"
+    },
+    "formatGuide": {
+      "trigger": "Hướng dẫn format Google Sheets",
+      "close": "Đóng",
+      "createTemplate": "Tạo Template với Style Đẹp",
+      "title": "Hướng dẫn Format Google Sheets",
+      "subtitle": "Cách format Google Sheets để sử dụng với app",
+      "requiredFormat": "✅ Format bắt buộc",
+      "rulesTitle": "Quy tắc:",
+      "ruleKeyColumn": "Column đầu tiên phải có tên KEY hoặc key",
+      "ruleUnique": "Mỗi KEY phải duy nhất (không trùng lặp)",
+      "ruleNotEmpty": "KEY không được để trống",
+      "ruleLocales": "Các columns khác là tên ngôn ngữ",
+      "ruleAtLeastOne": "Ít nhất phải có 1 column ngôn ngữ",
+      "commonErrors": "❌ Các lỗi thường gặp",
+      "errorMissingKey": "1. Thiếu column KEY",
+      "errorMissingKeyDesc": "← ❌ Không có column KEY",
+      "errorMissingKeyFix": "Khắc phục: Thêm column đầu tiên với tên \"KEY\"",
+      "errorDuplicateKey": "2. KEY trùng lặp",
+      "errorDuplicateKeyDesc": "← ❌ Trùng key \"hello\"",
+      "errorDuplicateKeyFix": "Khắc phục: Đổi tên thành \"hello\", \"hello_casual\" hoặc \"hi\"",
+      "errorEmptyKey": "3. KEY trống",
+      "errorEmptyKeyDesc": "← ❌ KEY trống",
+      "errorEmptyKeyFix": "Khắc phục: Điền KEY cho row này, ví dụ: \"goodbye\"",
+      "proTips": "💡 Mẹo hay",
+      "tipNaming": "• KEY nên ngắn gọn và có ý nghĩa: menu.home, button.save",
+      "tipEmptyTranslation": "• Có thể để trống translation trong khi làm việc",
+      "tipConvention": "• Sử dụng naming convention: page.section.element",
+      "tipHeaders": "• Headers tên ngôn ngữ có thể là: English, en, EN, Vietnamese, vi"
+    },
+    "templateCreator": {
+      "title": "Tạo Template với Style Đẹp",
+      "subtitle": "Tạo Google Sheets template với format đẹp và chuẩn",
+      "previewTitle": "📋 Preview Template",
+      "langManagerTitle": "🌍 Quản lý Ngôn ngữ",
+      "placeholderNewLang": "Thêm ngôn ngữ mới...",
+      "addButton": "Thêm",
+      "cancelButton": "Hủy",
+      "createButton": "Tạo Template",
+      "copySuccess": "📋 Hướng dẫn đã được copy vào clipboard!\n\nGoogle Sheets mới sẽ mở trong tab mới.",
+      "instructions": {
+        "title": "Hướng dẫn tạo template với style đẹp:",
+        "step1": "1. Mở Google Sheets mới: {url}",
+        "step2": "2. Tạo headers:",
+        "step3": "3. Format đẹp (như sheet mẫu của bạn):",
+        "step3_sub1": "- Select row 1 (headers)",
+        "step3_sub2": "- Chọn màu nền: Xanh dương (#4285f4)",
+        "step3_sub3": "- Text màu trắng và bold",
+        "step3_sub4": "- Căn giữa text",
+        "step4": "4. Thêm data mẫu:",
+        "step5": "5. Save và sử dụng!"
+      }
+    },
+    "addLanguage": {
+      "title": "Thêm Ngôn Ngữ Mới",
+      "subtitle": "Thêm cột ngôn ngữ mới vào Google Sheets",
+      "label": "Tên ngôn ngữ",
+      "placeholder": "Ví dụ: English, Français, 日本語...",
+      "hint": "Tên ngôn ngữ sẽ trở thành header column trong Google Sheets",
+      "cancelButton": "Hủy",
+      "addLanguageButton": "Thêm Ngôn Ngữ",
+      "errorNoSpreadsheet": "Không tìm thấy thông tin bảng tính"
+    },
+    "deleteLanguage": {
+      "title": "Xóa ngôn ngữ?",
+      "description": "Bạn có chắc chắn muốn xóa ngôn ngữ <strong class=\"text-slate-900\">{lang}</strong>? Hành động này sẽ xóa <span class=\"text-red-600 font-bold uppercase tracking-tight\">VĨNH VIỄN</span> toàn bộ cột và dữ liệu bản dịch liên quan trong tất cả các sheets.",
+      "warning": "⚠️ Bước này không thể hoàn tác. Chỉ thực hiện khi bạn biết chắc chắn mình đang làm gì.",
+      "inputLabel": "Nhập tên ngôn ngữ để xác nhận",
+      "cancelButton": "Hủy bỏ",
+      "deleteButton": "Xóa vĩnh viễn",
+      "deleting": "Đang xóa..."
+    },
+    "addSheet": {
+      "title": "Tạo Danh Mục Mới",
+      "subtitle": "Thêm sheet mới vào Google Spreadsheet",
+      "label": "Tên danh mục",
+      "placeholder": "Ví dụ: Common, Navigation, Errors...",
+      "hint": "Tên danh mục sẽ trở thành sheet mới trong Google Spreadsheet",
+      "cancelButton": "Hủy",
+      "createButton": "Tạo Danh Mục",
+      "errors": {
+        "empty": "Tên danh mục không được để trống",
+        "tooShort": "Tên danh mục phải có ít nhất 2 ký tự",
+        "tooLong": "Tên danh mục không được quá 50 ký tự",
+        "invalidChars": "Tên danh mục không được chứa ký tự đặc biệt: [ ] \\ / ? * :",
+        "duplicate": "Danh mục này đã tồn tại",
+        "noSpreadsheet": "Không có spreadsheet nào được tải"
+      }
+    },
+    "formatWarning": {
+      "title": "Google Sheets Format Warning",
+      "subtitle": "Phát hiện vấn đề format cần được sửa",
+      "cancelButton": "Hủy",
+      "openSheetsButton": "Mở Sheets",
+      "viewAndFixButton": "Xem & Sửa ({count})",
+      "autoFixButton": "Tự động sửa({count})",
+      "fixingState": "Đang sửa...",
+      "summaryTitle": "Phát hiện vấn đề format trong Google Sheets",
+      "summaryDesc": "Google Sheets của bạn có <span class=\"font-semibold text-amber-600\">{count} vấn đề format</span> cần được sửa để có thể sử dụng với ứng dụng translation này.",
+      "summaryTip": "<span class=\"font-medium\">Đừng lo!</span> Chúng tôi có thể tự động sửa <span class=\"font-semibold text-emerald-600\">{count} vấn đề</span> này cho bạn.",
+      "sheetDetailTitle": "Chi tiết vấn đề theo sheet:",
+      "sheetLabel": "Sheet: ",
+      "fixableCount": "<span class=\"font-semibold text-emerald-600\">{count} vấn đề</span> có thể tự động sửa",
+      "actionTitle": "Bạn muốn chúng tôi làm gì?",
+      "actionCancel": "<span class=\"font-medium text-slate-700\">Hủy:</span> Đóng và không thay đổi gì",
+      "actionView": "<span class=\"font-medium text-slate-700\">Xem & Sửa:</span> Xem chi tiết và chọn từng vấn đề cần sửa",
+      "actionAuto": "<span class=\"font-medium text-slate-700\">Tự động sửa tất cả:</span> Sửa tất cả vấn đề ngay lập tức"
+    },
+    "autoFix": {
+      "title": "Auto-Fix Google Sheets Format",
+      "subtitle": "Tự động sửa lỗi format trong Google Sheets",
+      "closeButton": "Đóng",
+      "openSheetsButton": "Mở Google Sheets",
+      "fixAllButton": "Sửa Tất Cả ({count})",
+      "summaryTitle": "Phát hiện {count} vấn đề format cần sửa",
+      "summaryDesc": "Nhấn <span class=\"font-medium text-slate-700\">\"Sửa\"</span> để tự động khắc phục từng vấn đề hoặc <span class=\"font-medium text-slate-700\">\"Sửa Tất Cả\"</span> để xử lý một lượt.",
+      "sheetTitlePrefix": "Sheet: ",
+      "foundErrorsTitle": "Lỗi được tìm thấy:",
+      "autoFixTitle": "Sửa chữa tự động:",
+      "fixingState": "Đang sửa..."
+    },
+    "row": {
+      "updateSuccess": "Đã cập nhật: {key}",
+      "copySuccess": "Đã copy mã từ khoá!",
+      "copyTip": "Click để copy mã này",
+      "updateButton": "Cập nhật"
+    },
+    "deleteModal": {
+      "title": "🗑️ Xóa Danh Mục",
+      "subtitle": "Hành động này không thể hoàn tác",
+      "confirmText": "Xác nhận xóa: {title}?",
+      "description": "Toàn bộ dữ liệu bản dịch bên trong danh mục này sẽ bị xóa vĩnh viễn khỏi Google Sheet / Excel.",
+      "advice": "Chúng tôi khuyên bạn nên xuất dữ liệu (Export) trước khi thực hiện xóa để lưu trữ dự phòng.",
+      "cancel": "Hủy bỏ",
+      "confirm": "Xác nhận xóa"
+    }
+  }
+}

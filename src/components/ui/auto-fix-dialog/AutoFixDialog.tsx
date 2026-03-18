@@ -30,12 +30,15 @@ interface AutoFixDialogProps {
   readonly validationIssues: ValidationIssue[]
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function AutoFixDialog({
   isOpen,
   onClose,
   spreadsheetId,
   validationIssues,
 }: AutoFixDialogProps) {
+  const { t } = useTranslation()
   const [fixingItems, setFixingItems] = useState<Set<string>>(new Set())
   const { setResponse } = useSpreadsheet()
 
@@ -147,7 +150,7 @@ export default function AutoFixDialog({
   const footer = (
     <div className="flex justify-between items-center">
       <Button variant="outline" onClick={onClose}>
-        Đóng
+        {t("detail.autoFix.closeButton")}
       </Button>
 
       <div className="flex gap-3">
@@ -175,7 +178,7 @@ export default function AutoFixDialog({
             </svg>
           }
         >
-          Mở Google Sheets
+          {t("detail.autoFix.openSheetsButton")}
         </Button>
         <Button
           variant="gradient"
@@ -198,7 +201,7 @@ export default function AutoFixDialog({
             </svg>
           }
         >
-          Sửa Tất Cả ({totalFixes})
+          {t("detail.autoFix.fixAllButton").replace("{count}", totalFixes.toString())}
         </Button>
       </div>
     </div>
@@ -208,8 +211,8 @@ export default function AutoFixDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Auto-Fix Google Sheets Format"
-      subtitle="Tự động sửa lỗi format trong Google Sheets"
+      title={t("detail.autoFix.title")}
+      subtitle={t("detail.autoFix.subtitle")}
       icon="🔧"
       iconColor="emerald"
       size="xl"
@@ -236,14 +239,12 @@ export default function AutoFixDialog({
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-slate-800 text-lg mb-2">
-                Phát hiện {totalFixes} vấn đề format cần sửa
+                {t("detail.autoFix.summaryTitle").replace("{count}", totalFixes.toString())}
               </h3>
-              <p className="text-slate-600 leading-relaxed">
-                Nhấn <span className="font-medium text-slate-700">"Sửa"</span>{" "}
-                để tự động khắc phục từng vấn đề hoặc{" "}
-                <span className="font-medium text-slate-700">"Sửa Tất Cả"</span>{" "}
-                để xử lý một lượt.
-              </p>
+              <p 
+                className="text-slate-600 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: t("detail.autoFix.summaryDesc") }}
+              />
             </div>
           </div>
         </div>
@@ -272,7 +273,7 @@ export default function AutoFixDialog({
                   </svg>
                 </div>
                 <span>
-                  Sheet:{" "}
+                  {t("detail.autoFix.sheetTitlePrefix")}
                   <span className="text-blue-600">"{issue.sheetTitle}"</span>
                 </span>
               </h4>
@@ -284,7 +285,7 @@ export default function AutoFixDialog({
                     <div className="w-5 h-5 rounded bg-red-100 flex items-center justify-center">
                       <span className="text-red-600 text-xs">⚠</span>
                     </div>
-                    Lỗi được tìm thấy:
+                    {t("detail.autoFix.foundErrorsTitle")}
                   </h5>
                   <div className="space-y-2">
                     {issue.errors.map((error) => (
@@ -309,7 +310,7 @@ export default function AutoFixDialog({
                     <div className="w-5 h-5 rounded bg-emerald-100 flex items-center justify-center">
                       <span className="text-emerald-600 text-xs">✓</span>
                     </div>
-                    Sửa chữa tự động:
+                    {t("detail.autoFix.autoFixTitle")}
                   </h5>
                   <div className="space-y-3">
                     {issue.fixes.map((fix) => {
@@ -340,7 +341,7 @@ export default function AutoFixDialog({
                               loading={isFixing}
                               className="flex-shrink-0"
                             >
-                              {isFixing ? "Đang sửa..." : fix.action}
+                              {isFixing ? t("detail.autoFix.fixingState") : fix.action}
                             </Button>
                           </div>
                         </div>

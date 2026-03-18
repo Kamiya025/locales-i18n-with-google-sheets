@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation"
 import { customToast } from "@/components/ui/toast"
 import { parseDocxToSegments } from "@/util/docx"
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function DocxPanel() {
   const router = useRouter()
+  const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -14,7 +17,7 @@ export default function DocxPanel() {
 
   const processFile = async (file: File) => {
     if (!file.name.match(/\.(docx)$/i)) {
-      customToast.error("Vui lòng chọn file .docx")
+      customToast.error(t("home.docxPanel.invalidFile"))
       return
     }
     setIsProcessing(true)
@@ -26,7 +29,7 @@ export default function DocxPanel() {
       router.push("/translate-docx")
     } catch (err) {
       console.error(err)
-      customToast.error("Lỗi khi đọc file Word, vui lòng thử lại.")
+      customToast.error(t("home.docxPanel.errorReading"))
       setFileName(null)
     } finally {
       setIsProcessing(false)
@@ -68,9 +71,7 @@ export default function DocxPanel() {
           <>
             <div className="w-10 h-10 border-3 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
             <p className="text-sm font-medium text-slate-600">
-              Đang xử lý{" "}
-              <span className="text-amber-600 font-semibold">{fileName}</span>
-              ...
+              {t("home.docxPanel.processing").replace("{name}", fileName || "")}
             </p>
           </>
         ) : (
@@ -94,14 +95,20 @@ export default function DocxPanel() {
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-slate-700">
-                Kéo thả file .docx vào đây
+                {t("home.docxPanel.dropTitle")}
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                hoặc{" "}
-                <span className="text-amber-600 font-medium underline underline-offset-2">
-                  chọn từ máy tính
-                </span>{" "}
-                · Bản dịch chia đoạn văn
+                {t("home.docxPanel.dropSubtitle").split("{choose}").map((part, index) => {
+                  if (index === 0) return part
+                  return (
+                    <span key={index} className="contents">
+                      <span className="text-amber-600 font-medium underline underline-offset-2">
+                        {t("home.docxPanel.chooseFromComputer")}
+                      </span>
+                      {part}
+                    </span>
+                  )
+                })}
               </p>
             </div>
           </>
@@ -118,11 +125,7 @@ export default function DocxPanel() {
 
       {/* Info badges */}
       <div className="flex flex-wrap gap-2">
-        {[
-          "Tự động chia đoạn văn",
-          "Bản dịch bên dưới bản gốc",
-          "Bảo mật tài liệu offline",
-        ].map((txt) => (
+        {(t("home.docxPanel.features") as any as string[]).map((txt) => (
           <span
             key={txt}
             className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60 font-medium"

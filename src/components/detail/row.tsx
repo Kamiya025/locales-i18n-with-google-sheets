@@ -4,6 +4,7 @@ import { SheetRowData } from "@/models"
 import { useSpreadsheet } from "@/providers/preadsheetProvider"
 import { useEffect, useState } from "react"
 import LanguageInputRow from "../ui/language-input-row"
+import { useTranslation } from "@/providers/I18nProvider"
 
 export function RowItemViewer(
   props: Readonly<{ row: SheetRowData; sheetId: number }>,
@@ -11,11 +12,12 @@ export function RowItemViewer(
   const { row, sheetId } = props
   const { data, selectedLocales } = useSpreadsheet()
   const { updateTranslation } = useSpreadsheet()
+  const { t } = useTranslation()
   const [state, setState] = useState(row)
 
   const mutationSaveRow = useSyncSheetSaveRow(() => {
     updateTranslation(sheetId, state)
-    customToast.success(`Đã cập nhật: ${row.key}`)
+    customToast.success(t("detail.row.updateSuccess").replace("{key}", row.key))
   })
 
   useEffect(() => {
@@ -32,9 +34,9 @@ export function RowItemViewer(
         className="absolute top-0 left-4 sm:left-6 z-10 px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg sm:rounded-xl bg-slate-900 text-white text-[9px] sm:text-[11px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 cursor-copy flex items-center gap-2 group-hover:-translate-y-1 transition-transform"
         onClick={() => {
           navigator.clipboard.writeText(row.key)
-          customToast.success("Đã copy mã từ khoá!")
+          customToast.success(t("detail.row.copySuccess"))
         }}
-        title="Click để copy mã này"
+        title={t("detail.row.copyTip")}
       >
         <span className="opacity-60">KEY:</span>{" "}
         <span className="max-w-[120px] sm:max-w-none truncate">{row.key}</span>
@@ -114,7 +116,7 @@ export function RowItemViewer(
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                Cập nhật
+                {t("detail.row.updateButton")}
               </button>
             )}
           </div>

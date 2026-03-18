@@ -9,10 +9,13 @@ interface TemplateCreatorProps {
   readonly onClose: () => void
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function TemplateCreator({
   isOpen,
   onClose,
 }: Readonly<TemplateCreatorProps>) {
+  const { t } = useTranslation()
   const [languages, setLanguages] = useState(["English", "Vietnamese"])
   const [newLanguage, setNewLanguage] = useState("")
 
@@ -33,28 +36,28 @@ export default function TemplateCreator({
 
     // Instructions for manual setup (since we can't auto-create with exact formatting)
     const instructions = `
-Hướng dẫn tạo template với style đẹp:
+${t("detail.templateCreator.instructions.title")}
 
-1. Mở Google Sheets mới: ${templateUrl}
+${t("detail.templateCreator.instructions.step1").replace("{url}", templateUrl)}
 
-2. Tạo headers:
+${t("detail.templateCreator.instructions.step2")}
    - A1: KEY
    ${languages
      .map((lang, index) => `   - ${String.fromCharCode(66 + index)}1: ${lang}`)
      .join("\n")}
 
-3. Format đẹp (như sheet mẫu của bạn):
-   - Select row 1 (headers)
-   - Chọn màu nền: Xanh dương (#4285f4)
-   - Text màu trắng và bold
-   - Căn giữa text
+${t("detail.templateCreator.instructions.step3")}
+   ${t("detail.templateCreator.instructions.step3_sub1")}
+   ${t("detail.templateCreator.instructions.step3_sub2")}
+   ${t("detail.templateCreator.instructions.step3_sub3")}
+   ${t("detail.templateCreator.instructions.step3_sub4")}
 
-4. Thêm data mẫu:
+${t("detail.templateCreator.instructions.step4")}
    - A2: hello
    - B2: Hello  
    - C2: Xin chào
    
-5. Save và sử dụng!
+${t("detail.templateCreator.instructions.step5")}
     `.trim()
 
     // Copy instructions to clipboard
@@ -64,9 +67,7 @@ Hướng dẫn tạo template với style đẹp:
     window.open(templateUrl, "_blank")
 
     // Show success message
-    alert(
-      "📋 Hướng dẫn đã được copy vào clipboard!\n\nGoogle Sheets mới sẽ mở trong tab mới."
-    )
+    alert(t("detail.templateCreator.copySuccess"))
 
     onClose()
   }
@@ -74,7 +75,7 @@ Hướng dẫn tạo template với style đẹp:
   const footer = (
     <div className="flex justify-end gap-3">
       <Button variant="outline" onClick={onClose}>
-        Hủy
+        {t("detail.templateCreator.cancelButton")}
       </Button>
       <Button
         variant="gradient"
@@ -95,7 +96,7 @@ Hướng dẫn tạo template với style đẹp:
           </svg>
         }
       >
-        Tạo Template
+        {t("detail.templateCreator.createButton")}
       </Button>
     </div>
   )
@@ -104,8 +105,8 @@ Hướng dẫn tạo template với style đẹp:
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Tạo Template với Style Đẹp"
-      subtitle="Tạo Google Sheets template với format đẹp và chuẩn"
+      title={t("detail.templateCreator.title")}
+      subtitle={t("detail.templateCreator.subtitle")}
       icon="🎨"
       iconColor="blue"
       size="lg"
@@ -115,7 +116,7 @@ Hướng dẫn tạo template với style đẹp:
         {/* Preview */}
         <div>
           <h3 className="text-lg font-semibold text-slate-800 mb-3">
-            📋 Preview Template
+            {t("detail.templateCreator.previewTitle")}
           </h3>
           <div className="bg-white border border-slate-200 rounded-lg p-4 overflow-x-auto">
             <table className="w-full border-collapse">
@@ -181,7 +182,7 @@ Hướng dẫn tạo template với style đẹp:
         {/* Language Manager */}
         <div>
           <h3 className="text-lg font-semibold text-slate-800 mb-3">
-            🌍 Quản lý Ngôn ngữ
+            {t("detail.templateCreator.langManagerTitle")}
           </h3>
 
           <div className="space-y-3">
@@ -191,12 +192,12 @@ Hướng dẫn tạo template với style đẹp:
                 type="text"
                 value={newLanguage}
                 onChange={(e) => setNewLanguage(e.target.value)}
-                placeholder="Thêm ngôn ngữ mới..."
+                placeholder={t("detail.templateCreator.placeholderNewLang")}
                 className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 onKeyDown={(e) => e.key === "Enter" && addLanguage()}
               />
               <Button onClick={addLanguage} variant="outline" size="sm">
-                Thêm
+                {t("detail.templateCreator.addButton")}
               </Button>
             </div>
 

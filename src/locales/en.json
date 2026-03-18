@@ -1,0 +1,378 @@
+{
+  "common": {
+    "appTitle": "Translator Tool",
+    "googleSheets": "Google Sheets",
+    "excel": "Excel",
+    "jsonToExcel": "JSON → Excel",
+    "docx": "Docx Translation",
+    "tag_tool": "Tool",
+    "tag_new": "New",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "loading": "Loading...",
+    "comingSoon": "Coming Soon",
+    "footer": {
+      "devRole": "Frontend Developer",
+      "bio": "A passionate {role} dedicated to crafting exceptional digital experiences with modern technologies and luxury UI/UX design.",
+      "projectsTitle": "Projects & Tools",
+      "techTitle": "Tech Mastery",
+      "connectTitle": "Quick Connect",
+      "currentlyBuilding": "Currently building...",
+      "trustedBy": "Trusted by developers worldwide",
+      "vision": "Have a vision? Let's bring it to life with modern code.",
+      "available": "Available for freelance",
+      "startConversation": "Start a Conversation",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "openSource": "Open Source"
+    }
+  },
+  "home": {
+    "hero": {
+      "title_prefix": "Manage ",
+      "title_highlight": "Translations",
+      "subtitle": "has never been easier",
+      "description": "Choose the data source that fits your workflow"
+    },
+    "cards": {
+      "google": {
+        "title": "Google Sheets",
+        "desc": "Direct connection, real-time sync",
+        "features": [
+          "Connect directly via URL",
+          "Auto save & sync",
+          "Collab-ready sharing",
+          "Login to Google to edit"
+        ]
+      },
+      "excel": {
+        "title": "Local Excel",
+        "desc": "Upload & edit .xlsx files quickly",
+        "features": [
+          "No Google login required",
+          "Browser-side processing",
+          "Original XLSX export",
+          "Fast & Offline support"
+        ]
+      },
+      "json": {
+        "title": "Convert JSON → Excel",
+        "desc": "Merge multiple i18n JSON files into a single XLSX",
+        "features": [
+          "Flat & nested JSON support",
+          "Merge multiple languages",
+          "Styled XLSX export"
+        ]
+      },
+      "docx": {
+        "title": "Docx Translation",
+        "desc": "Keep formatting, translate professionally"
+      }
+    },
+    "docxPanel": {
+      "invalidFile": "Please select a .docx file",
+      "errorReading": "Error reading Word file, please try again.",
+      "processing": "Processing {name}...",
+      "dropTitle": "Drag and drop .docx file here",
+      "dropSubtitle": "or {choose} · Paragraph translation",
+      "chooseFromComputer": "choose from computer",
+      "features": [
+        "Automatic paragraph splitting",
+        "Side-by-side translation",
+        "Offline document security"
+      ]
+    },
+    "excelPanel": {
+      "invalidFile": "Please select a .xlsx or .xls file",
+      "errorReading": "Error reading Excel file, please try again.",
+      "processing": "Processing {name}...",
+      "dropTitle": "Drag and drop file here",
+      "dropSubtitle": "or {choose} · .xlsx, .xls",
+      "chooseFromComputer": "choose from computer",
+      "features": [
+        "No login required",
+        "Local processing",
+        "Data stays private"
+      ]
+    },
+    "googleSheetsPanel": {
+      "invalidUrl": "Please enter a Google Sheets URL",
+      "notGoogleSheets": "URL must be a Google Sheets link",
+      "invalidId": "Could not extract ID from this URL",
+      "placeholder": "https://docs.google.com/spreadsheets/d/...",
+      "historyTip": "View history",
+      "openButton": "Open",
+      "cloudSyncProjects": "Cloud Sync Projects"
+    },
+    "jsonToExcelPanel": {
+      "invalidFile": "Please select at least one .json file",
+      "readSuccess": "Read {count} files successfully!",
+      "readError": "Error reading JSON file",
+      "noFilesToConvert": "No files to convert",
+      "exportSuccess": "Created translations.xlsx with styles!",
+      "exportError": "Error exporting file",
+      "processing": "Reading files...",
+      "dropTitle": "Drag and drop JSON files here",
+      "dropSubtitle": "or {choose} · Multi-file support",
+      "chooseFile": "choose files",
+      "stats": "{languages} languages · {keywords} keywords",
+      "deleteAll": "Delete all",
+      "exportButton": "Export to Excel (.xlsx)",
+      "features": [
+        "Flat & nested JSON support",
+        "Merge multiple languages",
+        "Styled XLSX export"
+      ]
+    },
+    "getLink": {
+      "invalidUrl": "Please enter a Google Sheets URL",
+      "notGoogleSheets": "URL must be a Google Sheets link",
+      "invalidId": "Could not extract ID from this URL",
+      "redirectError": "An error occurred while navigating",
+      "excelReadError": "Error reading Excel file, please try again.",
+      "placeholder": "Paste Google Sheets link...",
+      "placeholderLong": "Paste Google Sheets link here...",
+      "historyTip": "View history",
+      "buttonTextLong": "Get data",
+      "buttonTextShort": "Get",
+      "processing": "Processing...",
+      "uploadExcel": "Or upload Excel file (.xlsx) from computer"
+    },
+    "header": {
+      "home": "Home",
+      "projects": "My Projects",
+      "docs": "Docs",
+      "support": "Support"
+    }
+  },
+  "detail": {
+    "page": {
+      "loading": "Loading spreadsheet...",
+      "errorTitle": "Oops! Something went wrong",
+      "defaultError": "Could not load spreadsheet. Please check the ID.",
+      "retry": "Try again",
+      "backHome": "Back to Home"
+    },
+    "header": {
+      "myProjects": "My Projects",
+      "sheetDetail": "Sheet Detail",
+      "addCategory": "Add Category",
+      "exportJson": "Export JSON",
+      "exportExcel": "Export Excel"
+    },
+    "sidebar": {
+      "overallProgress": "Overall Progress",
+      "completed": "Completed",
+      "total": "Total",
+      "quickAccess": "Quick Access",
+      "allCategories": "All Categories",
+      "proTip": "Pro Tip",
+      "fKeyTip": "Use ⌘/Ctrl + F for quick search."
+    },
+    "filters": {
+      "searchPlaceholder": "Search keys or translation content...",
+      "all": "All",
+      "untranslated": "Untranslated"
+    },
+    "emptyState": {
+      "noResults": "No results found",
+      "adjustFilter": "Try adjusting your filters or search keywords."
+    },
+    "sheet": {
+      "keywords": "keywords",
+      "completed": "Completed",
+      "needTranslate": "need translation",
+      "progress": "Progress",
+      "showing": "Showing",
+      "deleteCategory": "Delete Category",
+      "addKeyword": "Add Keyword",
+      "emptyTitle": "Empty",
+      "emptyDesc": "No keywords in this category yet. Start by adding your first one!",
+      "loadMore": "Load more",
+      "deleteSuccess": "Deleted category \"{title}\" successfully",
+      "addForm": {
+        "keyLabel": "Keyword",
+        "keyDesc": "Enter key to identify translation (e.g., home.title, button.save)",
+        "keyPlaceholder": "Enter keyword (e.g., home.title)",
+        "keyRulesTitle": "Keyword naming rules:",
+        "keyRuleDots": "• Use dots (.) for hierarchy",
+        "keyRuleExamples": "• Example: home.title, button.save",
+        "keyRuleUnique": "• Must be unique",
+        "translationLabel": "Translation",
+        "translationDesc": "Enter translation for each language. At least one must be non-empty.",
+        "translationTipsTitle": "Translation tips:",
+        "translationTipAtLeastOne": "• Must have at least 1 translation",
+        "translationTipConsistent": "• Keep meaning consistent",
+        "translationTipAvoidLong": "• Avoid overly long translations",
+        "translationTipContext": "• Check usage context",
+        "saveButton": "Save",
+        "saving": "Saving...",
+        "errors": {
+          "keyEmpty": "Key cannot be empty",
+          "keyExists": "This key already exists in the sheet",
+          "translationEmpty": "Must have at least one non-empty translation"
+        }
+      }
+    },
+    "exportModal": {
+      "title": "📦 Export JSON Settings",
+      "subtitle": "Manage fallback languages and check translation progress",
+      "exportCount": "Export {count} Files",
+      "fallbackBy": "Fallback by {lang}",
+      "none": "None",
+      "cancel": "Cancel",
+      "startDownload": "Start Download",
+      "stats": {
+        "languages": "Languages",
+        "totalKeywords": "Total Keywords",
+        "averageCompleted": "Avg Completion"
+      },
+      "configTitle": "Language Configuration",
+      "deselectAll": "Deselect All",
+      "selectAll": "Select All",
+      "noFallback": "No Fallback",
+      "noFallbackDesc": "Keep empty values in JSON files",
+      "suggested": "Suggested",
+      "wordsCompleted": "{count} words completed",
+      "wordsMissing": "{count} words missing",
+      "setAsFallback": "Set as Fallback",
+      "translationRate": "Translation Rate"
+    },
+    "formatGuide": {
+      "trigger": "Google Sheets Formatting Guide",
+      "close": "Close",
+      "createTemplate": "Create Beautiful Template",
+      "title": "Google Sheets Formatting Guide",
+      "subtitle": "How to format your Google Sheets to work with this app",
+      "requiredFormat": "✅ Required Format",
+      "rulesTitle": "Rules:",
+      "ruleKeyColumn": "First column must be named KEY or key",
+      "ruleUnique": "Each KEY must be unique (no duplicates)",
+      "ruleNotEmpty": "KEY cannot be empty",
+      "ruleLocales": "Other columns are language names",
+      "ruleAtLeastOne": "At least one language column is required",
+      "commonErrors": "❌ Common Errors",
+      "errorMissingKey": "1. Missing KEY column",
+      "errorMissingKeyDesc": "← ❌ No KEY column found",
+      "errorMissingKeyFix": "Fix: Add the first column named \"KEY\"",
+      "errorDuplicateKey": "2. Duplicate KEY",
+      "errorDuplicateKeyDesc": "← ❌ Duplicate key \"hello\"",
+      "errorDuplicateKeyFix": "Fix: Rename to \"hello\", \"hello_casual\", or \"hi\"",
+      "errorEmptyKey": "3. Empty KEY",
+      "errorEmptyKeyDesc": "← ❌ Empty KEY field",
+      "errorEmptyKeyFix": "Fix: Fill in the KEY for this row, e.g., \"goodbye\"",
+      "proTips": "💡 Pro Tips",
+      "tipNaming": "• Keep KEYs short and meaningful: menu.home, button.save",
+      "tipEmptyTranslation": "• You can leave translations empty while working",
+      "tipConvention": "• Use naming conventions like page.section.element",
+      "tipHeaders": "• Language headers can be English, en, EN, Vietnamese, vi"
+    },
+    "templateCreator": {
+      "title": "Create Beautiful Template",
+      "subtitle": "Create Google Sheets template with clean and standard format",
+      "previewTitle": "📋 Preview Template",
+      "langManagerTitle": "🌍 Language Management",
+      "placeholderNewLang": "Add new language...",
+      "addButton": "Add",
+      "cancelButton": "Cancel",
+      "createButton": "Create Template",
+      "copySuccess": "📋 Instructions copied to clipboard!\n\nNew Google Sheets will open in a new tab.",
+      "instructions": {
+        "title": "Instructions to create beautiful template:",
+        "step1": "1. Open new Google Sheets: {url}",
+        "step2": "2. Create headers:",
+        "step3": "3. Beautiful format (like your sample sheet):",
+        "step3_sub1": "- Select row 1 (headers)",
+        "step3_sub2": "- Background color: Blue (#4285f4)",
+        "step3_sub3": "- White and bold text",
+        "step3_sub4": "- Center align text",
+        "step4": "4. Add sample data:",
+        "step5": "5. Save and use!"
+      }
+    },
+    "addLanguage": {
+      "title": "Add New Language",
+      "subtitle": "Add a new language column to Google Sheets",
+      "label": "Language name",
+      "placeholder": "Example: English, Français, 日本語...",
+      "hint": "The language name will become the header column in Google Sheets",
+      "cancelButton": "Cancel",
+      "addLanguageButton": "Add Language",
+      "errorNoSpreadsheet": "No spreadsheet information found"
+    },
+    "deleteLanguage": {
+      "title": "Delete language?",
+      "description": "Are you sure you want to delete language <strong class=\"text-slate-900\">{lang}</strong>? This action will <span class=\"text-red-600 font-bold uppercase tracking-tight\">PERMANENTLY</span> delete the entire column and associated translation data across all sheets.",
+      "warning": "⚠️ This step cannot be undone. Only proceed if you are sure what you are doing.",
+      "inputLabel": "Enter language name to confirm",
+      "cancelButton": "Cancel",
+      "deleteButton": "Delete Permanently",
+      "deleting": "Deleting..."
+    },
+    "addSheet": {
+      "title": "Create New Category",
+      "subtitle": "Add a new sheet to Google Spreadsheet",
+      "label": "Category name",
+      "placeholder": "Example: Common, Navigation, Errors...",
+      "hint": "The category name will become a new sheet in Google Spreadsheet",
+      "cancelButton": "Cancel",
+      "createButton": "Create Category",
+      "errors": {
+        "empty": "Category name cannot be empty",
+        "tooShort": "Category name must be at least 2 characters",
+        "tooLong": "Category name cannot exceed 50 characters",
+        "invalidChars": "Category name cannot contain special characters: [ ] \\ / ? * :",
+        "duplicate": "This category already exists",
+        "noSpreadsheet": "No spreadsheet loaded"
+      }
+    },
+    "formatWarning": {
+      "title": "Google Sheets Format Warning",
+      "subtitle": "Phát hiện vấn đề format cần được sửa",
+      "cancelButton": "Cancel",
+      "openSheetsButton": "Open Sheets",
+      "viewAndFixButton": "View & Fix ({count})",
+      "autoFixButton": "Auto Fix({count})",
+      "fixingState": "Fixing...",
+      "summaryTitle": "Google Sheets format issues detected",
+      "summaryDesc": "Your Google Sheets has <span class=\"font-semibold text-amber-600\">{count} format issues</span> that need to be fixed to be used with this translation app.",
+      "summaryTip": "<span class=\"font-medium\">Don't worry!</span> We can automatically fix <span class=\"font-semibold text-emerald-600\">{count} issues</span> for you.",
+      "sheetDetailTitle": "Issue details by sheet:",
+      "sheetLabel": "Sheet: ",
+      "fixableCount": "<span class=\"font-semibold text-emerald-600\">{count} issues</span> can be auto-fixed",
+      "actionTitle": "What would you like us to do?",
+      "actionCancel": "<span class=\"font-medium text-slate-700\">Cancel:</span> Close and make no changes",
+      "actionView": "<span class=\"font-medium text-slate-700\">View & Fix:</span> See details and choose each issue to fix",
+      "actionAuto": "<span class=\"font-medium text-slate-700\">Auto Fix All:</span> Fix all issues immediately"
+    },
+    "autoFix": {
+      "title": "Auto-Fix Google Sheets Format",
+      "subtitle": "Automatically fix format errors in Google Sheets",
+      "closeButton": "Close",
+      "openSheetsButton": "Open Google Sheets",
+      "fixAllButton": "Fix All ({count})",
+      "summaryTitle": "Detected {count} format issues to fix",
+      "summaryDesc": "Click <span class=\"font-medium text-slate-700\">\"Fix\"</span> to automatically fix each issue or <span class=\"font-medium text-slate-700\">\"Fix All\"</span> to process all at once.",
+      "sheetTitlePrefix": "Sheet: ",
+      "foundErrorsTitle": "Found errors:",
+      "autoFixTitle": "Auto fix:",
+      "fixingState": "Fixing..."
+    },
+    "row": {
+      "updateSuccess": "Updated: {key}",
+      "copySuccess": "Copied key code!",
+      "copyTip": "Click to copy this key",
+      "updateButton": "Update"
+    },
+    "deleteModal": {
+      "title": "🗑️ Delete Category",
+      "subtitle": "This action cannot be undone",
+      "confirmText": "Confirm delete: {title}?",
+      "description": "All translation data inside this category will be permanently deleted from Google Sheet / Excel.",
+      "advice": "We recommend exporting the data (Export) before deleting for backup purposes.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Delete"
+    }
+  }
+}

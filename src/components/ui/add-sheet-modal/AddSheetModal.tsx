@@ -12,7 +12,10 @@ interface AddSheetModalProps {
   onClose: () => void
 }
 
+import { useTranslation } from "@/providers/I18nProvider"
+
 export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
+  const { t } = useTranslation()
   const [sheetTitle, setSheetTitle] = useState("")
   const [validationError, setValidationError] = useState("")
   const { data, setResponse } = useSpreadsheet()
@@ -36,21 +39,21 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
     const trimmed = title.trim()
 
     if (!trimmed) {
-      return "Tên danh mục không được để trống"
+      return t("detail.addSheet.errors.empty")
     }
 
     if (trimmed.length < 2) {
-      return "Tên danh mục phải có ít nhất 2 ký tự"
+      return t("detail.addSheet.errors.tooShort")
     }
 
     if (trimmed.length > 50) {
-      return "Tên danh mục không được quá 50 ký tự"
+      return t("detail.addSheet.errors.tooLong")
     }
 
     // Check invalid characters for Google Sheets
     const invalidChars = /[[\]\\\/\?*:]/
     if (invalidChars.test(trimmed)) {
-      return "Tên danh mục không được chứa ký tự đặc biệt: [ ] \\ / ? * :"
+      return t("detail.addSheet.errors.invalidChars")
     }
 
     // Check if sheet title already exists
@@ -59,7 +62,7 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
         (sheet) => sheet.title.toLowerCase() === trimmed.toLowerCase()
       )
     ) {
-      return "Danh mục này đã tồn tại"
+      return t("detail.addSheet.errors.duplicate")
     }
 
     return ""
@@ -87,7 +90,7 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
     }
 
     if (!data?.id) {
-      setValidationError("Không có spreadsheet nào được tải")
+      setValidationError(t("detail.addSheet.errors.noSpreadsheet"))
       return
     }
 
@@ -112,8 +115,8 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
     <Dialog
       isOpen={isOpen}
       onClose={handleClose}
-      title="Tạo Danh Mục Mới"
-      subtitle="Thêm sheet mới vào Google Spreadsheet"
+      title={t("detail.addSheet.title")}
+      subtitle={t("detail.addSheet.subtitle")}
       icon="📁"
       iconColor="blue"
       size="sm"
@@ -126,14 +129,14 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
               htmlFor="sheet-title"
               className="block text-sm font-medium text-slate-700 mb-2"
             >
-              Tên danh mục
+              {t("detail.addSheet.label")}
             </label>
             <Input
               id="sheet-title"
               type="text"
               value={sheetTitle}
               onChange={handleTitleChange}
-              placeholder="Ví dụ: Common, Navigation, Errors..."
+              placeholder={t("detail.addSheet.placeholder")}
               disabled={addSheetMutation.isPending}
               className={`w-full ${
                 validationError
@@ -158,7 +161,7 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
               </p>
             ) : (
               <p className="text-xs text-slate-500 mt-1">
-                Tên danh mục sẽ trở thành sheet mới trong Google Spreadsheet
+                {t("detail.addSheet.hint")}
               </p>
             )}
           </div>
@@ -171,7 +174,7 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
             onClick={handleClose}
             disabled={addSheetMutation.isPending}
           >
-            Hủy
+            {t("detail.addSheet.cancelButton")}
           </Button>
           <Button
             type="submit"
@@ -200,7 +203,7 @@ export default function AddSheetModal({ isOpen, onClose }: AddSheetModalProps) {
               ) : undefined
             }
           >
-            Tạo Danh Mục
+            {t("detail.addSheet.createButton")}
           </Button>
         </div>
       </form>
