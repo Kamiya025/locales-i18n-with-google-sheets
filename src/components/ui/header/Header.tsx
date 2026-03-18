@@ -3,6 +3,7 @@
 import GetLinkGoogleSheets from "@/components/form"
 import SubtleAuthButton from "@/components/auth/SubtleAuthButton"
 import { Tooltip } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 interface HeaderProps {
   isHeader: boolean
@@ -21,15 +22,13 @@ export default function Header({ isHeader }: HeaderProps) {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 via-blue-400/15 to-purple-500/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-blue-300/30 hover:scale-105 transition-transform duration-300">
-                <span className="text-xl">🌊</span>
+                <Image src="/icon.png" alt="Logo" width={40} height={40} />
               </div>
               <div className="hidden md:block">
                 <h1 className="text-xl font-bold text-slate-800 drop-shadow-sm">
                   Translation Tool
                 </h1>
-                <p className="text-xs text-slate-600">
-                  Quản lý bản dịch Google Sheets
-                </p>
+                <p className="text-xs text-slate-600">Quản lý bản dịch</p>
               </div>
             </div>
           </div>
