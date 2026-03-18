@@ -1,6 +1,6 @@
 # Thông tin Deployment và Domain cho OAuth Verification
 
-**Google Sheet Translation Manager**
+**Google Sheet Translation Tool**
 
 ---
 

@@ -1,4 +1,4 @@
-# Điều khoản Dịch vụ - Google Sheet Translation Manager
+# Điều khoản Dịch vụ - Google Sheet Translation Tool
 
 **Cập nhật lần cuối: 15 tháng 12, 2024**
 
@@ -6,13 +6,13 @@
 
 ## 1. Chấp nhận Điều khoản
 
-Bằng việc truy cập và sử dụng Google Sheet Translation Manager ("Dịch vụ", "ứng dụng"), bạn đồng ý tuân thủ và bị ràng buộc bởi các điều khoản và điều kiện sau đây. Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản này, vui lòng không sử dụng dịch vụ.
+Bằng việc truy cập và sử dụng Google Sheet Translation Tool ("Dịch vụ", "ứng dụng"), bạn đồng ý tuân thủ và bị ràng buộc bởi các điều khoản và điều kiện sau đây. Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản này, vui lòng không sử dụng dịch vụ.
 
 ## 2. Mô tả Dịch vụ
 
 ### 2.1 Chức năng chính
 
-Google Sheet Translation Manager là một ứng dụng web cung cấp:
+Google Sheet Translation Tool là một ứng dụng web cung cấp:
 
 - **Quản lý bản dịch**: Import và quản lý translations từ Google Sheets
 - **Tích hợp Google Sheets**: Đọc, chỉnh sửa và đồng bộ dữ liệu với Google Sheets
@@ -221,7 +221,7 @@ Google Sheet Translation Manager là một ứng dụng web cung cấp:
 
 ## Tóm tắt Điều khoản
 
-**Bằng việc sử dụng Google Sheet Translation Manager, bạn đồng ý:**
+**Bằng việc sử dụng Google Sheet Translation Tool, bạn đồng ý:**
 
 - ✅ Tuân thủ các điều khoản sử dụng hợp pháp
 - ✅ Bảo vệ thông tin đăng nhập và tài khoản Google

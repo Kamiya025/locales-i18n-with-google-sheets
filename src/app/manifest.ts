@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Google Sheet Translation Manager',
+        name: 'Google Sheet Translation Tool',
         short_name: 'Translate PWA',
         description: 'Ứng dụng quản lý bản dịch với Google Sheets',
         start_url: '/',

@@ -1,4 +1,4 @@
-# Chính sách Bảo mật - Google Sheet Translation Manager
+# Chính sách Bảo mật - Google Sheet Translation Tool
 
 **Cập nhật lần cuối: 15 tháng 12, 2024**
 
@@ -6,7 +6,7 @@
 
 ## 1. Giới thiệu
 
-Google Sheet Translation Manager ("chúng tôi", "ứng dụng") cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn khi sử dụng dịch vụ quản lý bản dịch từ Google Sheets.
+Google Sheet Translation Tool ("chúng tôi", "ứng dụng") cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn khi sử dụng dịch vụ quản lý bản dịch từ Google Sheets.
 
 ## 2. Thông tin chúng tôi thu thập
 
@@ -186,7 +186,7 @@ Khi bạn đăng nhập bằng Google OAuth, chúng tôi thu thập:
 
 ## Tóm tắt cam kết
 
-**Google Sheet Translation Manager** cam kết:
+**Google Sheet Translation Tool** cam kết:
 
 - ✅ Chỉ truy cập Google Sheets với sự đồng ý của bạn
 - ✅ Không lưu trữ dữ liệu Google Sheets trên server

@@ -1,6 +1,6 @@
 # Hướng dẫn Cấu hình OAuth Consent Screen
 
-**Dành cho Google Sheet Translation Manager**
+**Dành cho Google Sheet Translation Tool**
 
 ---
 
@@ -34,7 +34,7 @@ Hướng dẫn này sẽ giúp bạn cấu hình OAuth Consent Screen trong Goog
 
 #### **App name**
 ```
-Google Sheet Translation Manager
+Google Sheet Translation Tool
 ```
 
 #### **User support email**
@@ -56,7 +56,7 @@ Terms of Service URL: https://locales-brown.vercel.app/terms-of-service
 
 ### 2.3 App description
 ```
-Google Sheet Translation Manager là công cụ quản lý bản dịch đa ngôn ngữ giúp người dùng:
+Google Sheet Translation Tool là công cụ quản lý bản dịch đa ngôn ngữ giúp người dùng:
 
 - Import và quản lý translations từ Google Sheets một cách trực quan
 - Chỉnh sửa và đồng bộ nội dung translation real-time với Google Sheets
@@ -101,7 +101,7 @@ Click **ADD OR REMOVE SCOPES**
 
 **Justification**:
 ```
-Ứng dụng Google Sheet Translation Manager cần quyền truy cập Google Sheets để:
+Ứng dụng Google Sheet Translation Tool cần quyền truy cập Google Sheets để:
 
 1. ĐỌC DỮ LIỆU TRANSLATION:
    - Import nội dung từ Google Sheets do người dùng cung cấp
@@ -200,14 +200,14 @@ Click **SAVE AND CONTINUE** để hoàn tất cấu hình
 ## 🎯 Mẫu Email cho Verification Request
 
 ```
-Subject: OAuth App Verification Request - Google Sheet Translation Manager
+Subject: OAuth App Verification Request - Google Sheet Translation Tool
 
 Dear Google OAuth Review Team,
 
-I am submitting our application "Google Sheet Translation Manager" for OAuth app verification.
+I am submitting our application "Google Sheet Translation Tool" for OAuth app verification.
 
 APPLICATION DETAILS:
-- App Name: Google Sheet Translation Manager
+- App Name: Google Sheet Translation Tool
 - Project ID: [YOUR_PROJECT_ID]
 - Client ID: [YOUR_CLIENT_ID]
 - Domain: locales-brown.vercel.app

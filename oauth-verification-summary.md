@@ -1,6 +1,6 @@
 # 📋 Tóm tắt Tài liệu OAuth Verification
 
-**Google Sheet Translation Manager - Đã hoàn thành chuẩn bị tài liệu**
+**Google Sheet Translation Tool - Đã hoàn thành chuẩn bị tài liệu**
 
 ---
 

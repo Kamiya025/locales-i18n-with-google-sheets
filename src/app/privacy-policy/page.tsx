@@ -2,9 +2,9 @@ import { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Chính sách Bảo mật | Google Sheet Translation Manager",
+  title: "Chính sách Bảo mật | Google Sheet Translation Tool",
   description:
-    "Chính sách bảo mật cho việc sử dụng Google Sheet Translation Manager",
+    "Chính sách bảo mật cho việc sử dụng Google Sheet Translation Tool",
 }
 
 export default function PrivacyPolicyPage() {
@@ -47,10 +47,10 @@ export default function PrivacyPolicyPage() {
                 1. Giới thiệu
               </h2>
               <p>
-                Google Sheet Translation Manager ("chúng tôi", "ứng dụng") cam
-                kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích
-                cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của
-                bạn khi sử dụng dịch vụ quản lý bản dịch từ Google Sheets.
+                Google Sheet Translation Tool ("chúng tôi", "ứng dụng") cam kết
+                bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách
+                chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn
+                khi sử dụng dịch vụ quản lý bản dịch từ Google Sheets.
               </p>
             </section>
 

@@ -2,9 +2,9 @@ import { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Điều khoản Dịch vụ | Google Sheet Translation Manager",
+  title: "Điều khoản Dịch vụ | Google Sheet Translation Tool",
   description:
-    "Điều khoản dịch vụ cho việc sử dụng Google Sheet Translation Manager",
+    "Điều khoản dịch vụ cho việc sử dụng Google Sheet Translation Tool",
 }
 
 export default function TermsOfServicePage() {
@@ -47,7 +47,7 @@ export default function TermsOfServicePage() {
                 1. Chấp nhận Điều khoản
               </h2>
               <p>
-                Bằng việc truy cập và sử dụng Google Sheet Translation Manager
+                Bằng việc truy cập và sử dụng Google Sheet Translation Tool
                 ("Dịch vụ", "ứng dụng"), bạn đồng ý tuân thủ và bị ràng buộc bởi
                 các điều khoản và điều kiện sau đây. Nếu bạn không đồng ý với
                 bất kỳ phần nào của các điều khoản này, vui lòng không sử dụng
@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
                 2.1 Chức năng chính
               </h3>
               <p className="mb-2">
-                Google Sheet Translation Manager là một ứng dụng web cung cấp:
+                Google Sheet Translation Tool là một ứng dụng web cung cấp:
               </p>
               <ul className="list-disc pl-5 space-y-1 mb-4">
                 <li>

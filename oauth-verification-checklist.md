@@ -1,4 +1,4 @@
-# 📋 OAuth Verification Checklist - Google Sheet Translation Manager
+# 📋 OAuth Verification Checklist - Google Sheet Translation Tool
 
 **Hoàn thành đầy đủ trước khi submit verification request**
 
@@ -31,7 +31,7 @@ https://locales-brown.vercel.app/terms-of-service
 ## ✅ 2. OAuth Consent Screen Configuration
 
 ### App Information
-- [ ] **App name**: `Google Sheet Translation Manager`
+- [ ] **App name**: `Google Sheet Translation Tool`
 - [ ] **User support email**: `hawk01525@gmail.com`
 - [ ] **Developer email**: `hawk01525@gmail.com`
 - [ ] **App logo**: Upload 120x120px logo

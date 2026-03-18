@@ -1,4 +1,4 @@
-# 🌊 Google Sheet Translation Manager
+# 🌊 Google Sheet Translation Tool
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-15.5.0-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />

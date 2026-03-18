@@ -25,7 +25,7 @@ export default function Header({ isHeader }: HeaderProps) {
               </div>
               <div className="hidden md:block">
                 <h1 className="text-xl font-bold text-slate-800 drop-shadow-sm">
-                  Translation Manager
+                  Translation Tool
                 </h1>
                 <p className="text-xs text-slate-600">
                   Quản lý bản dịch Google Sheets

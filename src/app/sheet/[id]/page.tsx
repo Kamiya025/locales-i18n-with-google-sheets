@@ -10,7 +10,7 @@ export async function generateMetadata({
   const spreadsheetId = resolvedParams.id
 
   return {
-    title: `Google Sheets Translation Manager - ${spreadsheetId}`,
+    title: `Google Sheets Translation Tool - ${spreadsheetId}`,
     description: `Quản lý bản dịch cho Google Sheets: ${spreadsheetId}`,
   }
 }

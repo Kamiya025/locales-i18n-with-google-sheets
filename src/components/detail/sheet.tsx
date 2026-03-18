@@ -42,122 +42,57 @@ export function SpreadsheetItemViewer(
   const { setResponse, selectedLocales } = useSpreadsheet()
   const [newTranslate, setNewTranslate] = useState(false)
 
-  // Calculate progress stats based on selected languages only
-  const { missingCount, progress, status } = useMemo((): {
-    missingCount: number
-    progress: number
-    status: ProgressStatus
-  } => {
-    // Chỉ tính progress cho những ngôn ngữ đã chọn
-    if (selectedLocales.length === 0) {
-      return { missingCount: 0, progress: 100, status: "completed" }
-    }
-
+  // Calculate progress stats
+  const { missingCount, progress, status } = useMemo(() => {
+    if (selectedLocales.length === 0) return { missingCount: 0, progress: 100, status: "completed" as const }
     const missing = calculateMissingTranslations(sheet, selectedLocales)
     const completed = sheet.rows.length - missing
-    const progressPercent =
-      sheet.rows.length > 0
-        ? Math.round((completed / sheet.rows.length) * 100)
-        : 0
-
+    const progressPercent = sheet.rows.length > 0 ? Math.round((completed / sheet.rows.length) * 100) : 100
     const status = getProgressStatus(missing, sheet.rows.length)
-
-    return {
-      missingCount: missing,
-      progress: progressPercent,
-      status,
-    }
+    return { missingCount: missing, progress: progressPercent, status }
   }, [sheet, selectedLocales])
-
-  // Luxury design - premium gradients with glassmorphism
-  const getCardStyle = () => {
-    return "bg-gradient-to-br from-white/95 via-slate-50/90 to-blue-50/85 border-blue-200/40 backdrop-blur-lg shadow-lg shadow-blue-500/10"
-  }
 
   return (
     <Disclosure as="div" key={sheet.sheetId}>
       {({ open }) => (
-        <div
-          className={`relative transition-all duration-500 ease-out hover:shadow-xl hover:shadow-blue-500/15 hover:border-blue-300/60 hover:scale-[1.01] hover:-translate-y-0.5 group ${getCardStyle()} ${
-            open ? "rounded-xl shadow-xl shadow-blue-500/15" : "rounded-xl"
-          }`}
-        >
-          {/* Subtle corner element */}
-          <div className="absolute top-3 right-3 w-4 h-4 opacity-10">
-            <div className="w-full h-full rounded-full bg-slate-400"></div>
-            <div className="absolute top-0.5 left-0.5 w-3 h-3 rounded-full bg-slate-300"></div>
-          </div>
-
-          <DisclosureButton className="w-full flex flex-col overflow-hidden">
-            <div
-              className={`flex-1 flex px-6 justify-between items-center relative z-10
-                        font-bold text-lg cursor-pointer select-none
-                        transition-all duration-300 focus:ring-2 focus:ring-slate-400/50 ${
-                          open
-                            ? "py-4 text-slate-900"
-                            : "py-3 text-slate-800 hover:text-slate-900"
-                        }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="tracking-wide">{sheet.title}</span>
-                {/* Clean Status Indicator */}
-                <div className="flex items-center gap-2">
-                  {sheet.rows.length === 0 ? (
-                    <div className="flex items-center gap-1.5">
-                      <div
-                        className={statusDotVariants({ status: "empty" })}
-                      ></div>
-                      <span
-                        className={statusBadgeVariants({ status: "empty" })}
-                      >
-                        Trống
+        <div className={`overflow-hidden transition-all duration-300 border border-slate-200/60 bg-white/80 backdrop-blur-sm rounded-[32px] ${open ? 'shadow-xl shadow-slate-200/60 ring-1 ring-blue-500/10' : 'hover:shadow-lg hover:shadow-slate-200/40'}`}>
+          <DisclosureButton className="w-full text-left">
+            <div className="px-8 py-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${open ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase">{sheet.title}</h3>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{sheet.rows.length} từ khóa</span>
+                      <span className="w-1 h-1 rounded-full bg-slate-200" />
+                      <span className={`text-[10px] font-black uppercase tracking-widest ${missingCount === 0 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                        {missingCount === 0 ? 'Hoàn thành' : `${missingCount} cần dịch`}
                       </span>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <div className={statusDotVariants({ status })}></div>
-                        <span className={statusBadgeVariants({ status })}>
-                          {missingCount === 0
-                            ? "Hoàn thành"
-                            : `${missingCount} cần dịch`}
-                        </span>
-                      </div>
-                      {/* Progress text */}
-                      <div className="text-xs font-semibold text-slate-700 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-200">
-                        {progress}%
-                      </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="hidden sm:flex flex-col items-end gap-1.5 min-w-[120px]">
+                    <div className="flex items-center justify-between w-full">
+                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiến độ</span>
+                       <span className="text-xs font-black text-blue-600">{progress}%</span>
                     </div>
-                  )}
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-600 transition-all duration-500" style={{ width: `${progress}%` }} />
+                    </div>
+                  </div>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${open ? 'bg-slate-900 text-white rotate-180' : 'bg-slate-50 text-slate-400'}`}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
                 </div>
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className={`w-6 h-6 ${
-                  open ? "rotate-180" : ""
-                } transition-transform duration-300`}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                />
-              </svg>
             </div>
-            {/* Minimal Progress Bar */}
-            {sheet.rows.length > 0 && (
-              <div className="w-full h-0.5 bg-slate-200 overflow-hidden rounded-t-lg">
-                <div
-                  className={progressBarVariants({ status })}
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            )}
           </DisclosureButton>
+
 
           <Transition
             enter="transition duration-100 ease-out"

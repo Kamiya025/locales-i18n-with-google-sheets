@@ -53,17 +53,12 @@ function SpreadsheetDetailContent({
 
   // Helper function to extract error message from error object
   const getErrorMessage = (error: any): string => {
-    // For 403 auth errors and other axios errors with response data
     if (error?.response?.data?.message) {
       return error.response.data.message
     }
-
-    // For regular errors thrown by axios interceptor
     if (error?.message) {
       return error.message
     }
-
-    // Fallback message
     return "Không thể tải spreadsheet. Vui lòng kiểm tra lại ID."
   }
 
@@ -71,179 +66,57 @@ function SpreadsheetDetailContent({
     if (error) {
       const errorMessage = getErrorMessage(error)
       customToast.error(errorMessage)
-      // Không chuyển hướng tự động - để user tự quyết định
     }
-  }, [error, router])
+  }, [error])
 
   if (isLoading) {
     return (
-      <div className="relative flex flex-col w-full min-h-screen ocean-gradient">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-lg text-slate-700">Đang tải spreadsheet...</p>
-          </div>
+      <div className="relative flex flex-col w-full min-h-screen selection:bg-blue-500/20 bg-slate-50">
+        <ImmersiveBackground />
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+           <div className="relative">
+             <div className="w-16 h-16 rounded-2xl border-4 border-slate-100 border-t-blue-600 animate-spin" />
+             <div className="absolute inset-0 flex items-center justify-center text-blue-600">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+             </div>
+           </div>
+           <p className="mt-8 text-slate-500 font-bold text-sm uppercase tracking-widest animate-pulse">Đang tải bảng tính...</p>
         </div>
       </div>
     )
   }
 
   if (error || !data) {
-    const errorMessage = error
-      ? getErrorMessage(error)
-      : "Không thể tải spreadsheet"
+    const errorType = (error as any)?.response?.status === 403 ? "permission" : (error as any)?.response?.status === 404 ? "not-found" : "general"
 
-    // Get error type based on the message or status code
-    const getErrorType = (error: any): string => {
-      if (error?.response?.status === 403) return "permission"
-      if (error?.response?.status === 404) return "not-found"
-      if (error?.message?.includes("Invalid spreadsheet ID"))
-        return "invalid-id"
-      return "general"
-    }
-
-    const errorType = error ? getErrorType(error) : "general"
-
-    // Get appropriate icon for error type
-    const getErrorIcon = () => {
-      switch (errorType) {
-        case "permission":
-          return (
-            <svg
-              className="w-10 h-10"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636A9 9 0 005.636 18.364m12.728-12.728A9 9 0 015.636 18.364"
-              />
-            </svg>
-          )
-        case "not-found":
-          return (
-            <svg
-              className="w-10 h-10"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607ZM13.5 10.5h-6"
-              />
-            </svg>
-          )
-        case "invalid-id":
-          return (
-            <svg
-              className="w-10 h-10"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-              />
-            </svg>
-          )
-        default:
-          return (
-            <svg
-              className="w-10 h-10"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-              />
-            </svg>
-          )
-      }
-    }
-
+    
     return (
-      <div className="relative flex flex-col w-full min-h-screen ocean-gradient">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="text-center max-w-md">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-red-50 to-red-100 text-red-600 border border-red-200/50 mb-6">
-              {getErrorIcon()}
+      <div className="relative flex flex-col w-full min-h-screen selection:bg-blue-500/20 bg-slate-50">
+        <ImmersiveBackground />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-md w-full p-10 rounded-[32px] bg-white border border-slate-200 shadow-xl shadow-slate-200/50 text-center space-y-8" style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-red-50 text-red-600 border border-red-100 shadow-inner">
+               <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
-
-            <h1 className="text-2xl font-bold text-slate-800 mb-3">
-              {errorType === "permission"
-                ? "Quyền truy cập bị từ chối"
-                : errorType === "not-found"
-                  ? "Không tìm thấy spreadsheet"
-                  : errorType === "invalid-id"
-                    ? "ID không hợp lệ"
-                    : "Không thể tải spreadsheet"}
-            </h1>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              {errorMessage}
-            </p>
-
+            
             <div className="space-y-3">
-              <button
-                onClick={() => window.location.reload()}
-                className="w-full px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                Thử lại
-              </button>
-
-              <button
-                onClick={() => router.push("/")}
-                className="w-full px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                  />
-                </svg>
-                Về trang chủ
-              </button>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">Oops! Có lỗi xảy ra</h1>
+              <p className="text-slate-500 font-medium leading-relaxed">{getErrorMessage(error)}</p>
             </div>
 
-            <div className="mt-6 text-sm text-slate-500">
-              <p>
-                Cần hỗ trợ? Liên hệ{" "}
-                <span className="font-medium text-slate-700">
-                  hawk01525@gmail.com
-                </span>
-              </p>
+            <div className="grid grid-cols-1 gap-3 pt-4">
+              <button 
+                onClick={() => window.location.reload()}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-lg shadow-slate-200 active:scale-95 transition-all"
+              >
+                Thử lại ngay
+              </button>
+              <button 
+                onClick={() => router.push("/")}
+                className="w-full py-4 bg-white border-2 border-slate-100 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-50 active:scale-95 transition-all"
+              >
+                Quay về trang chủ
+              </button>
             </div>
           </div>
         </div>
@@ -252,17 +125,32 @@ function SpreadsheetDetailContent({
   }
 
   return (
-    <div className="relative flex flex-col w-full min-h-screen ocean-gradient">
-      {/* Enhanced Header Component */}
+    <div className="relative flex flex-col w-full min-h-screen selection:bg-blue-500/20 bg-slate-50 overflow-hidden">
+      <ImmersiveBackground />
       <Header isHeader={true} />
-
-      {/* Main Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto mt-16">
+      <div className="flex-1 min-h-0 pt-16 relative z-10 h-screen overflow-hidden">
         <SpreadsheetViewer />
       </div>
+      <style jsx>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }
+
+function ImmersiveBackground() {
+  return (
+    <div className="fixed inset-0 -z-10 bg-white">
+      <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] rounded-[100%] bg-blue-50/60 blur-[100px]" />
+      <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] rounded-[100%] bg-indigo-50/50 blur-[100px]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }} />
+    </div>
+  )
+}
+
 
 // Component wrapper với provider
 function SpreadsheetDetailWrapper({
