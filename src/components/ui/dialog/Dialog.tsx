@@ -59,7 +59,7 @@ export default function Dialog({
   const isFullscreen = size === "full"
   const sizeClass = isFullscreen
     ? "w-full h-full"
-    : `w-full ${sizeClasses[size]} max-h-[90vh]`
+    : `w-full ${sizeClasses[size]} max-h-[calc(100vh-2rem)]`
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -74,7 +74,7 @@ export default function Dialog({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" />
         </TransitionChild>
 
         {/* Modal container */}
@@ -94,10 +94,10 @@ export default function Dialog({
                 className={`${sizeClass} transform transition-all ${className}`}
               >
                 {/* Clean Dialog Container */}
-                <div className="bg-white/95 backdrop-blur-xl border border-blue-200/30 rounded-2xl shadow-xl shadow-blue-500/15 flex flex-col h-full overflow-hidden">
+                <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-blue-200/30 dark:border-white/10 rounded-2xl shadow-2xl shadow-blue-500/10 flex flex-col h-full overflow-hidden">
                   {/* Minimal Header */}
                   {(title || showCloseButton) && (
-                    <div className="flex-shrink-0 px-6 py-4 border-b border-blue-100/50">
+                    <div className="flex-shrink-0 px-6 py-4 border-b border-blue-100/50 dark:border-white/5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           {icon && (
@@ -117,14 +117,14 @@ export default function Dialog({
                             <div>
                               <DialogTitle
                                 as="h2"
-                                className="text-lg font-semibold text-slate-800"
+                                className="text-lg font-bold text-slate-800 dark:text-white"
                               >
                                 {title}
                               </DialogTitle>
                               {subtitle && (
                                 <Description
                                   as="p"
-                                  className="text-sm text-slate-600 mt-0.5"
+                                  className="text-sm text-slate-600 dark:text-slate-400 mt-0.5"
                                 >
                                   {subtitle}
                                 </Description>
@@ -137,7 +137,7 @@ export default function Dialog({
                         {showCloseButton && (
                           <button
                             onClick={onClose}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100/50 transition-colors duration-200"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors duration-200"
                             aria-label="Đóng"
                           >
                             <svg
@@ -159,14 +159,14 @@ export default function Dialog({
                     </div>
                   )}
 
-                  {/* Clean Content */}
-                  <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                  {/* Clean Content Area (Flexible and Scrollable) */}
+                  <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
                     {children}
                   </div>
 
-                  {/* Minimal Footer */}
+                  {/* Minimal Footer (Fixed at bottom) */}
                   {footer && (
-                    <div className="flex-shrink-0 px-6 py-4 border-t border-blue-100/50 bg-slate-50/30">
+                    <div className="flex-shrink-0">
                       {footer}
                     </div>
                   )}

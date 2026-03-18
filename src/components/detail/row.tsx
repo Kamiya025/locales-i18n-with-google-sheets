@@ -91,23 +91,29 @@ export function RowItemViewer(
           </svg>
         </div>
         <div className="flex flex-col gap-4 pt-6">
-          {selectedLocales.map((lang) => (
-            <LanguageInputRow
-              key={lang}
-              language={lang}
-              value={state.data[lang] || ""}
-              onChange={(value) =>
-                setState((prev) => ({
-                  ...prev,
-                  data: {
-                    ...prev.data,
-                    [lang]: value,
-                  },
-                }))
-              }
-              variant="glass"
-            />
-          ))}
+          {selectedLocales.map((lang, index) => {
+            const isFirst = index === 0
+            const referenceValue = !isFirst ? state.data[selectedLocales[0]] : undefined
+
+            return (
+              <LanguageInputRow
+                key={lang}
+                language={lang}
+                value={state.data[lang] || ""}
+                referenceValue={referenceValue}
+                onChange={(value) =>
+                  setState((prev) => ({
+                    ...prev,
+                    data: {
+                      ...prev.data,
+                      [lang]: value,
+                    },
+                  }))
+                }
+                variant="glass"
+              />
+            )
+          })}
         </div>
         <div className="flex justify-end pt-6">
           {JSON.stringify(row.data) !== JSON.stringify(state.data) && (
