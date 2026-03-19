@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react"
+"use client"
+
 import { useSession } from "next-auth/react"
+import { useQuery } from "@tanstack/react-query"
 
 export interface CloudProject {
   _id: string
@@ -10,33 +12,23 @@ export interface CloudProject {
 
 export function useCloudHistory() {
   const { data: session } = useSession()
-  const [cloudProjects, setCloudProjects] = useState<CloudProject[]>([])
-  const [isLoading, setIsLoading] = useState(false)
 
-  const fetchCloudProjects = async () => {
-    if (!session?.user?.email) return
-    
-    setIsLoading(true)
-    try {
+  const { data: cloudProjects = [], isLoading, refetch } = useQuery<CloudProject[]>({
+    queryKey: ['cloud-history', session?.user?.email],
+    queryFn: async () => {
       const resp = await fetch("/api/user/recent-projects")
-      if (resp.ok) {
-        const data = await resp.json()
-        setCloudProjects(data)
+      if (!resp.ok) {
+        throw new Error("Failed to fetch cloud projects")
       }
-    } catch (error) {
-      console.error("Error fetching cloud projects:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchCloudProjects()
-  }, [session])
+      return resp.json()
+    },
+    enabled: !!session?.user?.email,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
 
   return {
     cloudProjects,
     isLoading,
-    refresh: fetchCloudProjects
+    refresh: refetch
   }
 }
