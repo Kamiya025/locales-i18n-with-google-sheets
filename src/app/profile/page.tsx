@@ -9,12 +9,14 @@ import { useCloudHistory } from "@/hooks/useCloudHistory"
 import ProjectDiscovery from "@/components/profile/ProjectDiscovery"
 import Header from "@/components/ui/header"
 import GeminiConfig from "@/components/profile/GeminiConfig"
+import { useTranslation } from "@/providers/I18nProvider"
 
 
 import ProjectCard from "@/components/ui/card/ProjectCard"
 
 
 export default function ProfilePage() {
+  const { t, locale } = useTranslation()
   const { data: session, status } = useSession()
   const { cloudProjects } = useCloudHistory()
   const [activeTab, setActiveTab] = useState<"recent" | "drive" | "settings">("recent")
@@ -31,7 +33,7 @@ export default function ProfilePage() {
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-slate-500 font-medium animate-pulse text-sm">Đang tải hồ sơ...</p>
+          <p className="text-slate-500 font-medium animate-pulse text-sm">{t("detail.profile.loading")}</p>
         </div>
       </div>
     )
@@ -76,7 +78,7 @@ export default function ProfilePage() {
 
                 <div className="w-full py-4 border-t border-slate-100">
                    <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest text-slate-400">
-                     <span>Total Projects</span>
+                     <span>{t("detail.profile.totalProjects")}</span>
                      <span className="text-blue-600 font-black">{cloudProjects.length}</span>
                    </div>
                 </div>
@@ -86,15 +88,15 @@ export default function ProfilePage() {
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="w-full py-3 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 font-bold text-xs uppercase tracking-widest hover:bg-slate-100 hover:text-slate-900 transition-all active:scale-95"
                   >
-                    Đăng xuất
+                    {t("common.auth.logout")}
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100/50 text-blue-800">
-               <div className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-60">Info</div>
-               <p className="text-xs font-medium leading-relaxed">Sử dụng Translator Tool để quản lý các bản dịch từ Google Sheets của bạn một cách nhanh chóng.</p>
+               <div className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-60">{t("detail.profile.infoTitle")}</div>
+               <p className="text-xs font-medium leading-relaxed">{t("detail.profile.infoDesc")}</p>
             </div>
           </aside>
 
@@ -108,28 +110,28 @@ export default function ProfilePage() {
                   onClick={() => setActiveTab("recent")}
                   className={`pb-4 text-sm font-bold tracking-tight transition-all relative ${activeTab === "recent" ? "text-blue-600" : "text-slate-400 hover:text-slate-600"}`}
                 >
-                  Dự án đã mở
+                  {t("detail.profile.recentProjects")}
                   {activeTab === "recent" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
                 </button>
                 <button 
                   onClick={() => setActiveTab("drive")}
                   className={`pb-4 text-sm font-bold tracking-tight transition-all relative ${activeTab === "drive" ? "text-blue-600" : "text-slate-400 hover:text-slate-600"}`}
                 >
-                  Khám phá Drive
+                  {t("detail.profile.exploreDrive")}
                   {activeTab === "drive" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
                 </button>
                 <button 
                   onClick={() => setActiveTab("settings")}
                   className={`pb-4 text-sm font-bold tracking-tight transition-all relative ${activeTab === "settings" ? "text-blue-600" : "text-slate-400 hover:text-slate-600"}`}
                 >
-                  Cài đặt AI
+                  {t("detail.profile.aiSettings")}
                   {activeTab === "settings" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
                 </button>
               </div>
 
               <div className="hidden sm:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-                 Last updated: {new Date().toLocaleTimeString('vi-VN')}
+                 {t("detail.profile.lastUpdated")}: {new Date().toLocaleTimeString(locale === 'vi' ? 'vi-VN' : 'en-US')}
               </div>
             </div>
 
@@ -145,8 +147,8 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="py-20 text-center rounded-2xl bg-white border border-dashed border-slate-200">
-                      <p className="text-slate-500 font-bold text-sm">Chưa có dự án nào được đồng bộ.</p>
-                      <Link href="/" className="text-sm text-blue-600 font-bold hover:underline mt-2 inline-block">Bắt đầu dịch ngay</Link>
+                      <p className="text-slate-500 font-bold text-sm">{t("detail.profile.noProjectsSynced")}</p>
+                      <Link href="/" className="text-sm text-blue-600 font-bold hover:underline mt-2 inline-block">{t("detail.profile.startTranslatingNow")}</Link>
                     </div>
                   )}
                 </>
@@ -157,13 +159,13 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between">
                     <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-100 text-blue-700 text-xs font-semibold leading-relaxed flex items-center gap-3 flex-1 mr-4">
                       <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/></svg>
-                      Tìm kiếm và mở các tệp Google Sheets từ Drive của bạn.
+                      {t("detail.profile.driveSearchTip")}
                     </div>
                     <Link 
                       href="/profile/google-sheet"
                       className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap"
                     >
-                      Bản xem đầy đủ
+                      {t("detail.profile.fullView")}
                     </Link>
                   </div>
                   <ProjectDiscovery />

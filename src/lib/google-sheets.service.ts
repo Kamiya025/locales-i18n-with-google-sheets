@@ -281,33 +281,23 @@ export class GoogleSheetsService {
 
     let sheets: any[]
 
-    // OPTIMIZATION: Chọn strategy dựa vào size và user preference
-    const aggressiveMode = process.env.AGGRESSIVE_LOADING === "true" // Env var to control
+    // 🚀 ULTRA-FAST: dùng batchGet cho mọi size → chỉ 2 API calls tổng cộng
+    try {
+      console.log(`⚡ BatchGet mode: loading all ${tabCount} sheets in 2 API calls...`)
+      sheets = await this.batchGetAllSheets(spreadsheetId, doc.sheetsByIndex)
+      console.log(`✅ BatchGet completed: ${sheets.length} sheets loaded`)
+    } catch (batchError: any) {
+      // Fallback về strategy cũ nếu batchGet thất bại
+      console.warn(`⚠️ BatchGet failed (${batchError.message}), falling back to sequential...`)
+      const aggressiveMode = process.env.AGGRESSIVE_LOADING === "true"
 
-    if (tabCount > 25 && !aggressiveMode) {
-      console.log(
-        `⚡ Very large spreadsheet (${tabCount} tabs). Using batch processing...`
-      )
-      sheets = await this.processLargeSpreadsheetSequentially(
-        doc.sheetsByIndex,
-        spreadsheetId
-      )
-    } else if (tabCount > 10) {
-      console.log(
-        `🚀 Medium-large spreadsheet (${tabCount} tabs). Using aggressive parallel with strong retry...`
-      )
-      sheets = await this.processSpreadsheetAggressiveParallel(
-        doc.sheetsByIndex,
-        spreadsheetId
-      )
-    } else {
-      console.log(
-        `⚡ Small spreadsheet (${tabCount} tabs). Using normal parallel processing...`
-      )
-      sheets = await this.processSmallSpreadsheetParallel(
-        doc.sheetsByIndex,
-        spreadsheetId
-      )
+      if (tabCount > 25 && !aggressiveMode) {
+        sheets = await this.processLargeSpreadsheetSequentially(doc.sheetsByIndex, spreadsheetId)
+      } else if (tabCount > 10) {
+        sheets = await this.processSpreadsheetAggressiveParallel(doc.sheetsByIndex, spreadsheetId)
+      } else {
+        sheets = await this.processSmallSpreadsheetParallel(doc.sheetsByIndex, spreadsheetId)
+      }
     }
 
     // Update progress to completed
@@ -331,6 +321,91 @@ export class GoogleSheetsService {
     setTimeout(() => this.progressMap.delete(spreadsheetId), 5000) // Keep for 5s for final display
 
     return result
+  }
+
+  /**
+   * 🚀 ULTRA-FAST: Lấy toàn bộ data của TẤT CẢ sheets chỉ với 2 API calls:
+   *   1. doc.loadInfo() (đã làm ở getDocument)
+   *   2. spreadsheets.values.batchGet với tất cả sheet ranges → 1 call duy nhất
+   *
+   * Thay vì: N sheets × 2 calls (loadHeaderRow + getRows) = 2N calls
+   * Giờ chỉ còn: 1 + 1 = 2 calls BẤT KỂ số lượng sheets
+   */
+  protected async batchGetAllSheets(
+    spreadsheetId: string,
+    sheetsByIndex: any[]
+  ): Promise<any[]> {
+    if (sheetsByIndex.length === 0) return []
+
+    // Tạo ranges cho tất cả sheets - mỗi range lấy toàn bộ sheet
+    const ranges = sheetsByIndex.map((s) => `'${s.title}'`)
+
+    // Chỉ 1 API call để lấy toàn bộ data
+    await this.rateLimiter.checkLimit()
+
+    const accessToken = await this.auth.getAccessToken()
+    const rangesParam = ranges.map((r) => `ranges=${encodeURIComponent(r)}`).join("&")
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${rangesParam}&valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS`
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${accessToken.token}`,
+        Accept: "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}))
+      throw new Error(`BatchGet failed: ${response.status} - ${JSON.stringify(errBody)}`)
+    }
+
+    const data = await response.json()
+    const valueRanges: any[] = data.valueRanges ?? []
+
+    // Parse từng sheet
+    const sheets: any[] = []
+    for (let i = 0; i < sheetsByIndex.length; i++) {
+      const sheet = sheetsByIndex[i]
+      const valueRange = valueRanges[i]
+      const rows2D: string[][] = valueRange?.values ?? []
+
+      if (rows2D.length === 0) {
+        sheets.push({ sheetId: sheet.sheetId, title: sheet.title, rows: [] })
+        continue
+      }
+
+      // Hàng đầu tiên là headers
+      const headers = rows2D[0].map((h) => h?.trim() ?? "")
+      const keyColIdx = headers.findIndex((h) => h.toLowerCase() === "key")
+
+      if (keyColIdx === -1) {
+        // Không có cột key → bỏ qua (sheet không đúng format)
+        sheets.push({ sheetId: sheet.sheetId, title: sheet.title, rows: [] })
+        continue
+      }
+
+      // Parse data rows (bỏ qua hàng header)
+      const parsedRows: SheetRow[] = []
+      for (let rowIdx = 1; rowIdx < rows2D.length; rowIdx++) {
+        const rawRow = rows2D[rowIdx]
+        const key = rawRow[keyColIdx]?.trim() ?? ""
+        if (!key) continue // Bỏ qua row không có key
+
+        const obj: Record<string, string> = {}
+        for (let colIdx = 0; colIdx < headers.length; colIdx++) {
+          const header = headers[colIdx]
+          if (!header || header.toLowerCase() === "key") continue
+          obj[header] = rawRow[colIdx]?.trim() ?? ""
+        }
+
+        parsedRows.push({ rowNumber: rowIdx + 1, key, data: obj })
+      }
+
+      sheets.push({ sheetId: sheet.sheetId, title: sheet.title, rows: parsedRows })
+      console.log(`  ✓ ${sheet.title}: ${parsedRows.length} rows`)
+    }
+
+    return sheets
   }
 
   // Initialize progress tracking
@@ -1127,63 +1202,94 @@ export class GoogleSheetsService {
   ): Promise<SpreadsheetResponse> {
     const doc = await this.getDocument(spreadsheetId)
 
-    // Validate language name
     if (!languageName.trim()) {
       throw new Error("Language name cannot be empty")
     }
 
-    // Check if language already exists in any sheet
-    const existingLanguages = new Set<string>()
-    for (const sheet of doc.sheetsByIndex) {
-      await this.rateLimiter.checkLimit()
-      await sheet.loadHeaderRow()
-      sheet.headerValues.forEach((header) => {
-        if (header.toLowerCase() !== "key") {
-          existingLanguages.add(header.toLowerCase())
-        }
-      })
-    }
+    console.log(`🚀 Adding language column "${languageName}" using BatchGet + BatchUpdate`)
 
-    if (existingLanguages.has(languageName.toLowerCase())) {
-      throw new Error(`Language "${languageName}" already exists`)
-    }
+    // ── STEP 1: Lấy headers của TẤT CẢ sheets trong 1 API call ──────────────
+    await this.rateLimiter.checkLimit()
+    const accessToken = await this.auth.getAccessToken()
 
-    // Add the new language column to all sheets
-    for (const sheet of doc.sheetsByIndex) {
-      await this.rateLimiter.checkLimit()
-      await sheet.loadHeaderRow()
+    const ranges = doc.sheetsByIndex.map((s) => `'${s.title}'!1:1`)
+    const rangesParam = ranges.map((r) => `ranges=${encodeURIComponent(r)}`).join("&")
+    const batchGetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${rangesParam}&majorDimension=ROWS`
 
-      // Add new header if not exists
-      if (!sheet.headerValues.includes(languageName)) {
-        // Get the next column index
-        const nextColIndex = sheet.headerValues.length
+    const headerRes = await fetch(batchGetUrl, {
+      headers: { Authorization: `Bearer ${accessToken.token}`, Accept: "application/json" },
+    })
 
-        // Add the new column header (Rate limited)
+    // Lấy headers của từng sheet
+    const sheetHeaders: Map<number, string[]> = new Map()
+
+    if (!headerRes.ok) {
+      // Fallback: load từng sheet riêng lẻ
+      console.warn("⚠️ BatchGet headers failed, falling back to per-sheet loadHeaderRow...")
+      for (const sheet of doc.sheetsByIndex) {
         await this.rateLimiter.checkLimit()
-        await sheet.loadCells(`A1:${String.fromCharCode(65 + nextColIndex)}1`)
-        const headerCell = sheet.getCell(0, nextColIndex)
-        headerCell.value = languageName
+        await sheet.loadHeaderRow()
+        sheetHeaders.set(sheet.sheetId, sheet.headerValues ?? [])
+      }
+    } else {
+      const headerData = await headerRes.json()
+      const valueRanges: any[] = headerData.valueRanges ?? []
 
-        // Preserve existing header formatting if any
-        const firstHeaderCell = sheet.getCell(0, 0)
-        if (firstHeaderCell.backgroundColor) {
-          headerCell.backgroundColor = firstHeaderCell.backgroundColor
-        }
-        if (firstHeaderCell.textFormat) {
-          headerCell.textFormat = firstHeaderCell.textFormat
-        }
-
-        await this.rateLimiter.checkLimit()
-        await sheet.saveUpdatedCells()
-
-        // Update header row (Rate limited)
-        const newHeaders = [...sheet.headerValues, languageName]
-        await this.rateLimiter.checkLimit()
-        await sheet.setHeaderRow(newHeaders)
+      for (let i = 0; i < doc.sheetsByIndex.length; i++) {
+        const sheet = doc.sheetsByIndex[i]
+        const rawHeaders: string[] = valueRanges[i]?.values?.[0] ?? []
+        sheetHeaders.set(sheet.sheetId, rawHeaders.map((h: string) => h?.trim() ?? ""))
       }
     }
 
-    // Return updated spreadsheet data
+    // ── Kiểm tra language đã tồn tại chưa ────────────────────────────────────
+    const normalizedNew = languageName.toLowerCase()
+    for (const [, headers] of sheetHeaders) {
+      const alreadyExists = headers.some((h) => h.toLowerCase() === normalizedNew)
+      if (alreadyExists) {
+        throw new Error(`Language "${languageName}" already exists`)
+      }
+    }
+
+    // ── STEP 2: Build batchUpdate để append column header cho từng sheet ──────
+    // Dùng appendCells request: thêm header cell vào cuối hàng 0 của mỗi sheet
+    const requests: any[] = []
+
+    for (const sheet of doc.sheetsByIndex) {
+      const headers = sheetHeaders.get(sheet.sheetId) ?? []
+      const colIndex = headers.length // append sau cột cuối cùng
+
+      requests.push({
+        updateCells: {
+          rows: [{
+            values: [{
+              userEnteredValue: { stringValue: languageName },
+            }],
+          }],
+          fields: "userEnteredValue",
+          range: {
+            sheetId: sheet.sheetId,
+            startRowIndex: 0,
+            endRowIndex: 1,
+            startColumnIndex: colIndex,
+            endColumnIndex: colIndex + 1,
+          },
+        },
+      })
+
+      console.log(`  ✓ Will add "${languageName}" to "${sheet.title}" at column ${colIndex}`)
+    }
+
+    // Gửi 1 batchUpdate duy nhất cho tất cả sheets
+    if (requests.length > 0) {
+      await this.rateLimiter.checkLimit()
+      // @ts-ignore
+      await doc._makeBatchUpdateRequest(requests)
+      console.log(`📍 batchUpdate: added "${languageName}" column to ${requests.length} sheet(s)`)
+    }
+
+    // Invalidate cache và trả về data mới
+    this.invalidateSpreadsheetCache(spreadsheetId)
     return this.getSpreadsheet(spreadsheetId)
   }
 
@@ -1198,28 +1304,55 @@ export class GoogleSheetsService {
       throw new Error("Tên ngôn ngữ không được để trống")
     }
 
-    console.log(`🚀 Optimized: Deleting language column: ${languageName} from all sheets in ${spreadsheetId} using BatchUpdate`)
+    console.log(`🚀 Deleting language column "${languageName}" from all sheets using BatchGet + BatchUpdate`)
 
-    // Step 1: Parallel load headers for all sheets using Promise.all and rate limiting
-    await Promise.all(
-      doc.sheetsByIndex.map(async (sheet) => {
-        try {
-          await this.rateLimiter.checkLimit()
-          await sheet.loadHeaderRow()
-        } catch (err: any) {
-          console.warn(`⚠️ Could not load headers for sheet "${sheet.title}":`, err.message)
-        }
-      })
-    )
+    // ── STEP 1: Lấy hàng header của TẤT CẢ sheets trong 1 API call ──────────
+    // Thay vì: N sheets × loadHeaderRow() = N calls
+    // Giờ chỉ cần: 1 batchGet call với range hàng đầu tiên của mỗi sheet
+    await this.rateLimiter.checkLimit()
+    const accessToken = await this.auth.getAccessToken()
 
-    // Step 2: Build batch requests
+    const ranges = doc.sheetsByIndex.map((s) => `'${s.title}'!1:1`)
+    const rangesParam = ranges.map((r) => `ranges=${encodeURIComponent(r)}`).join("&")
+    const batchGetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?${rangesParam}&majorDimension=ROWS`
+
+    const headerRes = await fetch(batchGetUrl, {
+      headers: { Authorization: `Bearer ${accessToken.token}`, Accept: "application/json" },
+    })
+
+    if (!headerRes.ok) {
+      // Fallback về cách cũ nếu batchGet lỗi
+      console.warn(`⚠️ BatchGet headers failed, falling back to loadHeaderRow per sheet...`)
+      await Promise.all(
+        doc.sheetsByIndex.map(async (sheet) => {
+          try {
+            await this.rateLimiter.checkLimit()
+            await sheet.loadHeaderRow()
+          } catch (err: any) {
+            console.warn(`⚠️ Could not load headers for "${sheet.title}":`, err.message)
+          }
+        })
+      )
+    } else {
+      const headerData = await headerRes.json()
+      const valueRanges: any[] = headerData.valueRanges ?? []
+
+      // Inject headerValues vào từng sheet object để dùng ở step 2
+      for (let i = 0; i < doc.sheetsByIndex.length; i++) {
+        const rawHeaders: string[] = valueRanges[i]?.values?.[0] ?? []
+        ;(doc.sheetsByIndex[i] as any)._cachedHeaders = rawHeaders.map((h: string) => h?.trim() ?? "")
+      }
+    }
+
+    // ── STEP 2: Build batchUpdate requests (xóa column theo index) ───────────
     const requests: any[] = []
     const normalizedTarget = languageName.toLowerCase()
 
     for (const sheet of doc.sheetsByIndex) {
-      if (!sheet.headerValues) continue
+      // Dùng _cachedHeaders nếu có (từ batchGet), fallback về headerValues (từ loadHeaderRow)
+      const headers: string[] = (sheet as any)._cachedHeaders ?? sheet.headerValues ?? []
 
-      const colIndex = sheet.headerValues.findIndex(
+      const colIndex = headers.findIndex(
         (h: string) => h.toLowerCase() === normalizedTarget
       )
 
@@ -1234,25 +1367,23 @@ export class GoogleSheetsService {
             },
           },
         })
+        console.log(`  ✓ Found "${languageName}" in "${sheet.title}" at column ${colIndex}`)
       }
     }
 
     if (requests.length === 0) {
       console.log(`ℹ️ No sheets found containing language: ${languageName}`)
     } else {
-      console.log(`📍 Sending batchUpdate with ${requests.length} delete requests...`)
-      
-      // google-spreadsheet@5.x uses ky (not axios) via doc.sheetsApi
-      // Use the internal _makeBatchUpdateRequest (Rate limited)
+      console.log(`📍 batchUpdate: deleting ${requests.length} column(s)...`)
       await this.rateLimiter.checkLimit()
-      // @ts-ignore - internal method but stable across v5.x
+      // @ts-ignore - internal method stable in v5.x
       await doc._makeBatchUpdateRequest(requests)
     }
 
-    // Invalidate local cache 
+    // Invalidate local cache
     this.invalidateSpreadsheetCache(spreadsheetId)
 
-    // Return the updated spreadsheet data
+    // Return updated spreadsheet data
     return this.getSpreadsheet(spreadsheetId)
   }
 

@@ -53,6 +53,35 @@ const sheetApi = {
     return axiosClient.get(url, { params })
   },
 
+  /**
+   * Lấy nhanh metadata (title, danh sách sheet) mà không load bất kỳ row nào.
+   * Chỉ 1 HTTP call → rất nhanh, ít quota.
+   */
+  getMetadata(spreadsheetId: string): Promise<{
+    success: boolean
+    data: {
+      spreadsheetId: string
+      title: string
+      sheets: Array<{
+        sheetId: number
+        title: string
+        index: number
+        rowCount: number
+        columnCount: number
+        hidden: boolean
+      }>
+      _meta: {
+        authType: string
+        fetchedAt: string
+        totalSheets: number
+      }
+    }
+  }> {
+    const url = "/sheet/" + spreadsheetId + "/metadata"
+    console.log("⚡ Quick metadata fetch for:", spreadsheetId)
+    return axiosClient.get(url)
+  },
+
   update(data: SpreadsheetResponse): Promise<any> {
     if (isLocalExcel(data.id)) {
       persistLocalExcel(data)

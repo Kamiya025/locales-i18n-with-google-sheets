@@ -11,9 +11,15 @@ import DeleteLanguageConfirmationModal from "../delete-language-confirmation-mod
 import { customToast } from "../toast"
 
 export default function LanguageFilter() {
-  const { data, listLocales, selectedLocales, setSelectedLocales, setResponse } = useSpreadsheet()
+  const {
+    data,
+    listLocales,
+    selectedLocales,
+    setSelectedLocales,
+    setResponse,
+  } = useSpreadsheet()
   const [isAddLanguageModalOpen, setIsAddLanguageModalOpen] = useState(false)
-  
+
   // States for Language Deletion
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [languageToDelete, setLanguageToDelete] = useState("")
@@ -39,13 +45,20 @@ export default function LanguageFilter() {
     if (!data || !languageToDelete) return
     setIsDeleting(true)
     try {
-      const updatedData = await sheetApi.deleteLanguage(data.id, languageToDelete)
+      const updatedData = await sheetApi.deleteLanguage(
+        data.id,
+        languageToDelete,
+      )
       setResponse(updatedData)
       customToast.success(`Đã xóa thành công ngôn ngữ ${languageToDelete}`)
       setIsDeleteModalOpen(false)
       setLanguageToDelete("")
     } catch (error: any) {
-      customToast.error(error?.response?.data?.error || error?.message || "Không thể xóa ngôn ngữ")
+      customToast.error(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Không thể xóa ngôn ngữ",
+      )
     } finally {
       setIsDeleting(false)
     }
@@ -73,7 +86,7 @@ export default function LanguageFilter() {
                   d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z"
                 />
               </svg>
-              <span>
+              <span className="text-[10px] uppercase tracking-widest">
                 Ngôn ngữ ({selectedLocales.length}/{listLocales.length})
               </span>
               <svg
@@ -108,7 +121,7 @@ export default function LanguageFilter() {
                   {/* Header với Select/Deselect All */}
                   <div className="flex justify-between items-center mb-3 pb-3 border-b border-slate-200/30">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                       Bộ lọc hiển thị
+                      Bộ lọc hiển thị
                     </span>
                     <div className="flex gap-1">
                       <button
@@ -116,14 +129,38 @@ export default function LanguageFilter() {
                         className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors focus:outline-none"
                         title="Chọn tất cả"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2.5}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
                       </button>
                       <button
                         onClick={handleDeselectAll}
                         className="p-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors focus:outline-none"
                         title="Bỏ chọn tất cả"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                        <svg
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2.5}
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18 18 6M6 6l12 12"
+                          />
+                        </svg>
                       </button>
                     </div>
                   </div>
@@ -139,36 +176,48 @@ export default function LanguageFilter() {
                             }`}
                           >
                             <label className="flex-1 flex items-center gap-3 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedLocales.includes(lang)}
-                                  onChange={() => handleToggleLanguage(lang)}
-                                  className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500/10 focus:ring-2"
-                                />
-                                <span className="text-sm font-bold text-slate-700 uppercase tracking-tight">
-                                  {lang}
-                                </span>
+                              <input
+                                type="checkbox"
+                                checked={selectedLocales.includes(lang)}
+                                onChange={() => handleToggleLanguage(lang)}
+                                className="w-4 h-4 text-blue-600 bg-white border-slate-300 rounded focus:ring-blue-500/10 focus:ring-2"
+                              />
+                              <span className="text-sm font-bold text-slate-700 uppercase tracking-tight">
+                                {lang}
+                              </span>
                             </label>
-                            
+
                             {/* Delete Action (Irreversible Danger) */}
                             <button
                               onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
+                                e.preventDefault()
+                                e.stopPropagation()
                                 setLanguageToDelete(lang)
                                 setIsDeleteModalOpen(true)
                               }}
                               className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
                               title="Xóa vĩnh viễn ngôn ngữ này khỏi bảng tính"
                             >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                              <svg
+                                className="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
                             </button>
                           </div>
                         )}
                       </Menu.Item>
                     ))}
                   </div>
-                  
+
                   {/* Footer Action: Add Language */}
                   <div className="mt-3 pt-3 border-t border-slate-200/30">
                     <Menu.Item as="div">
@@ -181,7 +230,19 @@ export default function LanguageFilter() {
                               : "border-slate-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
                           }`}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4"/></svg>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2.5}
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
                           <span className="text-xs font-black uppercase tracking-widest">
                             Thêm ngôn ngữ
                           </span>

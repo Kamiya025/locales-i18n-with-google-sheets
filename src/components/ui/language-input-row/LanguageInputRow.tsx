@@ -37,30 +37,30 @@ export default function LanguageInputRow({
   }, [value])
 
   const isEmpty = !value || !value.trim()
-  
+
   // Design refined for simple variant
   const getDynamicClasses = () => {
     if (variant === "simple") {
       return {
-        container: `group flex flex-col sm:flex-row rounded-xl sm:rounded-2xl border transition-all duration-300 overflow-hidden ${
-          isEmpty 
-            ? "bg-slate-50/50 border-slate-200" 
+        container: `group flex flex-col xl:flex-row rounded-xl xl:rounded-2xl border transition-all duration-300 overflow-hidden ${
+          isEmpty
+            ? "bg-slate-50/50 border-slate-200"
             : "bg-white border-slate-200 shadow-sm"
         } focus-within:ring-2 focus-within:ring-blue-500/10 focus-within:border-blue-500/50`,
-        badge: `w-full sm:w-20 px-3 py-2 sm:py-4 flex justify-center items-center text-center bg-slate-900 text-white font-black uppercase text-[9px] sm:text-[10px] tracking-widest relative overflow-hidden`,
-        input: `flex-1 w-full border-0 outline-none px-4 sm:px-5 py-3 sm:py-4 pr-14 sm:pr-20 text-slate-800 placeholder-slate-400 bg-transparent resize-none overflow-hidden transition-colors min-h-[48px] sm:min-h-[56px] text-xs sm:text-sm leading-relaxed`
+        badge: `w-full xl:w-20 px-3 py-2 xl:py-4 flex justify-center items-center text-center bg-slate-900 text-white font-black uppercase text-[9px] xl:text-[10px] tracking-widest relative overflow-hidden`,
+        input: `flex-1 w-full border-0 outline-none px-2 py-2 xl:py-3 text-slate-800 placeholder-slate-400 bg-transparent resize-none overflow-hidden transition-colors min-h-[48px] xl:min-h-[56px] text-xs xl:text-sm`,
       }
     }
-    
+
     // Default/Glass fallback
     return {
-      container: `group flex flex-col sm:flex-row rounded-xl sm:rounded-2xl border transition-all duration-300 overflow-hidden backdrop-blur-md ${
-        isEmpty 
-          ? "bg-amber-50/20 border-amber-200/40" 
+      container: `group flex flex-col xl:flex-row rounded-xl xl:rounded-2xl border transition-all duration-300 overflow-hidden backdrop-blur-md ${
+        isEmpty
+          ? "bg-amber-50/20 border-amber-200/40"
           : "bg-white/40 border-slate-200/40"
       } focus-within:ring-2 focus-within:ring-indigo-500/30 focus-within:border-indigo-500/50`,
-      badge: `w-full sm:w-20 px-3 py-2 sm:py-4 flex justify-center items-center text-center bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-black uppercase text-[10px] sm:text-xs tracking-tighter shadow-inner relative overflow-hidden`,
-      input: `flex-1 w-full border-0 outline-none px-4 py-3 sm:py-4 pr-14 sm:pr-20 text-slate-800 placeholder-slate-400 bg-transparent resize-none overflow-hidden transition-colors min-h-[48px] sm:min-h-[56px] text-xs sm:text-sm`
+      badge: `w-full xl:w-20 px-3 py-2 xl:py-4 flex justify-center items-center text-center bg-gradient-to-br from-indigo-500 to-violet-600 text-white font-black uppercase text-[10px] xl:text-xs tracking-tighter shadow-inner relative overflow-hidden`,
+      input: `flex-1 w-full border-0 outline-none px-2 py-3 xl:py-4 text-slate-800 placeholder-slate-400 bg-transparent resize-none overflow-hidden transition-colors min-h-[48px] xl:min-h-[56px] text-xs xl:text-sm`,
     }
   }
 
@@ -71,7 +71,9 @@ export default function LanguageInputRow({
       {/* Language Badge */}
       <div className={classes.badge}>
         <span className="relative z-10">{language}</span>
-        {variant !== "simple" && <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>}
+        {variant !== "simple" && (
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
+        )}
       </div>
 
       {/* Input Area */}
@@ -85,29 +87,20 @@ export default function LanguageInputRow({
           disabled={disabled}
           className={classes.input}
         />
-        
+
         {/* Helper Action Toolbar */}
-        <div className="absolute top-2 right-2 flex gap-1 sm:gap-1.5 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 flex gap-1 xl:gap-1.5 opacity-100 xl:opacity-0 group-hover:opacity-100 transition-opacity">
           {suggestion && value !== suggestion && (
             <button
               type="button"
               onClick={() => onChange(suggestion)}
-              className="p-1 px-1.5 sm:px-2 text-[9px] sm:text-[10px] font-bold bg-emerald-500 text-white rounded-md shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
+              className="p-1 px-1.5 xl:px-2 text-[9px] xl:text-[10px] font-bold bg-emerald-500 text-white rounded-md shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
               title="Sử dụng gợi ý"
             >
               Gợi ý
             </button>
           )}
-          {referenceValue && value !== referenceValue && (
-            <button
-              type="button"
-              onClick={() => onChange(referenceValue)}
-              className="p-1 px-1.5 sm:px-2 text-[9px] sm:text-[10px] font-bold bg-white text-blue-600 rounded-md border border-blue-100 shadow-sm hover:scale-105 active:scale-95 transition-all"
-              title="Copy từ ngôn ngữ gốc"
-            >
-              Sync
-            </button>
-          )}
+
           {value && (
             <button
               type="button"
@@ -115,19 +108,24 @@ export default function LanguageInputRow({
               className="p-1 text-slate-400 hover:text-red-500 bg-white/80 backdrop-blur-sm rounded-md shadow-sm transition-colors"
               title="Xoá nhanh"
             >
-              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-3 h-3 xl:w-3.5 xl:h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           )}
         </div>
 
         {/* Character Count */}
-        {value.length > 0 && (
-          <div className="absolute bottom-1 right-2 text-[8px] sm:text-[9px] font-mono text-slate-400">
-            {value.length} chars
-          </div>
-        )}
       </div>
     </div>
   )

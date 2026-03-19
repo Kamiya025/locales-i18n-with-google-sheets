@@ -4,15 +4,12 @@ import { ReactNode } from "react"
 import { buttonVariants } from "@/lib/variants"
 import { cn } from "@/lib/utils"
 
-interface ButtonProps {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
   onClick?: () => void
-  type?: "button" | "submit" | "reset"
-  disabled?: boolean
   loading?: boolean
   variant?: "primary" | "secondary" | "glass" | "gradient" | "outline"
   size?: "sm" | "md" | "lg"
-  className?: string
   icon?: ReactNode
   iconPosition?: "left" | "right"
 }
@@ -28,6 +25,7 @@ export default function Button({
   className = "",
   icon,
   iconPosition = "left",
+  ...props
 }: Readonly<ButtonProps>) {
   return (
     <button
@@ -35,6 +33,7 @@ export default function Button({
       onClick={onClick}
       disabled={disabled || loading}
       className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
     >
       {loading ? (
         <>

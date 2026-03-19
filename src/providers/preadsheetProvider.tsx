@@ -16,9 +16,15 @@ interface SpreadsheetContextProps {
   listLocales: string[]
   selectedLocales: string[]
   setSelectedLocales: (locales: string[]) => void
-  setResponse: (data: SpreadsheetResponse | null) => void
+  setResponse: (
+    data: SpreadsheetResponse | null,
+    options?: { resetChanges?: boolean },
+  ) => void
   updateTranslation: (sheetID: number, rows: SheetRowData) => void
   syncSheet: () => void
+  hasChanges: boolean
+  isSyncing: boolean
+  setHasChanges: (val: boolean) => void
 }
 
 const SpreadsheetContext = createContext<SpreadsheetContextProps | undefined>(
@@ -39,24 +45,35 @@ export const SpreadsheetProvider = ({
   )
   const [listLocales, setListLocales] = useState<string[]>([])
   const [selectedLocales, setSelectedLocales] = useState<string[]>([])
-  const mutation = useSyncSheet(() => {})
+  const [hasChanges, setHasChanges] = useState(false)
+  const mutation = useSyncSheet(() => {
+    setHasChanges(false)
+  })
 
-  const updateResponse = useCallback((data: SpreadsheetResponse | null) => {
-    if (!data) {
-      setResponse(null)
-      setListLocales([])
-      setSelectedLocales([])
-      return
-    }
+  const updateResponse = useCallback(
+    (data: SpreadsheetResponse | null, options?: { resetChanges?: boolean }) => {
+      const resetChanges = options?.resetChanges ?? true
+      if (!data) {
+        setResponse(null)
+        setListLocales([])
+        setSelectedLocales([])
+        setHasChanges(false)
+        return
+      }
 
-    setResponse(data)
-    const list = getLanguages(data)
-    setListLocales(list)
-    // Mặc định chọn tất cả ngôn ngữ khi load data mới
-    setSelectedLocales(list)
-  }, [])
+      setResponse(data)
+      const list = getLanguages(data)
+      setListLocales(list)
+      // Mặc định chọn tất cả ngôn ngữ khi load data mới
+      setSelectedLocales(list)
+      if (resetChanges) setHasChanges(false)
+    },
+    []
+  )
+
   const updateTranslation = useCallback(
     (sheetId: number, row: SheetRowData) => {
+      setHasChanges(true)
       setResponse((prev) => {
         if (!prev) return prev
 
@@ -88,6 +105,7 @@ export const SpreadsheetProvider = ({
     },
     []
   )
+
   const syncSheet = useCallback(() => {
     if (response) mutation.mutate(response)
   }, [response, mutation])
@@ -101,6 +119,9 @@ export const SpreadsheetProvider = ({
       setSelectedLocales,
       updateTranslation,
       syncSheet,
+      hasChanges,
+      isSyncing: mutation.isPending,
+      setHasChanges,
     }),
     [
       response,
@@ -109,6 +130,8 @@ export const SpreadsheetProvider = ({
       updateResponse,
       updateTranslation,
       syncSheet,
+      hasChanges,
+      mutation.isPending,
     ]
   )
 

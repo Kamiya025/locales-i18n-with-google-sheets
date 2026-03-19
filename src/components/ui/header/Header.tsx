@@ -70,29 +70,6 @@ export default function Header({ isHeader = true }: HeaderProps) {
 
           {/* 3. Essential Actions */}
           <div className="flex items-center gap-4">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-slate-100 rounded-lg p-1 mr-2">
-              <button
-                onClick={() => setLocale("vi")}
-                className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
-                  locale === "vi"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                VI
-              </button>
-              <button
-                onClick={() => setLocale("en")}
-                className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${
-                  locale === "en"
-                    ? "bg-white text-blue-600 shadow-sm"
-                    : "text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                EN
-              </button>
-            </div>
 
             {/* Action Group */}
             <div className="hidden sm:flex items-center gap-2 pr-4 border-r border-slate-200/60 h-8">

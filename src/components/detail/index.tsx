@@ -12,14 +12,21 @@ import AddSheetModal from "../ui/add-sheet-modal"
 import AutoTranslateDialog from "../ui/auto-translate-dialog/AutoTranslateDialog"
 import Button from "../ui/button"
 import ExportConfirmationModal from "../ui/export-confirmation-modal"
-import LanguageFilter from "../ui/language-filter"
-import SearchCombobox from "../ui/search-combobox"
-import { SpreadsheetItemViewer } from "./sheet"
+import { DetailHeader } from "./Header"
+import { DetailSidebar } from "./Sidebar"
+import { DetailEditorPanel } from "./EditorPanel"
 import { useTranslation } from "@/providers/I18nProvider"
 
 export default function SpreadsheetViewer() {
   const { t } = useTranslation()
-  const { data, listLocales, selectedLocales } = useSpreadsheet()
+  const {
+    data,
+    listLocales,
+    selectedLocales,
+    hasChanges,
+    syncSheet,
+    isSyncing,
+  } = useSpreadsheet()
   const [isAddSheetModalOpen, setIsAddSheetModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isAiConfigOpen, setIsAiConfigOpen] = useState(false)
@@ -87,6 +94,13 @@ export default function SpreadsheetViewer() {
     (fallbackLanguage: string | undefined, selectedLanguages: string[]) => {
       if (!data) return
 
+      // Handle Excel export special case
+      if ((fallbackLanguage as any) === "EXCEL_FORMAT") {
+        exportSpreadsheetToExcel(data)
+        setIsExportModalOpen(false)
+        return
+      }
+
       // Transform data with fallback for requested languages
       const allTranslations = transformToI18n(data, fallbackLanguage)
 
@@ -117,278 +131,80 @@ export default function SpreadsheetViewer() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50 overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-700">
-      {/* 1. Immersive Header */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200 px-8 flex flex-col md:flex-row gap-2 items-center justify-between z-30">
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            <Link
-              href="/profile"
-              className="hover:text-blue-600 transition-colors"
-            >
-              {t("detail.header.myProjects")}
-            </Link>
-            <span className="opacity-40">/</span>
-            <span className="text-slate-600">{t("detail.header.sheetDetail")}</span>
-          </div>
-          <div className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-500/30">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </span>
-            <h1>{data.title}</h1>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setIsAiConfigOpen(true)}
-            variant="outline"
-            size="sm"
-            className="!p-2.5 rounded-xl border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-600 shadow-sm"
-          >
-            <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </Button>
-          <Button
-            onClick={() => setIsAddSheetModalOpen(true)}
-            variant="outline"
-            size="sm"
-            className="!px-4 !py-2.5 rounded-xl border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs uppercase shadow-sm"
-            icon={
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            }
-          >
-            {t("detail.header.addCategory")}
-          </Button>
-          <Button
-            onClick={() => setIsExportModalOpen(true)}
-            variant="primary"
-            size="sm"
-            className="!px-6 !py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs uppercase shadow-lg shadow-slate-200"
-            icon={
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                />
-              </svg>
-            }
-          >
-            {t("detail.header.exportJson")}
-          </Button>
-
-          {data && (
-            <Button
-              onClick={() => exportSpreadsheetToExcel(data)}
-              variant="outline"
-              size="sm"
-              className="!px-6 !py-2.5 rounded-xl border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs uppercase shadow-sm"
-              icon={
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              }
-            >
-              {t("detail.header.exportExcel")}
-            </Button>
-          )}
-        </div>
-      </div>
+      <DetailHeader
+        data={data}
+        onOpenAiConfig={() => setIsAiConfigOpen(true)}
+        onOpenAddSheet={() => setIsAddSheetModalOpen(true)}
+        onOpenExport={() => setIsExportModalOpen(true)}
+      />
 
       {/* 2. Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Desktop Only */}
-        <aside className="hidden lg:flex w-72 flex-shrink-0 flex-col border-r border-white/20 bg-white/20 backdrop-blur-md p-6 space-y-8 overflow-y-auto">
-          {/* Section: Status */}
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
-              {t("detail.sidebar.overallProgress")}
-            </label>
-            <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-end justify-between">
-                <span className="text-3xl font-black text-slate-900">
-                  {stats.percent}%
-                </span>
-                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">
-                  LIVE
-                </span>
-              </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 transition-all duration-1000"
-                  style={{ width: `${stats.percent}%` }}
-                />
-              </div>
-              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
-                <span>{stats.completed} {t("detail.sidebar.completed")}</span>
-                <span>{stats.total} {t("detail.sidebar.total")}</span>
-              </div>
-            </div>
+        <DetailSidebar
+          stats={stats}
+          namespaceOptions={namespaceOptions}
+          selectedNamespace={selectedNamespace}
+          setSelectedNamespace={setSelectedNamespace}
+        />
+
+        <DetailEditorPanel
+          search={search}
+          setSearch={setSearch}
+          searchSuggestions={searchSuggestions}
+          isSearching={isSearching}
+          showOnlyMissing={showOnlyMissing}
+          setShowOnlyMissing={setShowOnlyMissing}
+          filtered={filtered}
+        />
+      </div>
+
+      {/* 3. Floating Action Button (FAB) for Saving */}
+      {hasChanges && (
+        <div className="fixed bottom-10 right-10 z-50 group flex flex-col items-end gap-3 pointer-events-none">
+          {/* Label tooltip that appears on group hover */}
+          <div className="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest shadow-xl opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-auto border border-white/10">
+            {t("detail.header.saveToGoogle")}
           </div>
 
-          {/* Section: Quick Access */}
-          <div className="space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
-              {t("detail.sidebar.quickAccess")}
-            </label>
-            <div className="flex flex-col gap-1">
-              {namespaceOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setSelectedNamespace(opt.value)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all text-left ${selectedNamespace === opt.value ? "bg-blue-600 text-white shadow-md shadow-blue-500/20" : "text-slate-600 hover:bg-white/50"}`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${selectedNamespace === opt.value ? "bg-white" : "bg-slate-300"}`}
-                  />
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section: Actions */}
-          <div className="pt-4 mt-auto">
-            <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-blue-800 text-center">
-              <p className="text-[10px] font-black uppercase tracking-widest mb-1">
-                {t("detail.sidebar.proTip")}
-              </p>
-              <p className="text-[10px] font-medium leading-relaxed opacity-80">
-                {t("detail.sidebar.fKeyTip")}
-              </p>
-            </div>
-          </div>
-        </aside>
-
-        {/* Dynamic Editor Panel */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          {/* Floating Filter Bar */}
-          <div className="sticky top-0 z-20 px-6 py-3 bg-white/60 backdrop-blur-xl border-b border-slate-200/40 flex flex-col md:flex-row items-center gap-4">
-            <div className="relative flex-1 w-full overflow-visible">
-              <SearchCombobox
-                value={search}
-                onChange={setSearch}
-                placeholder={t("detail.filters.searchPlaceholder")}
-                suggestions={searchSuggestions}
-                isLoading={isSearching}
-                className="!rounded-2xl !bg-white/80 !border-slate-200/60 focus:!ring-blue-100 shadow-sm"
-              />
-            </div>
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <div className="p-1 rounded-xl bg-slate-100/50 flex items-center gap-1 shadow-inner border border-slate-200/20">
-                <button
-                  onClick={() => setShowOnlyMissing(false)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${!showOnlyMissing ? "bg-white text-blue-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                  {t("detail.filters.all")}
-                </button>
-                <button
-                  onClick={() => setShowOnlyMissing(true)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${showOnlyMissing ? "bg-white text-amber-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                  {t("detail.filters.untranslated")}
-                </button>
-              </div>
-              <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block" />
-              <LanguageFilter />
-            </div>
-          </div>
-
-          {/* Keys Container */}
-          <div
-            className={`flex-1 overflow-y-auto px-6 py-6 space-y-6 custom-scrollbar transition-opacity duration-300 ${isSearching ? "opacity-50" : "opacity-100"}`}
+          <button
+            onClick={syncSheet}
+            disabled={isSyncing}
+            className={`pointer-events-auto relative w-16 h-16 rounded-3xl flex items-center justify-center transition-all duration-500 shadow-2xl ${
+              isSyncing
+                ? "bg-blue-500 cursor-not-allowed scale-95"
+                : "bg-blue-600 hover:bg-blue-700 hover:scale-110 active:scale-95 shadow-blue-500/40"
+            } border-4 border-white animate-in fade-in zoom-in slide-in-from-bottom-8 duration-700`}
           >
-            {/* Sheet Lists */}
-            {filtered?.sheets?.length === 0 ? (
-              <div
-                className="flex flex-col items-center justify-center py-32 text-center space-y-6"
-                style={{
-                  animation: "fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
-                }}
-              >
-                <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-slate-300">
-                  <svg
-                    className="w-12 h-12"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight">
-                    {t("detail.emptyState.noResults")}
-                  </h3>
-                  <p className="text-slate-500 font-medium">
-                    {t("detail.emptyState.adjustFilter")}
-                  </p>
-                </div>
+            {/* Pulsing indicator dot */}
+            {!isSyncing && (
+              <div className="absolute top-0 right-0 -mt-1 -mr-1 w-5 h-5 bg-red-500 rounded-full border-4 border-white animate-pulse shadow-md" />
+            )}
+
+            {isSyncing ? (
+              <div className="flex flex-col items-center">
+                <div className="w-6 h-6 border-[3px] border-white/30 border-t-white rounded-full animate-spin" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 pb-20">
-                {filtered?.sheets?.map((sheet, index) =>
-                  sheet ? (
-                    <div
-                      key={sheet.sheetId}
-                      className="animate-in fade-in slide-in-from-bottom-4 duration-500 fill-mode-both"
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
-                      <SpreadsheetItemViewer sheet={sheet} />
-                    </div>
-                  ) : null,
-                )}
-              </div>
+              <svg
+                className="w-7 h-7 text-white drop-shadow-sm"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={3}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
             )}
-          </div>
-        </main>
-      </div>
+
+            {/* Shine effect */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-white/20 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+        </div>
+      )}
 
       {/* Confirmation Modals */}
       <AddSheetModal

@@ -24,7 +24,7 @@ export default function AutoTranslateDialog({
   sheetId,
 }: AutoTranslateDialogProps) {
   const { t } = useTranslation()
-  const { data, setResponse } = useSpreadsheet()
+  const { data, setResponse, setHasChanges } = useSpreadsheet()
   const {
     apiKey,
     setApiKey,
@@ -130,7 +130,11 @@ export default function AutoTranslateDialog({
         })
 
         // Update the provider state
-        setResponse({ ...data, sheets: updatedSheets })
+        setResponse(
+          { ...data, sheets: updatedSheets },
+          { resetChanges: false },
+        )
+        setHasChanges(true)
       }
 
       failCount = result.missingItems.length - successCount

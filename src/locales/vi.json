@@ -16,7 +16,10 @@
       "profile": "Trang cá nhân",
       "searchDrive": "Tìm kiếm Drive",
       "logout": "Đăng xuất",
-      "login": "Đăng nhập"
+      "login": "Đăng nhập",
+      "loginWithGoogle": "Đăng nhập bằng Google",
+      "language": "Ngôn ngữ",
+      "interfaceLanguage": "Ngôn ngữ giao diện"
     },
     "footer": {
       "devRole": "Frontend Developer",
@@ -160,12 +163,27 @@
       "retry": "Thử lại ngay",
       "backHome": "Quay về trang chủ"
     },
+    "profile": {
+      "loading": "Đang tải hồ sơ...",
+      "totalProjects": "Tổng dự án",
+      "recentProjects": "Dự án đã mở",
+      "exploreDrive": "Khám phá Drive",
+      "aiSettings": "Cài đặt AI",
+      "lastUpdated": "Cập nhật lần cuối",
+      "noProjectsSynced": "Chưa có dự án nào được đồng bộ.",
+      "startTranslatingNow": "Bắt đầu dịch ngay",
+      "driveSearchTip": "Tìm kiếm và mở các tệp Google Sheets từ Drive của bạn.",
+      "fullView": "Bản xem đầy đủ",
+      "infoTitle": "Thông tin",
+      "infoDesc": "Sử dụng Translator Tool để quản lý các bản dịch từ Google Sheets của bạn một cách nhanh chóng."
+    },
     "header": {
       "myProjects": "Dự án của tôi",
       "sheetDetail": "Chi tiết bảng tính",
       "addCategory": "Thêm Danh Mục",
       "exportJson": "Xuất JSON",
-      "exportExcel": "Xuất Excel"
+      "exportExcel": "Xuất Excel",
+      "saveToGoogle": "Lưu vào Google Sheets"
     },
     "sidebar": {
       "overallProgress": "Tiến độ tổng quan",
@@ -222,9 +240,15 @@
       }
     },
     "exportModal": {
-      "title": "📦 Thiết lập Xuất JSON",
-      "subtitle": "Quản lý ngôn ngữ dự phòng và kiểm tra tỉ lệ dịch thuật",
+      "title": "📦 Xuất Dữ Liệu",
+      "subtitle": "Chọn định dạng và cấu hình cho bản dịch của bạn",
+      "formatLabel": "Định dạng xuất",
+      "jsonTitle": "JSON (i18n)",
+      "jsonDesc": "Xuất mỗi ngôn ngữ thành 1 file .json riêng biệt",
+      "excelTitle": "Excel (.xlsx)",
+      "excelDesc": "Xuất toàn bộ bảng tính thành 1 file Excel duy nhất",
       "exportCount": "Xuất {count} File",
+      "exportExcelAction": "Xuất file Excel",
       "fallbackBy": "Dự phòng bằng {lang}",
       "none": "Không có",
       "cancel": "Hủy",
@@ -305,7 +329,8 @@
       "hint": "Tên ngôn ngữ sẽ trở thành header column trong Google Sheets",
       "cancelButton": "Hủy",
       "addLanguageButton": "Thêm Ngôn Ngữ",
-      "errorNoSpreadsheet": "Không tìm thấy thông tin bảng tính"
+      "errorNoSpreadsheet": "Không tìm thấy thông tin bảng tính",
+      "errorAlreadyExists": "Ngôn ngữ này đã tồn tại trong bảng tính"
     },
     "deleteLanguage": {
       "title": "Xóa ngôn ngữ?",
@@ -412,8 +437,9 @@
       "title": "🗑️ Xóa Danh Mục",
       "subtitle": "Hành động này không thể hoàn tác",
       "confirmText": "Xác nhận xóa: {title}?",
-      "description": "Toàn bộ dữ liệu bản dịch bên trong danh mục này sẽ bị xóa vĩnh viễn khỏi Google Sheet / Excel.",
-      "advice": "Chúng tôi khuyên bạn nên xuất dữ liệu (Export) trước khi thực hiện xóa để lưu trữ dự phòng.",
+      "description": "Toàn bộ dữ liệu bản dịch bên trong danh mục này sẽ bị xóa <span class=\"text-red-600 font-bold uppercase tracking-tight\">VĨNH VIỄN</span> khỏi Google Sheet / Excel.",
+      "advice": "CẨN THẬN: Hành động này sẽ xóa vĩnh viễn dữ liệu. Bạn nên Export trước để dự phòng.",
+      "inputLabel": "Nhập tên danh mục để xác nhận",
       "cancel": "Hủy bỏ",
       "confirm": "Xác nhận xóa"
     }

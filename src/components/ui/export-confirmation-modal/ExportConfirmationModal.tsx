@@ -41,6 +41,7 @@ export default function ExportConfirmationModal({
   data,
 }: ExportConfirmationModalProps) {
   const { t, locale } = useTranslation()
+  const [exportFormat, setExportFormat] = useState<"JSON" | "EXCEL">("JSON")
   const [selectedFallback, setSelectedFallback] = useState<string>("")
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 
@@ -103,7 +104,7 @@ export default function ExportConfirmationModal({
         completed,
         missing,
         percentage,
-        })
+      })
     })
 
     return stats.sort((a, b) => b.percentage - a.percentage)
@@ -117,7 +118,12 @@ export default function ExportConfirmationModal({
   }, [languageStats])
 
   const handleConfirm = () => {
-    onConfirm(selectedFallback || undefined, selectedLanguages)
+    if (exportFormat === "JSON") {
+      onConfirm(selectedFallback || undefined, selectedLanguages)
+    } else {
+      // Special format for Excel
+      onConfirm("EXCEL_FORMAT" as any, []) 
+    }
     onClose()
   }
 
@@ -137,7 +143,6 @@ export default function ExportConfirmationModal({
       size="lg"
       footer={
         <div className="p-4 sm:p-6 bg-gradient-to-br from-slate-900 to-indigo-950 dark:from-black dark:to-indigo-950 text-white shadow-2xl relative overflow-hidden border-t border-white/10">
-          {/* Abstract decor */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 blur-[60px] rounded-full"></div>
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -147,10 +152,14 @@ export default function ExportConfirmationModal({
               </div>
               <div className="hidden sm:block">
                 <div className="text-xl font-black leading-none mb-1">
-                  {t("detail.exportModal.exportCount").replace("{count}", selectedLanguages.length.toString())}
+                  {exportFormat === "JSON" 
+                    ? t("detail.exportModal.exportCount").replace("{count}", selectedLanguages.length.toString())
+                    : t("detail.exportModal.exportExcelAction")}
                 </div>
                 <div className="text-sm text-slate-400 font-medium">
-                  {t("detail.exportModal.fallbackBy").replace("{lang}", selectedFallback || t("detail.exportModal.none"))}
+                  {exportFormat === "JSON" 
+                    ? t("detail.exportModal.fallbackBy").replace("{lang}", selectedFallback || t("detail.exportModal.none"))
+                    : `${data.sheets.length} categories · ${languageStats[0]?.total || 0} keywords`}
                 </div>
               </div>
             </div>
@@ -164,7 +173,7 @@ export default function ExportConfirmationModal({
               </button>
               <button
                 onClick={handleConfirm}
-                disabled={selectedLanguages.length === 0}
+                disabled={exportFormat === "JSON" && selectedLanguages.length === 0}
                 className="sm:px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-black shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed transform active:scale-95"
               >
                 {t("detail.exportModal.startDownload")}
@@ -175,196 +184,173 @@ export default function ExportConfirmationModal({
       }
     >
       <div className="space-y-8 pb-4">
-        {/* Statistics Header Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            {
-              label: t("detail.exportModal.stats.languages"),
-              value: languageStats.length,
-              icon: "🌍",
-              color: "from-blue-500/10 to-indigo-500/10",
-            },
-            {
-              label: t("detail.exportModal.stats.totalKeywords"),
-              value: languageStats[0]?.total || 0,
-              icon: "🔖",
-              color: "from-purple-500/10 to-violet-500/10",
-            },
-            {
-              label: t("detail.exportModal.stats.averageCompleted"),
-              value: `${Math.round(languageStats.reduce((sum, s) => sum + s.percentage, 0) / (languageStats.length || 1))}%`,
-              icon: "✅",
-              color: "from-emerald-500/10 to-teal-500/10",
-            },
-          ].map((card, i) => (
-            <div
-              key={i}
-              className={`relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br ${card.color} border border-white/40 dark:border-white/5 shadow-sm`}
-            >
-              <div className="relative z-10">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">
-                  {card.label}
+        {/* Format Selector */}
+        <div className="space-y-3 px-1">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">
+            {t("detail.exportModal.formatLabel")}
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              { id: "JSON", title: t("detail.exportModal.jsonTitle"), desc: t("detail.exportModal.jsonDesc"), icon: "📄" },
+              { id: "EXCEL", title: t("detail.exportModal.excelTitle"), desc: t("detail.exportModal.excelDesc"), icon: "📊" }
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setExportFormat(f.id as any)}
+                className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+                  exportFormat === f.id
+                    ? "border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 shadow-lg shadow-blue-500/10"
+                    : "border-slate-100 dark:border-slate-800 hover:border-slate-200 bg-white/40 dark:bg-slate-900/40"
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${exportFormat === f.id ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800"}`}>
+                  {f.icon}
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white leading-none">
-                  {card.value}
-                </div>
-              </div>
-              <div className="absolute -right-2 -bottom-2 text-4xl opacity-10 grayscale">
-                {card.icon}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Action Header */}
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <span className="w-4 h-1 bg-blue-600 rounded-full"></span>
-            {t("detail.exportModal.configTitle")}
-          </h3>
-          <button
-            onClick={toggleAll}
-            className="text-[10px] font-black uppercase tracking-tighter px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-blue-600 hover:text-white transition-all border border-slate-200 dark:border-slate-700"
-          >
-            {selectedLanguages.length === languageStats.length
-              ? t("detail.exportModal.deselectAll")
-              : t("detail.exportModal.selectAll")}
-          </button>
-        </div>
-
-        {/* Language List - Now flexible inside the Dialog's scrollable area */}
-        <div className="space-y-3">
-          {/* No Fallback Option */}
-          <button
-            onClick={() => setSelectedFallback("")}
-            className={`w-full text-left group flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-300 ${
-              selectedFallback === ""
-                ? "border-blue-500/50 bg-blue-50/50 dark:bg-blue-900/10 shadow-lg shadow-blue-500/5"
-                : "border-slate-100 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-800 bg-white/40 dark:bg-slate-900/40"
-            }`}
-          >
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${selectedFallback === "" ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:text-blue-500"}`}
-            >
-              <BanIcon className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <div className="font-bold text-slate-900 dark:text-white text-base">
-                {t("detail.exportModal.noFallback")}
-              </div>
-              <div className="text-xs text-slate-500">
-                {t("detail.exportModal.noFallbackDesc")}
-              </div>
-            </div>
-            <div
-              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${selectedFallback === "" ? "border-blue-600 bg-blue-600" : "border-slate-200 dark:border-slate-700"}`}
-            >
-              {selectedFallback === "" && (
-                <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-              )}
-            </div>
-          </button>
-
-          {/* Individual Language Options */}
-          {languageStats.map((stat) => (
-            <div
-              key={stat.language}
-              className={`group relative flex flex-col p-4 rounded-2xl border-2 transition-all duration-300 ${
-                selectedFallback === stat.language
-                  ? "border-blue-500/50 bg-blue-50/50 dark:bg-blue-900/10 shadow-lg shadow-blue-500/5"
-                  : "border-slate-100 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-900 bg-white/40 dark:bg-slate-900/40"
-              }`}
-            >
-              {/* Top Section: Logic & Identity */}
-              <div className="flex items-center gap-4 mb-4">
-                {/* Export Selection (Checkbox) */}
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.includes(stat.language)}
-                  onChange={() => toggleLanguage(stat.language)}
-                  className="w-5 h-5 rounded-lg border-2 border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500/30 transition-all cursor-pointer"
-                  title="Xuất file cho ngôn ngữ này"
-                />
-
-                {/* Info */}
-                <div className="flex-1 flex items-center gap-3">
-                  <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-inner border-2 ${
-                      stat.percentage === 100
-                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                        : "bg-indigo-500/10 text-indigo-600 border-indigo-500/20"
-                    }`}
-                  >
-                    {stat.language.slice(0, 2).toUpperCase()}
+                <div className="flex-1">
+                  <div className={`font-bold ${exportFormat === f.id ? "text-blue-600" : "text-slate-800 dark:text-white"}`}>
+                    {f.title}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-black text-slate-900 dark:text-white text-lg leading-none">
-                        {stat.language}
-                      </h4>
-                      {suggestedFallback?.language === stat.language && (
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500 text-white tracking-tighter">
-                          {t("detail.exportModal.suggested")}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs font-medium text-slate-500 mt-1">
-                      {t("detail.exportModal.wordsCompleted").replace("{count}", stat.completed.toString())} • {t("detail.exportModal.wordsMissing").replace("{count}", stat.missing.toString())}
-                    </p>
+                  <div className="text-[10px] text-slate-500 leading-tight mt-0.5">
+                    {f.desc}
                   </div>
                 </div>
+                {exportFormat === f.id && (
+                  <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+                    <CheckCircleIcon className="w-3 h-3 text-white" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-                {/* Fallback Selection (Radio) */}
-                <button
-                  onClick={() => setSelectedFallback(stat.language)}
-                  className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all ${
-                    selectedFallback === stat.language
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700"
+        {exportFormat === "JSON" ? (
+          <>
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { label: t("detail.exportModal.stats.languages"), value: languageStats.length, icon: "🌍", color: "from-blue-500/10 to-indigo-500/10" },
+                { label: t("detail.exportModal.stats.totalKeywords"), value: languageStats[0]?.total || 0, icon: "🔖", color: "from-purple-500/10 to-violet-500/10" },
+                { label: t("detail.exportModal.stats.averageCompleted"), value: `${Math.round(languageStats.reduce((sum, s) => sum + s.percentage, 0) / (languageStats.length || 1))}%`, icon: "✅", color: "from-emerald-500/10 to-teal-500/10" },
+              ].map((card, i) => (
+                <div key={i} className={`relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br ${card.color} border border-white/40 dark:border-white/5`}>
+                  <div className="relative z-10">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">{card.label}</div>
+                    <div className="text-2xl font-black text-slate-900 dark:text-white">{card.value}</div>
+                  </div>
+                  <div className="absolute -right-2 -bottom-2 text-4xl opacity-10 grayscale">{card.icon}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Config Header */}
+            <div className="flex items-center justify-between px-2">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-4 h-1 bg-blue-600 rounded-full"></span>
+                {t("detail.exportModal.configTitle")}
+              </h3>
+              <button
+                onClick={toggleAll}
+                className="text-[10px] font-black uppercase tracking-tighter px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 hover:bg-blue-600 hover:text-white transition-all"
+              >
+                {selectedLanguages.length === languageStats.length
+                  ? t("detail.exportModal.deselectAll")
+                  : t("detail.exportModal.selectAll")}
+              </button>
+            </div>
+
+            {/* Language Selection List */}
+            <div className="space-y-3">
+              <button
+                onClick={() => setSelectedFallback("")}
+                className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
+                  selectedFallback === "" ? "border-blue-500/50 bg-blue-50/50 dark:bg-blue-900/10" : "border-slate-100 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40"
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedFallback === "" ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800"}`}>
+                  <BanIcon className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-bold text-slate-900 dark:text-white">{t("detail.exportModal.noFallback")}</div>
+                  <div className="text-xs text-slate-500">{t("detail.exportModal.noFallbackDesc")}</div>
+                </div>
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedFallback === "" ? "border-blue-600 bg-blue-600" : "border-slate-200"}`}>
+                  {selectedFallback === "" && <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>}
+                </div>
+              </button>
+
+              {languageStats.map((stat) => (
+                <div
+                  key={stat.language}
+                  className={`relative flex flex-col p-4 rounded-2xl border-2 transition-all ${
+                    selectedFallback === stat.language ? "border-blue-500/50 bg-blue-50/50 dark:bg-blue-900/10" : "border-slate-100 dark:border-slate-800 bg-white/40 dark:bg-slate-900/40"
                   }`}
                 >
-                  <span className="text-[10px] font-semibold tracking-tighter">
-                    {t("detail.exportModal.setAsFallback")}
-                  </span>
-                  <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedFallback === stat.language ? "border-white" : "border-slate-300 dark:border-slate-600"}`}
-                  >
-                    {selectedFallback === stat.language && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                    )}
+                  <div className="flex items-center gap-4 mb-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedLanguages.includes(stat.language)}
+                      onChange={() => toggleLanguage(stat.language)}
+                      className="w-5 h-5 rounded-lg border-2 border-slate-300 dark:border-slate-700 text-blue-600 cursor-pointer"
+                    />
+                    <div className="flex-1 flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-lg font-black border-2 border-slate-200/50 dark:border-slate-700/50 text-slate-600">
+                        {stat.language.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-black text-slate-900 dark:text-white text-lg">{stat.language}</h4>
+                          {suggestedFallback?.language === stat.language && (
+                            <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-500 text-white">i18m</span>
+                          )}
+                        </div>
+                        <p className="text-xs font-medium text-slate-500">
+                          {t("detail.exportModal.wordsCompleted").replace("{count}", stat.completed.toString())} • {t("detail.exportModal.wordsMissing").replace("{count}", stat.missing.toString())}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setSelectedFallback(stat.language)}
+                      className={`px-3 py-2 rounded-xl transition-all ${
+                        selectedFallback === stat.language ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                      }`}
+                    >
+                      <span className="text-[10px] font-semibold">{t("detail.exportModal.setAsFallback")}</span>
+                    </button>
                   </div>
-                </button>
-              </div>
-
-              {/* Progress Visualizer */}
-              <div className="relative group/progress">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    {t("detail.exportModal.translationRate")}
-                  </span>
-                  <span
-                    className={`text-[11px] font-black ${stat.percentage === 100 ? "text-emerald-500" : "text-blue-500"}`}
-                  >
-                    {stat.percentage}%
-                  </span>
+                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full bg-gradient-to-r ${getProgressColor(stat.percentage)}`} style={{ width: `${stat.percentage}%` }}></div>
+                  </div>
                 </div>
-                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-[2px] border border-slate-200/50 dark:border-slate-700/50">
-                  <div
-                    className={`h-full rounded-full bg-gradient-to-r ${getProgressColor(stat.percentage)} transition-all duration-1000 ease-out shadow-sm`}
-                    style={{ width: `${stat.percentage}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Success Badge */}
-              {stat.percentage === 100 && (
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <CheckCircleIcon className="w-4 h-4" />
-                </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          /* Excel Overview */
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center space-y-6">
+            <div className="w-24 h-24 rounded-[32px] bg-emerald-50 dark:bg-emerald-900/10 flex items-center justify-center border-2 border-emerald-100 dark:border-emerald-900/20 shadow-xl shadow-emerald-500/10">
+              <span className="text-5xl">📊</span>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                {t("detail.exportModal.excelTitle")}
+              </h3>
+              <p className="text-sm text-slate-500 font-medium max-w-xs">
+                {t("detail.exportModal.excelDesc")}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="text-[10px] font-black uppercase text-slate-400 mb-1">Categories</div>
+                <div className="text-xl font-black text-emerald-600">{data.sheets.length}</div>
+              </div>
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="text-[10px] font-black uppercase text-slate-400 mb-1">Total Keys</div>
+                <div className="text-xl font-black text-emerald-600">{languageStats[0]?.total || 0}</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Dialog>
   )
