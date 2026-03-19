@@ -9,6 +9,7 @@ import { transformToI18n } from "@/util/transform"
 import { exportSpreadsheetToExcel } from "@/util/excel"
 import { useCallback, useMemo, useState } from "react"
 import AddSheetModal from "../ui/add-sheet-modal"
+import AutoTranslateDialog from "../ui/auto-translate-dialog/AutoTranslateDialog"
 import Button from "../ui/button"
 import ExportConfirmationModal from "../ui/export-confirmation-modal"
 import LanguageFilter from "../ui/language-filter"
@@ -21,6 +22,7 @@ export default function SpreadsheetViewer() {
   const { data, listLocales, selectedLocales } = useSpreadsheet()
   const [isAddSheetModalOpen, setIsAddSheetModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isAiConfigOpen, setIsAiConfigOpen] = useState(false)
 
   const {
     filtered,
@@ -149,6 +151,16 @@ export default function SpreadsheetViewer() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setIsAiConfigOpen(true)}
+            variant="outline"
+            size="sm"
+            className="!p-2.5 rounded-xl border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-600 shadow-sm"
+          >
+            <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </Button>
           <Button
             onClick={() => setIsAddSheetModalOpen(true)}
             variant="outline"
@@ -390,6 +402,14 @@ export default function SpreadsheetViewer() {
           onClose={() => setIsExportModalOpen(false)}
           onConfirm={handleConfirmExport}
           data={data}
+        />
+      )}
+
+      {data && (
+        <AutoTranslateDialog
+          isOpen={isAiConfigOpen}
+          onClose={() => setIsAiConfigOpen(false)}
+          spreadsheetId={data.id}
         />
       )}
 

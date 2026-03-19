@@ -64,50 +64,64 @@ class SimpleCache {
 // Rate limiting để tránh Google API quota exceeded
 class RateLimiter {
   private requestTimes: number[] = []
-  private readonly maxRequests = 60 // Google limit: 100/minute, để buffer lớn hơn
+  private readonly maxRequests = 40 
   private readonly windowMs = 60 * 1000 // 1 phút
-  private totalRequestsCount = 0 // Track total API calls
-
-  async checkLimit(): Promise<void> {
-    const now = Date.now()
-
-    // Remove old requests outside the window
-    this.requestTimes = this.requestTimes.filter(
-      (time) => now - time < this.windowMs
-    )
-
-    if (this.requestTimes.length >= this.maxRequests) {
-      const oldestRequest = Math.min(...this.requestTimes)
-      const waitTime = this.windowMs - (now - oldestRequest)
-
-      console.log(
-        `⏱️ Rate limit reached. Waiting ${Math.round(waitTime / 1000)}s...`
-      )
-      console.log(
-        `📊 Current: ${this.requestTimes.length}/${this.maxRequests} requests in last minute`
-      )
-      console.log(`📈 Total API calls this session: ${this.totalRequestsCount}`)
-
-      await this.sleep(waitTime)
-
-      // Recursive check after waiting
-      return this.checkLimit()
-    }
-
-    // Record this request
-    this.requestTimes.push(now)
-    this.totalRequestsCount++
-
-    // Log every 10th request để track usage
-    if (this.totalRequestsCount % 10 === 0) {
-      console.log(
-        `📈 API Usage: ${this.totalRequestsCount} total calls, ${this.requestTimes.length}/${this.maxRequests} in last minute`
-      )
-    }
-  }
+  private lastRequestTime = 0 // Thời điểm yêu cầu cuối cùng được thông qua
+  private readonly minInterval = 250 // Khoảng cách tối thiểu giữa 2 yêu cầu (4 req/s max)
+  private totalRequestsCount = 0 
+  private isProcessing = false // Để lock đồng bộ các check song song
 
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+
+  async checkLimit(): Promise<void> {
+    // Nếu có một check đang ngủ/xử lý, check khác phải đợi sau (FIFO)
+    while (this.isProcessing) {
+      await this.sleep(100)
+    }
+
+    try {
+      this.isProcessing = true
+      const now = Date.now()
+
+      // 1. Kiểm tra burst interval (dãn cách các request song song)
+      const timeSinceLast = now - this.lastRequestTime
+      if (timeSinceLast < this.minInterval) {
+        const waitInterval = this.minInterval - timeSinceLast
+        await this.sleep(waitInterval)
+        return this.checkLimit()
+      }
+
+      // 2. Kiểm tra quota 1 phút
+      this.requestTimes = this.requestTimes.filter(
+        (time) => now - time < this.windowMs
+      )
+
+      if (this.requestTimes.length >= this.maxRequests) {
+        const oldestRequest = Math.min(...this.requestTimes)
+        const waitTime = this.windowMs - (now - oldestRequest)
+
+        console.log(
+          `⏱️ Quota limit reached (${this.maxRequests}). Waiting ${Math.round(waitTime / 1000)}s...`
+        )
+        await this.sleep(waitTime)
+        return this.checkLimit()
+      }
+
+      // Record request
+      const approvalTime = Date.now()
+      this.requestTimes.push(approvalTime)
+      this.lastRequestTime = approvalTime
+      this.totalRequestsCount++
+
+      // Log periodically
+      if (this.totalRequestsCount % 10 === 0) {
+        console.log(`📈 API Usage: ${this.totalRequestsCount} total calls, ${this.requestTimes.length}/${this.maxRequests} in last minute`)
+      }
+    } finally {
+      this.isProcessing = false
+    }
   }
 }
 
@@ -438,6 +452,8 @@ export class GoogleSheetsService {
         // Các sheet khác: chỉ load metadata
         console.log(`📋 Loading metadata only for sheet: ${sheet.title}`)
         try {
+          // Metadata only - load headers (Rate limited)
+          await this.rateLimiter.checkLimit()
           await sheet.loadHeaderRow()
           sheets.push({
             sheetId: sheet.sheetId,
@@ -1119,6 +1135,7 @@ export class GoogleSheetsService {
     // Check if language already exists in any sheet
     const existingLanguages = new Set<string>()
     for (const sheet of doc.sheetsByIndex) {
+      await this.rateLimiter.checkLimit()
       await sheet.loadHeaderRow()
       sheet.headerValues.forEach((header) => {
         if (header.toLowerCase() !== "key") {
@@ -1133,6 +1150,7 @@ export class GoogleSheetsService {
 
     // Add the new language column to all sheets
     for (const sheet of doc.sheetsByIndex) {
+      await this.rateLimiter.checkLimit()
       await sheet.loadHeaderRow()
 
       // Add new header if not exists
@@ -1140,7 +1158,8 @@ export class GoogleSheetsService {
         // Get the next column index
         const nextColIndex = sheet.headerValues.length
 
-        // Add the new column header
+        // Add the new column header (Rate limited)
+        await this.rateLimiter.checkLimit()
         await sheet.loadCells(`A1:${String.fromCharCode(65 + nextColIndex)}1`)
         const headerCell = sheet.getCell(0, nextColIndex)
         headerCell.value = languageName
@@ -1154,10 +1173,12 @@ export class GoogleSheetsService {
           headerCell.textFormat = firstHeaderCell.textFormat
         }
 
+        await this.rateLimiter.checkLimit()
         await sheet.saveUpdatedCells()
 
-        // Update header row to include the new column
+        // Update header row (Rate limited)
         const newHeaders = [...sheet.headerValues, languageName]
+        await this.rateLimiter.checkLimit()
         await sheet.setHeaderRow(newHeaders)
       }
     }
@@ -1177,29 +1198,55 @@ export class GoogleSheetsService {
       throw new Error("Tên ngôn ngữ không được để trống")
     }
 
-    console.log(`🗑️ Deleting language column: ${languageName} from all sheets in ${spreadsheetId}`)
+    console.log(`🚀 Optimized: Deleting language column: ${languageName} from all sheets in ${spreadsheetId} using BatchUpdate`)
 
-    // Delete the language column from all sheets
+    // Step 1: Parallel load headers for all sheets using Promise.all and rate limiting
+    await Promise.all(
+      doc.sheetsByIndex.map(async (sheet) => {
+        try {
+          await this.rateLimiter.checkLimit()
+          await sheet.loadHeaderRow()
+        } catch (err: any) {
+          console.warn(`⚠️ Could not load headers for sheet "${sheet.title}":`, err.message)
+        }
+      })
+    )
+
+    // Step 2: Build batch requests
+    const requests: any[] = []
+    const normalizedTarget = languageName.toLowerCase()
+
     for (const sheet of doc.sheetsByIndex) {
-      await sheet.loadHeaderRow()
+      if (!sheet.headerValues) continue
 
-      // Find the column index for this language
       const colIndex = sheet.headerValues.findIndex(
-        (h) => h.toLowerCase() === languageName.toLowerCase()
+        (h: string) => h.toLowerCase() === normalizedTarget
       )
 
       if (colIndex !== -1) {
-        console.log(`📍 Removing column ${colIndex} from sheet: ${sheet.title}`)
-
-        // Delete column by index
-        // Correct signature for some versions of google-spreadsheet: deleteDimension(type, start, end)
-        // @ts-ignore
-        await sheet.deleteDimension("COLUMNS", colIndex, colIndex + 1)
-
-
-        // Force reload headers for the sheet
-        await sheet.loadHeaderRow()
+        requests.push({
+          deleteDimension: {
+            range: {
+              sheetId: sheet.sheetId,
+              dimension: "COLUMNS",
+              startIndex: colIndex,
+              endIndex: colIndex + 1,
+            },
+          },
+        })
       }
+    }
+
+    if (requests.length === 0) {
+      console.log(`ℹ️ No sheets found containing language: ${languageName}`)
+    } else {
+      console.log(`📍 Sending batchUpdate with ${requests.length} delete requests...`)
+      
+      // google-spreadsheet@5.x uses ky (not axios) via doc.sheetsApi
+      // Use the internal _makeBatchUpdateRequest (Rate limited)
+      await this.rateLimiter.checkLimit()
+      // @ts-ignore - internal method but stable across v5.x
+      await doc._makeBatchUpdateRequest(requests)
     }
 
     // Invalidate local cache 
@@ -1211,6 +1258,7 @@ export class GoogleSheetsService {
 
 
   private async validateSheetFormat(sheet: any): Promise<void> {
+    await this.rateLimiter.checkLimit()
     await sheet.loadHeaderRow()
 
     const headers = sheet.headerValues ?? []

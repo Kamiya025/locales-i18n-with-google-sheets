@@ -43,6 +43,16 @@ const sheetApi = {
     return axiosClient.get(url, { params })
   },
 
+  getSpecificSheet(
+    spreadsheetId: string,
+    sheetTitle: string
+  ): Promise<SpreadsheetResponse> {
+    const url = "/sheet/" + spreadsheetId
+    const params = { mode: "first-only", sheet: sheetTitle }
+    console.log("🚀 API call for specific sheet:", sheetTitle)
+    return axiosClient.get(url, { params })
+  },
+
   update(data: SpreadsheetResponse): Promise<any> {
     if (isLocalExcel(data.id)) {
       persistLocalExcel(data)

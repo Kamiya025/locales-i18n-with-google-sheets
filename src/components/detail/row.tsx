@@ -20,6 +20,8 @@ export function RowItemViewer(
     customToast.success(t("detail.row.updateSuccess").replace("{key}", row.key))
   })
 
+
+
   useEffect(() => {
     setState(row)
   }, [row])
@@ -54,6 +56,8 @@ export function RowItemViewer(
           />
         </svg>
       </div>
+
+
 
       <div className="p-4 pt-8 sm:p-8 sm:pt-10 rounded-2xl sm:rounded-[32px] bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 relative overflow-hidden">
         {/* Subtle background decoration */}
