@@ -175,7 +175,13 @@
       "driveSearchTip": "Tìm kiếm và mở các tệp Google Sheets từ Drive của bạn.",
       "fullView": "Bản xem đầy đủ",
       "infoTitle": "Thông tin",
-      "infoDesc": "Sử dụng Translator Tool để quản lý các bản dịch từ Google Sheets của bạn một cách nhanh chóng."
+      "infoDesc": "Sử dụng Translator Tool để quản lý các bản dịch từ Google Sheets của bạn một cách nhanh chóng.",
+      "unauthenticated": {
+        "title": "Bạn chưa đăng nhập",
+        "subtitle": "Vui lòng đăng nhập bằng Google để xem lịch sử dự án, đồng bộ Cloud và quản lý cấu hình AI của bạn.",
+        "loginButton": "Đăng nhập với Google",
+        "loginTip": "Kết nối an toàn qua dịch vụ của Google"
+      }
     },
     "header": {
       "myProjects": "Dự án của tôi",
@@ -184,6 +190,107 @@
       "exportJson": "Xuất JSON",
       "exportExcel": "Xuất Excel",
       "saveToGoogle": "Lưu vào Google Sheets"
+    },
+    "privacy": {
+      "title": "Chính sách Bảo mật",
+      "lastUpdated": "Cập nhật lần cuối: 15 tháng 12, 2024",
+      "backHome": "Quay lại trang chủ",
+      "sections": {
+        "intro": {
+          "title": "1. Giới thiệu",
+          "content": "Google Sheet Translation Tool (\"chúng tôi\", \"ứng dụng\") cam kết bảo vệ quyền riêng tư của bạn. Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn khi sử dụng dịch vụ quản lý bản dịch từ Google Sheets."
+        },
+        "collection": {
+          "title": "2. Thông tin chúng tôi thu thập",
+          "google_account": "2.1 Thông tin Google Account",
+          "google_account_desc": "Khi bạn đăng nhập bằng Google OAuth, chúng tôi thu thập: Tên, email, ảnh đại diện và quyền truy cập Google Sheets.",
+          "spreadsheet_data": "2.2 Dữ liệu Google Sheets",
+          "spreadsheet_data_desc": "Chúng tôi truy xuất nội dung bản dịch, metadata của sheet và lịch sử truy cập để phục vụ tính năng quản lý.",
+          "usage_data": "2.3 Dữ liệu sử dụng",
+          "usage_data_desc": "Bao gồm các cài đặt ưu tiên, lịch sử tìm kiếm và thống kê sử dụng ẩn danh."
+        },
+        "usage": {
+          "title": "3. Cách chúng tôi sử dụng thông tin",
+          "core": "3.1 Chức năng chính",
+          "core_desc": "Sử dụng dữ liệu để hiển thị, chỉnh sửa bản dịch real-time và xuất tệp JSON/Excel.",
+          "improvement": "3.2 Cải thiện trải nghiệm",
+          "improvement_desc": "Ghi nhớ lịch sử truy cập, cá nhân hóa giao diện và tối ưu hóa tính năng tìm kiếm."
+        },
+        "sharing": {
+          "title": "4. Chia sẻ thông tin",
+          "google": "4.1 Google Services",
+          "google_desc": "Tương tác trực tiếp với Google Sheets API và Google OAuth.",
+          "commitment": "4.2 Cam kết bảo mật",
+          "commitment_desc": "Chúng tôi không bán dữ liệu, không quảng cáo và chỉ chia sẻ khi có sự đồng ý của bạn."
+        },
+        "security": {
+          "title": "5. Bảo mật dữ liệu",
+           "encryption": "5.1 Mã hóa",
+           "encryption_desc": "Sử dụng HTTPS/SSL, mã hóa token JWT và lưu trữ an toàn tiêu chuẩn.",
+           "access": "5.2 Kiểm soát truy cập",
+           "access_desc": "Chỉ người dùng đã xác thực, quản lý phiên làm việc và yêu cầu quyền tối thiểu."
+        },
+        "rights": {
+          "title": "6. Quyền của bạn",
+          "access": "6.1 Truy cập và chỉnh sửa",
+          "access_desc": "Bạn có quyền xem, cập nhật hoặc tải xuống dữ liệu cá nhân bất kỳ lúc nào.",
+          "deletion": "6.2 Quyền yêu cầu xóa",
+          "deletion_desc": "Thu hồi quyền truy cập Google hoặc xóa vĩnh viễn tài khoản và dữ liệu liên quan."
+        },
+        "contact": {
+          "title": "9. Liên hệ",
+          "content": "Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu nào về quyền riêng tư, vui lòng liên hệ hawk01525@gmail.com. Chúng tôi hỗ trợ tiếng Việt/Anh và phản hồi trong 48 giờ làm việc."
+        }
+      }
+    },
+    "terms": {
+      "title": "Điều khoản Dịch vụ",
+      "lastUpdated": "Cập nhật lần cuối: 15 tháng 12, 2024",
+      "backHome": "Quay lại trang chủ",
+      "sections": {
+        "intro": {
+          "title": "1. Chấp nhận Điều khoản",
+          "content": "Bằng việc truy cập và sử dụng Google Sheet Translation Tool, bạn đồng ý tuân thủ và bị ràng buộc bởi các điều khoản và điều kiện sau đây."
+        },
+        "service": {
+          "title": "2. Mô tả Dịch vụ",
+          "core": "2.1 Chức năng chính",
+          "core_desc": "Quản lý bản dịch, tích hợp Google Sheets, xuất dữ liệu JSON và bộ lọc thông minh.",
+          "scope": "2.2 Phạm vi dịch vụ",
+          "scope_desc": "Ứng dụng web hoạt động trên trình duyệt hiện đại, tối ưu cho desktop và mobile."
+        },
+        "account": {
+          "title": "3. Tài khoản và Truy cập",
+          "requirement": "3.1 Yêu cầu",
+          "requirement_desc": "Cần tài khoản Google, từ 13 tuổi trở lên để sử dụng dịch vụ.",
+          "access": "3.2 Quyền truy cập",
+          "access_desc": "Truy cập Google Sheets scope và thông tin hồ sơ cơ bản để xác thực.",
+          "security": "3.3 Bảo mật",
+          "security_desc": "Xác thực qua Google OAuth 2.0 và quản lý token phiên an toàn."
+        },
+        "rights_responsibility": {
+          "title": "4. Quyền và Trách nhiệm",
+          "use": "4.1 Quyền sử dụng",
+          "use_desc": "Truy cập miễn phí, giữ quyền sở hữu dữ liệu Google Sheets và kiểm soát riêng tư.",
+          "responsibility": "4.2 Trách nhiệm",
+          "responsibility_desc": "Sử dụng hợp pháp, bảo mật thông tin tài khoản và không gây quá tải hệ thống."
+        },
+        "intellectual": {
+          "title": "5. Sở hữu Trí tuệ",
+          "our": "5.1 Quyền của chúng tôi",
+          "our_desc": "Mã nguồn ứng dụng, thiết kế và trải nghiệm người dùng thuộc về chúng tôi.",
+          "user": "5.2 Quyền của người dùng",
+          "user_desc": "Nội dung Google Sheets và các tệp export hoàn toàn thuộc quyền sở hữu của bạn."
+        },
+        "disclaimer": {
+          "title": "6. Miễn trừ Trách nhiệm",
+          "content": "Dịch vụ được cung cấp 'như hiện có'. Chúng tôi không chịu trách nhiệm về sự cố mất dữ liệu hoặc các lỗi từ dịch vụ Google."
+        },
+        "contact": {
+          "title": "7. Liên hệ",
+          "content": "Mọi vướng mắc về điều khoản vui lòng liên hệ hawk01525@gmail.com. Giờ làm việc: 9:00 - 17:00 (GMT+7), Thứ 2 - Thứ 6."
+        }
+      }
     },
     "sidebar": {
       "overallProgress": "Tiến độ tổng quan",

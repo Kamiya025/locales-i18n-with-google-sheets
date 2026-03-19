@@ -175,7 +175,13 @@
       "driveSearchTip": "Search and open Google Sheets from your Drive.",
       "fullView": "Full View",
       "infoTitle": "Info",
-      "infoDesc": "Use Translator Tool to manage your translations from Google Sheets quickly."
+      "infoDesc": "Use Translator Tool to manage your translations from Google Sheets quickly.",
+      "unauthenticated": {
+        "title": "You are not signed in",
+        "subtitle": "Please sign in with Google to view your project history, sync with Cloud, and manage your AI configurations.",
+        "loginButton": "Sign in with Google",
+        "loginTip": "Secure connection via Google Services"
+      }
     },
     "header": {
       "myProjects": "My Projects",
@@ -340,6 +346,107 @@
       "cancelButton": "Cancel",
       "deleteButton": "Delete Permanently",
       "deleting": "Deleting..."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: December 15, 2024",
+      "backHome": "Back to home",
+      "sections": {
+        "intro": {
+          "title": "1. Introduction",
+          "content": "Google Sheet Translation Tool ('we', 'us', 'the application') is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal information when using our Google Sheets translation management service."
+        },
+        "collection": {
+          "title": "2. Information We Collect",
+          "google_account": "2.1 Google Account Info",
+          "google_account_desc": "When you sign in with Google OAuth, we collect: Name, email, profile picture, and Google Sheets access permissions.",
+          "spreadsheet_data": "2.2 Google Sheets Data",
+          "spreadsheet_data_desc": "We retrieve translation content, sheet metadata, and access history to provide management features.",
+          "usage_data": "2.3 Usage Data",
+          "usage_data_desc": "Includes your preferences, search history, and anonymous usage statistics."
+        },
+        "usage": {
+          "title": "3. How We Use Information",
+          "core": "3.1 Core Functionality",
+          "core_desc": "Using data to display, edit translations in real-time, and export JSON/Excel files.",
+          "improvement": "3.2 Experience Improvement",
+          "improvement_desc": "Remembering access history, personalizing settings, and optimizing search features."
+        },
+        "sharing": {
+          "title": "4. Information Sharing",
+          "google": "4.1 Google Services",
+          "google_desc": "Direct interaction with Google Sheets API and Google OAuth.",
+          "commitment": "4.2 Security Commitment",
+          "commitment_desc": "We do not sell data, do not advertise, and only share with your explicit consent."
+        },
+        "security": {
+          "title": "5. Data Security",
+          "encryption": "5.1 Encryption",
+          "encryption_desc": "Using HTTPS/SSL, JWT token encryption, and standard secure storage.",
+          "access": "5.2 Access Control",
+          "access_desc": "Authenticated users only, session management, and minimal permission scoping."
+        },
+        "rights": {
+          "title": "6. Your Rights",
+          "access": "6.1 Access and Edit",
+          "access_desc": "You have the right to view, update, or download your personal data at any time.",
+          "deletion": "6.2 Right to Delete",
+          "deletion_desc": "Revoke Google access or permanently delete your account and associated data."
+        },
+        "contact": {
+          "title": "9. Contact",
+          "content": "If you have any questions or requests regarding privacy, please contact hawk01525@gmail.com. We support Vietnamese/English and respond within 48 business hours."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: December 15, 2024",
+      "backHome": "Back to home",
+      "sections": {
+        "intro": {
+          "title": "1. Acceptance of Terms",
+          "content": "By accessing and using Google Sheet Translation Tool, you agree to comply with and be bound by the following terms and conditions."
+        },
+        "service": {
+          "title": "2. Service Description",
+          "core": "2.1 Core Features",
+          "core_desc": "Translation management, Google Sheets integration, JSON export, and smart filtering.",
+          "scope": "2.2 Service Scope",
+          "scope_desc": "Web application running on modern browsers, optimized for desktop and mobile."
+        },
+        "account": {
+          "title": "3. Account and Access",
+          "requirement": "3.1 Requirements",
+          "requirement_desc": "Requires a Google account, must be 13 years or older to use the service.",
+          "access": "3.2 Access Rights",
+          "access_desc": "Access to Google Sheets scope and basic profile info for authentication.",
+          "security": "3.3 Security",
+          "security_desc": "Authentication via Google OAuth 2.0 and secure session token management."
+        },
+        "rights_responsibility": {
+          "title": "4. Rights and Responsibilities",
+          "use": "4.1 Usage Rights",
+          "use_desc": "Free access, full ownership of Google Sheets data, and privacy control.",
+          "responsibility": "4.2 Responsibilities",
+          "responsibility_desc": "Lawful use, maintaining account security, and not abusing system resources."
+        },
+        "intellectual": {
+          "title": "5. Intellectual Property",
+          "our": "5.1 Our Rights",
+          "our_desc": "Application source code, design, and user experience are owned by us.",
+          "user": "5.2 User Rights",
+          "user_desc": "Google Sheets content and exported files remain entirely your property."
+        },
+        "disclaimer": {
+          "title": "6. Disclaimer",
+          "content": "Service provided 'AS IS'. We are not responsible for data loss or issues from Google services."
+        },
+        "contact": {
+          "title": "7. Contact",
+          "content": "For any concerns regarding terms, please contact hawk01525@gmail.com. Working hours: 9:00 - 17:00 (GMT+7), Mon - Fri."
+        }
+      }
     },
     "addSheet": {
       "title": "Create New Category",
