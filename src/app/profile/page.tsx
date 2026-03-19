@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 import { useCloudHistory } from "@/hooks/useCloudHistory"
 import ProjectDiscovery from "@/components/profile/ProjectDiscovery"
 import Header from "@/components/ui/header"
+import GeminiConfig from "@/components/profile/GeminiConfig"
 
 
 import ProjectCard from "@/components/ui/card/ProjectCard"
@@ -16,7 +17,7 @@ import ProjectCard from "@/components/ui/card/ProjectCard"
 export default function ProfilePage() {
   const { data: session, status } = useSession()
   const { cloudProjects } = useCloudHistory()
-  const [activeTab, setActiveTab] = useState<"recent" | "drive">("recent")
+  const [activeTab, setActiveTab] = useState<"recent" | "drive" | "settings">("recent")
   const router = useRouter()
 
   useEffect(() => {
@@ -117,6 +118,13 @@ export default function ProfilePage() {
                   Khám phá Drive
                   {activeTab === "drive" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
                 </button>
+                <button 
+                  onClick={() => setActiveTab("settings")}
+                  className={`pb-4 text-sm font-bold tracking-tight transition-all relative ${activeTab === "settings" ? "text-blue-600" : "text-slate-400 hover:text-slate-600"}`}
+                >
+                  Cài đặt AI
+                  {activeTab === "settings" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />}
+                </button>
               </div>
 
               <div className="hidden sm:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -127,7 +135,7 @@ export default function ProfilePage() {
 
             {/* Dynamic Content Area */}
             <div className="space-y-4">
-              {activeTab === "recent" ? (
+              {activeTab === "recent" && (
                 <>
                   {cloudProjects.length > 0 ? (
                     <div className="grid grid-cols-1 gap-3">
@@ -142,7 +150,9 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </>
-              ) : (
+              )}
+
+              {activeTab === "drive" && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-100 text-blue-700 text-xs font-semibold leading-relaxed flex items-center gap-3 flex-1 mr-4">
@@ -159,6 +169,12 @@ export default function ProfilePage() {
                   <ProjectDiscovery />
                 </div>
               )}
+
+              {activeTab === "settings" && (
+                <div style={{ animation: 'fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both' }}>
+                  <GeminiConfig />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -171,4 +187,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-

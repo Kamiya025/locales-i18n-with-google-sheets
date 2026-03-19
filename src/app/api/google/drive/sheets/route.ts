@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
     const q = encodeURIComponent(query)
     const fields = encodeURIComponent("nextPageToken, files(id, name, modifiedTime, iconLink, webViewLink, owners)")
-    let url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=modifiedTime desc&pageSize=20`
+    let url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=modifiedTime desc&pageSize=5`
 
     if (pageToken) {
       url += `&pageToken=${pageToken}`

@@ -5,6 +5,7 @@ import { Switch as HeadlessSwitch } from "@headlessui/react"
 interface SwitchProps {
   label?: string
   defaultChecked?: boolean
+  checked?: boolean
   disabled?: boolean
   onChange?: (checked: boolean) => void
   color?: "blue" | "gray" // Added prop to toggle color theme
@@ -13,16 +14,20 @@ interface SwitchProps {
 const Switch: React.FC<SwitchProps> = ({
   label,
   defaultChecked = false,
+  checked,
   disabled = false,
   onChange,
   color = "blue", // Default to blue color
 }) => {
-  const [isChecked, setIsChecked] = useState(defaultChecked)
+  const [internalChecked, setInternalChecked] = useState(defaultChecked)
+  const isChecked = checked !== undefined ? checked : internalChecked
 
-  const handleChange = (checked: boolean) => {
-    setIsChecked(checked)
+  const handleChange = (newChecked: boolean) => {
+    if (checked === undefined) {
+      setInternalChecked(newChecked)
+    }
     if (onChange) {
-      onChange(checked)
+      onChange(newChecked)
     }
   }
 

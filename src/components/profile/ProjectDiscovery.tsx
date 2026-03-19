@@ -17,16 +17,22 @@ export default function ProjectDiscovery() {
   const { data: session } = useSession()
   const [files, setFiles] = useState<DriveFile[]>([])
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [nextPageToken, setNextPageToken] = useState<string | null>(null)
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageTokens, setPageTokens] = useState<(string | null)[]>([null])
+  const [hasNextPage, setHasNextPage] = useState(false)
 
-  const fetchDriveFiles = async (search: string, token: string | null = null, isLoadMore = false) => {
+  const fetchDriveFiles = async (search: string, page: number, customTokens?: (string | null)[]) => {
     try {
-      if (isLoadMore) setLoadingMore(true)
-      else setLoading(true)
+      setLoading(true)
+      setError(null)
 
+      const activeTokens = customTokens ?? pageTokens
+      const token = activeTokens[page - 1]
+      
       let url = `/api/google/drive/sheets?search=${encodeURIComponent(search)}`
       if (token) {
         url += `&pageToken=${token}`
@@ -39,43 +45,131 @@ export default function ProjectDiscovery() {
       }
       const data = await res.json()
       
-      if (isLoadMore) {
-        setFiles(prev => [...prev, ...data.files])
-      } else {
-        setFiles(data.files)
-      }
-      setNextPageToken(data.nextPageToken)
+      setFiles(data.files)
+      
+      // Update page tokens for the NEXT page
+      setPageTokens(prev => {
+        const resetTokens = customTokens ?? prev
+        const newTokens = [...resetTokens]
+        if (data.nextPageToken) {
+          newTokens[page] = data.nextPageToken
+        }
+        return newTokens
+      })
+      
+      setHasNextPage(!!data.nextPageToken)
+      setCurrentPage(page)
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoading(false)
-      setLoadingMore(false)
     }
   }
 
   // Debounced search function
   const debouncedFetch = useCallback(
-    debounce((nextValue: string) => fetchDriveFiles(nextValue, null, false), 500),
+    debounce((nextValue: string) => {
+      const freshTokens = [null]
+      setPageTokens(freshTokens)
+      fetchDriveFiles(nextValue, 1, freshTokens)
+    }, 500),
     []
   )
 
   useEffect(() => {
     if (session) {
-      fetchDriveFiles(searchTerm, null, false)
+      fetchDriveFiles(searchTerm, 1)
     }
   }, [session])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchTerm(value)
-    setNextPageToken(null)
     debouncedFetch(value)
   }
 
-  const handleLoadMore = () => {
-    if (nextPageToken && !loadingMore) {
-      fetchDriveFiles(searchTerm, nextPageToken, true)
-    }
+  const goToPage = (page: number) => {
+    if (page < 1 || loading) return
+    if (page > currentPage && !hasNextPage) return
+    fetchDriveFiles(searchTerm, page)
+  }
+
+  const renderPagination = () => {
+    if (loading && currentPage === 1) return null
+    if (files.length === 0 && !error) return null
+
+    return (
+      <div className="pt-10 flex items-center justify-center gap-3">
+        {/* Previous Button */}
+        <button
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage === 1 || loading}
+          className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md active:scale-95"
+          title="Trang trước"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <div className="flex items-center gap-2">
+          {/* First Page Link */}
+          {currentPage > 2 && (
+            <>
+              <button
+                onClick={() => goToPage(1)}
+                className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-500 font-black text-xs hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm flex items-center justify-center"
+              >
+                1
+              </button>
+              {currentPage > 3 && <span className="text-slate-300 font-black text-xs px-1">···</span>}
+            </>
+          )}
+
+          {/* Previous Page Number */}
+          {currentPage > 1 && (
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-500 font-black text-xs hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm flex items-center justify-center"
+            >
+              {currentPage - 1}
+            </button>
+          )}
+
+          {/* Current Page Indicator */}
+          <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white font-black text-sm flex items-center justify-center shadow-xl shadow-blue-200 ring-4 ring-blue-50 z-10">
+            {currentPage}
+          </div>
+
+          {/* Next Page Number */}
+          {hasNextPage && (
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              className="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-500 font-black text-xs hover:border-blue-300 hover:text-blue-600 transition-all shadow-sm flex items-center justify-center"
+            >
+              {currentPage + 1}
+            </button>
+          )}
+
+          {/* More Pages Ellipsis */}
+          {hasNextPage && pageTokens[currentPage + 1] && (
+             <span className="text-slate-300 font-black text-xs px-1">···</span>
+          )}
+        </div>
+
+        {/* Next Button */}
+        <button
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={!hasNextPage || loading}
+          className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-300 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md active:scale-95"
+          title="Trang sau"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -96,7 +190,7 @@ export default function ProjectDiscovery() {
         />
         {searchTerm && (
           <button 
-            onClick={() => { setSearchTerm(""); setNextPageToken(null); fetchDriveFiles("", null, false); }}
+            onClick={() => { setSearchTerm(""); const t = [null]; setPageTokens(t); fetchDriveFiles("", 1, t); }}
             className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
           >
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/></svg>
@@ -107,7 +201,7 @@ export default function ProjectDiscovery() {
       {loading ? (
         <div className="flex flex-col gap-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-20 w-full bg-slate-100/50 animate-pulse rounded-2xl border border-slate-200/40" />
+            <div key={i} className="h-28 w-full bg-white animate-pulse rounded-2xl border border-slate-200/40 shadow-sm" />
           ))}
         </div>
       ) : error ? (
@@ -119,7 +213,7 @@ export default function ProjectDiscovery() {
           </div>
           <p className="font-bold">{error}</p>
           <button 
-             onClick={() => fetchDriveFiles(searchTerm, null, false)}
+             onClick={() => fetchDriveFiles(searchTerm, 1)}
              className="px-6 py-2 bg-white border border-red-200 rounded-xl text-red-600 font-bold text-xs uppercase hover:bg-red-50 transition-colors"
           >
              Thử lại
@@ -142,18 +236,18 @@ export default function ProjectDiscovery() {
               <Link
                 key={`${file.id}-${idx}`}
                 href={`/sheet/${file.id}`}
-                className="group relative flex items-center justify-between p-5 rounded-2xl bg-white hover:bg-blue-50/10 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300 overflow-hidden"
+                className="group relative flex items-center justify-between p-6 rounded-2xl bg-white hover:bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-500 overflow-hidden"
                 style={{ animation: `fadeUp 0.6s ${idx % 20 * 0.05}s cubic-bezier(0.16, 1, 0.3, 1) both` }}
               >
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-6">
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-sm">
-                      <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-500 shadow-sm">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-1">
                     <span className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors tracking-tight uppercase">
                       {file.name}
                     </span>
@@ -168,8 +262,8 @@ export default function ProjectDiscovery() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 shadow-sm bg-slate-50/50">
-                      <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-500 shadow-sm bg-slate-50/50">
+                      <svg className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
                       </svg>
                   </div>
@@ -178,26 +272,7 @@ export default function ProjectDiscovery() {
             ))}
           </div>
 
-          {nextPageToken && (
-            <div className="pt-6 flex justify-center">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="group relative px-8 py-3 rounded-2xl bg-white border-2 border-slate-100 text-slate-600 font-bold text-sm uppercase tracking-widest hover:border-blue-500/50 hover:text-blue-600 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm overflow-hidden"
-              >
-                <div className="relative z-10 flex items-center gap-3">
-                  {loadingMore ? (
-                    <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
-                  ) : (
-                    <svg className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                  {loadingMore ? "Đang tải..." : "Xem thêm file"}
-                </div>
-              </button>
-            </div>
-          )}
+          {renderPagination()}
         </div>
       )}
 
@@ -210,5 +285,3 @@ export default function ProjectDiscovery() {
     </div>
   )
 }
-
-
