@@ -174,8 +174,16 @@
       "startTranslatingNow": "Bắt đầu dịch ngay",
       "driveSearchTip": "Tìm kiếm và mở các tệp Google Sheets từ Drive của bạn.",
       "fullView": "Bản xem đầy đủ",
+      "lastAccessed": "Lần cuối truy cập",
       "infoTitle": "Thông tin",
       "infoDesc": "Sử dụng Translator Tool để quản lý các bản dịch từ Google Sheets của bạn một cách nhanh chóng.",
+      "welcomeTitle": "Chào {name}",
+      "welcomeSubtitle": "Quản lý các dự án dịch thuật và cấu hình của bạn.",
+      "stats": {
+        "projects": "Tổng dự án",
+        "lastActivity": "Hoạt động cuối",
+        "accountType": "Trạng thái"
+      },
       "unauthenticated": {
         "title": "Bạn chưa đăng nhập",
         "subtitle": "Vui lòng đăng nhập bằng Google để xem lịch sử dự án, đồng bộ Cloud và quản lý cấu hình AI của bạn.",

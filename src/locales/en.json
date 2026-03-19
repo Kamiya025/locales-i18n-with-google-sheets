@@ -172,15 +172,23 @@
       "lastUpdated": "Last updated",
       "noProjectsSynced": "No projects synced yet.",
       "startTranslatingNow": "Start translating now",
-      "driveSearchTip": "Search and open Google Sheets from your Drive.",
+      "driveSearchTip": "Search and open Google Sheets files from your Drive.",
       "fullView": "Full View",
+      "lastAccessed": "Last Accessed",
       "infoTitle": "Info",
       "infoDesc": "Use Translator Tool to manage your translations from Google Sheets quickly.",
+      "welcomeTitle": "Hi, {name}",
+      "welcomeSubtitle": "Manage your translation projects and configuration.",
+      "stats": {
+        "projects": "Total Projects",
+        "lastActivity": "Last Activity",
+        "accountType": "Status"
+      },
       "unauthenticated": {
-        "title": "You are not signed in",
-        "subtitle": "Please sign in with Google to view your project history, sync with Cloud, and manage your AI configurations.",
-        "loginButton": "Sign in with Google",
-        "loginTip": "Secure connection via Google Services"
+        "title": "You're Not Logged In",
+        "subtitle": "Please log in with Google to view project history, cloud sync, and manage your AI configuration.",
+        "loginButton": "Login with Google",
+        "loginTip": "Secure connection via Google"
       }
     },
     "header": {

@@ -13,7 +13,11 @@ interface DriveFile {
   webViewLink?: string
 }
 
-export default function ProjectDiscovery() {
+interface ProjectDiscoveryProps {
+  viewMode?: "grid" | "list"
+}
+
+export default function ProjectDiscovery({ viewMode = "grid" }: ProjectDiscoveryProps) {
   const { data: session } = useSession()
   const [files, setFiles] = useState<DriveFile[]>([])
   const [loading, setLoading] = useState(true)
@@ -199,9 +203,9 @@ export default function ProjectDiscovery() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col gap-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-28 w-full bg-white animate-pulse rounded-2xl border border-slate-200/40 shadow-sm" />
+        <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "flex flex-col gap-3"}>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className={`${viewMode === "grid" ? "h-48" : "h-24"} w-full bg-white animate-pulse rounded-2xl border border-slate-200/40 shadow-sm`} />
           ))}
         </div>
       ) : error ? (
@@ -231,39 +235,45 @@ export default function ProjectDiscovery() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
+          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "flex flex-col gap-3"}>
             {files.map((file, idx) => (
               <Link
                 key={`${file.id}-${idx}`}
                 href={`/sheet/${file.id}`}
-                className="group relative flex items-center justify-between p-6 rounded-2xl bg-white hover:bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 hover:-translate-y-1 transition-all duration-500 overflow-hidden"
+                className={`group relative flex items-center justify-between rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-500 overflow-hidden ${viewMode === "grid" ? "flex-col p-6 items-start gap-6" : "p-4 items-center"}`}
                 style={{ animation: `fadeUp 0.6s ${idx % 20 * 0.05}s cubic-bezier(0.16, 1, 0.3, 1) both` }}
               >
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-100 transition-all duration-500 shadow-sm">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className={`flex items-center gap-5 ${viewMode === "grid" ? "w-full" : "flex-1 min-w-0"}`}>
+                  <div className="relative flex-shrink-0">
+                    <div className={`${viewMode === "grid" ? "w-14 h-14" : "w-10 h-10"} rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-sm`}>
+                      <svg className={viewMode === "grid" ? "w-7 h-7" : "w-5 h-5"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors tracking-tight uppercase">
+                  <div className="flex flex-col gap-0.5 overflow-hidden">
+                    <span className={`font-black text-slate-900 group-hover:text-blue-600 transition-colors tracking-tight uppercase truncate ${viewMode === "grid" ? "text-base" : "text-sm"}`}>
                       {file.name}
                     </span>
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 leading-none">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {new Date(file.modifiedTime).toLocaleDateString("vi-VN")}
                       </span>
-                      <span className="w-1 h-1 rounded-full bg-slate-200" />
-                      <span className="text-[10px] text-slate-400 font-mono opacity-60">ID: {file.id.slice(0, 8)}...</span>
+                      {viewMode === "list" && <span className="w-1 h-1 rounded-full bg-slate-200" />}
+                      <span className="text-[10px] text-slate-400 font-mono opacity-60 truncate">ID: {file.id.slice(0, 8)}...</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-500 shadow-sm bg-slate-50/50">
-                      <svg className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                <div className={`flex items-center gap-4 ${viewMode === "grid" ? "w-full justify-between border-t pt-4 border-slate-50" : "flex-shrink-0"}`}>
+                   {viewMode === "grid" && (
+                     <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Google Drive</span>
+                        <span className="text-[11px] font-bold text-emerald-600">Spreadsheet</span>
+                     </div>
+                   )}
+                  <div className={`${viewMode === "grid" ? "w-10 h-10" : "w-8 h-8"} rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-500 shadow-sm bg-slate-50/50`}>
+                      <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
                       </svg>
                   </div>
